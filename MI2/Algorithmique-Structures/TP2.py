@@ -57,6 +57,8 @@ def degre_total(table):
 #############################
 # Corps du programme
 ###############
+# Qul
+
 #matrice=matriceAdj([0,1],[0,2],[2,3],[1,3],[3,4],[3,5])
 #matriceLpr(matrice)
 #print voisins(matrice,0)
