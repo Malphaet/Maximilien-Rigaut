@@ -1,0 +1,220 @@
+
+<p><span style="font-size: small;">Ce TP est organis&eacute; en deux parties ind&eacute;pendantes. &Ccedil;a veut dire que si vous bloquez d'un cot&eacute; et que je suis occup&eacute; &agrave; r&eacute;installer tous les PC de la salle, Il ne faut pas h&eacute;siter &agrave; progresser sur l'autre partie. J'ai rajout&eacute; des exercices difficiles (*) et tr&egrave;s difficiles (**). Vous &ecirc;tes libres de choisir quels exercices vous faites suivant votre aisance. Ceux-ci devraient demander une plus grande r&eacute;flexion algorithmique, n'h&eacute;sitez pas &agrave; me demander des indices si vous bloquez.</span></p>
+<p><span style="font-size: large;"><strong>Premi&egrave;re partie : Logique.</strong></span></p>
+<p><span style="font-size: small;">On va manipuler un peu les objets bool&eacute;ens : True et False. On connait d&eacute;j&agrave; les fonctions not, and, or, qu'on pourra utiliser. </span></p>
+<p><span style="font-size: small;">Exercice 1 : &Eacute;crire une fonction "Implique(a,b)" qui vaut True si a=&gt;b, False sinon.</span></p>
+
+{{{id=0|
+def implies(a,b):
+        "a,b bools, return a=>b"
+        if a: return b
+        return True
+
+def or_tst(a,b):
+    return a or b
+
+def and_tst(a,b):
+    return a and b
+def mega_and(*a):
+    if False in a: return False
+    return True
+print implies(True, True)
+///
+True
+}}}
+
+<p><span style="font-size: small;">Exercice 2 : On repr&eacute;sente une formule logique &agrave; deux inconnues par une fonction &agrave; deux arguments </span><span id="cell_outer_3"><span style="font-size: small;">({Vrai, Faux}&sup2; -&gt; {Vrai, Faux})</span></span><span style="font-size: small;">. &Eacute;crire une fonction qui prend</span> <span id="cell_outer_3"><span style="font-size: small;">en entr&eacute;e deux telles formules et qui teste si elles sont &eacute;quivalentes.</span></span></p>
+
+<p><span style="font-size: small;">&nbsp;</span><span id="cell_outer_3"><span style="font-size: small;"><br /></span></span></p>
+
+{{{id=27|
+def equiv(f1,f2):
+    "[bool],[bool] => [bool] \nTest if the two functions are equals"
+    lo=[True,False]
+    for i in lo:
+        for j in lo:
+            if not f1(i,j)==f2(i,j): return False
+    return True
+print equiv(and_tst,or_tst)
+///
+False
+}}}
+
+<p><span style="font-size: small;"><br /></span></p>
+
+<p><span style="font-size: small;">Exercice 3  :  Construire une fonction, qui prend en entr&eacute;e une formule logique et  qui imprime sa table de  v&eacute;rit&eacute; (de taille 4). </span></p>
+
+{{{id=2|
+def print_table(f1):
+    "Print the table of a 2 arg function"
+    lo=[1,0]
+    print "+-----------------+"
+    print "| Table of Truth  |"
+    print "+-----------------+"
+    for i in lo:
+        for j in lo:
+            print "|  %i  |  %i  |  %i  |"%(i,j,f1(i,j))
+    print "+-----------------+"
+
+print_table(and_tst)
+print_table(or_tst)
+///
++-----------------+
+| Table of Truth  |
++-----------------+
+|  1  |  1  |  1  |
+|  1  |  0  |  0  |
+|  0  |  1  |  0  |
+|  0  |  0  |  0  |
++-----------------+
++-----------------+
+| Table of Truth  |
++-----------------+
+|  1  |  1  |  1  |
+|  1  |  0  |  1  |
+|  0  |  1  |  1  |
+|  0  |  0  |  0  |
++-----------------+
+}}}
+
+<p><span style="font-size: small;">Exercice 4 (*) : M&ecirc;me question, mais l'entr&eacute;e est un entier n et une fonction &agrave; n arguments. Pour ce faire, sachez que * transforme une liste en arguments pour une fonction : par exemple, si args = [1,2,3], alors f(*args) = f(1,2,3).<br /></span></p>
+
+{{{id=21|
+def print_mega_table(f1,nb_args):
+    lo=[0]*(nb_args+1)
+    i=0
+    print '+'+'-'*((nb_args-1)*3+7)+'+'
+    print "Table of truth"
+    print '+'+'-'*((nb_args-1)*3+7)+'+'
+    while i<nb_args:
+        print '|',lo[:-1], int(f1(*lo[:-1])),'|'
+        i=0
+        while lo[i]:
+            lo[i]=0
+            i+=1
+        lo[i]=1
+    print '+'+'-'*((nb_args-1)*3+7)+'+'
+
+print_mega_table(mega_and,4)
+///
++----------------+
+Table of truth
++----------------+
+| [0, 0, 0, 0] 0 |
+| [1, 0, 0, 0] 0 |
+| [0, 1, 0, 0] 0 |
+| [1, 1, 0, 0] 0 |
+| [0, 0, 1, 0] 0 |
+| [1, 0, 1, 0] 0 |
+| [0, 1, 1, 0] 0 |
+| [1, 1, 1, 0] 0 |
+| [0, 0, 0, 1] 0 |
+| [1, 0, 0, 1] 0 |
+| [0, 1, 0, 1] 0 |
+| [1, 1, 0, 1] 0 |
+| [0, 0, 1, 1] 0 |
+| [1, 0, 1, 1] 0 |
+| [0, 1, 1, 1] 0 |
+| [1, 1, 1, 1] 1 |
++----------------+
+}}}
+
+<p><span style="font-size: small;">Exercice 5 (**) : On prend en entr&eacute;e une cha&icirc;ne de caract&egrave;res de la forme "(p ou q) =&gt; r", bien parenth&eacute;s&eacute;e (o&ugrave; on admet que non, ou, et, =&gt;, &lt;=&gt; sont des mots-cl&eacute;s, et les autres lettres des propositions). On veut obtenir une table de v&eacute;rit&eacute; compl&egrave;te. Bon courage !</span></p>
+
+{{{id=4|
+logic={'ou':'or','et':'and','modulo':'%'}
+functions={'<=>': 'equiv','=>':'implies','=/':'unhappy'}
+
+def list_id(text,a):
+    i,table=0,[]
+    mx=text.count(a)
+    while i<mx:
+        table.append(text.find(a))
+        text=text.replace(a,'',1)
+        i+=1
+    return table        
+
+def format_str(text):
+    text='('+text+')'
+    for operator in logic:
+        text=text.replace(operator,logic[operator])
+    for fun in functions:
+        if fun in text:
+            i=text.find(fun)
+            text=text.replace(fun,',',1)
+            p_or,p_ol=text[:i].count('('),text[i:].count('(')
+            p_cr,p_cl=text[:i].count(')'),text[i:].count(')')
+            a=list_id(text,'(')[p_or-p_cr]
+            b=list_id(text,')')[p_ol-p_cl]
+            text=text[:a+1]+functions[fun]+'('+text[a+1:b+1]+')'+text[b+1:]
+            #print a,b,functions[fun]   
+    return text[1:-1]
+print eval(format_str("(True) => False "))
+///
+False
+}}}
+
+{{{id=32|
+def indexs(a,b,str):
+    nba=str.count(a)
+    nbb=str.count(b)
+    a_i,b_i=[],[]
+    mx=str.count(a)
+    
+    i=0
+    while i<mx:
+        b_id.append(str.find(b))
+        str=str.replace(b,1)
+    #return a_i[nba-nbb]
+///
+}}}
+
+<p><span style="font-size: medium;"><strong>Deuxi&egrave;me partie : ensembles.</strong></span></p>
+<p><span style="font-size: small;">On </span><span style="font-size: small;">va essayer de mod&eacute;liser des ensembles avec des structures de donn&eacute;es qui ne sont pas forc&eacute;ment faites pour &ccedil;a, &agrave; savoir des listes (d'entiers). Dans la suite, quand on parlera d'ensemble, on voudra dire liste sans prendre en compte les r&eacute;p&eacute;titions ou l'ordre des entr&eacute;es. Dans la vraie vie, Sage utilise aussi les listes pour mod&eacute;liser des ensembles vie l'op&eacute;ration "set".<br /></span></p>
+<p><span style="font-size: small;">Exercice 6 : &Eacute;crivez une fonction qui prend en entr&eacute;e deux ensembles et qui teste s'ils sont &eacute;gaux, sans les modifier.</span></p>
+
+{{{id=14|
+
+///
+}}}
+
+<p><span style="font-size: small;">Exercice 7 : &Eacute;crivez une fonction qui, &eacute;tant donn&eacute; en entr&eacute;e deux ensembles A et B et une fonction f, v&eacute;rifie qu'on a bien f : A -&gt; B et indique si f est injective, surjective ou bijective.</span></p>
+
+{{{id=30|
+
+///
+}}}
+
+<p><span style="font-size: small;">Exercice 8 : &Eacute;crivez un fonction qui "nettoie" un ensemble, c'est-&agrave;-dire qui supprime les doublons. Vous pouvez utiliser une fonction appartient(E,x,i) qui teste si l'&eacute;l&eacute;ment x fait partie des i premiers &eacute;l&eacute;ments de E. Si vous &ecirc;tes perfectionniste, il existe une fonction qui trie les listes (trouvez-la).</span></p>
+
+{{{id=20|
+
+///
+}}}
+
+<p><span style="font-size: small;">On va repr&eacute;senter une relation comme une fonction qui prend en entr&eacute;e deux entiers et renvoie True ou False.</span></p>
+<p><span style="font-size: small;">Exercice 9 : &Eacute;crivez une fonction qui prend en entr&eacute;e un ensemble et une relation et qui teste si elle est r&eacute;flexive, sym&eacute;trique et/ou transitive.</span></p>
+
+{{{id=16|
+
+///
+}}}
+
+<p><span style="font-size: small;">Puis, &eacute;tant donn&eacute; un ensemble et une relation d'&eacute;quivalence, passez l'ensemble au quotient.</span></p>
+
+{{{id=24|
+
+///
+}}}
+
+<p><span style="font-size: small;">Exercice 10 (*) : Construire la fonction qui &agrave; un ensemble associe l'ensemble de ses parties.</span></p>
+
+{{{id=13|
+
+///
+}}}
+
+{{{id=31|
+
+///
+}}}
