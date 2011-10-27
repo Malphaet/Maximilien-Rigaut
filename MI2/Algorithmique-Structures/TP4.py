@@ -47,7 +47,7 @@ class List():
 		return st
 		
 ##############################
-# Definition des Fonctions
+# Definition des Fonctions 1
 
 def liste(*l):
 	"""*[Int] Prend une suite d'entiers en parametres 
@@ -77,7 +77,7 @@ def supprimer(l,i):
 #	if i<1: l.first,x.next=x,elt
 #	if i>0: elt.next,x.next=x,elt.next.next
 
-def ajouter(l,x,i): 
+def ajouter(l,x,i):
 	if i==1: 
 		x=Node(x,l.first.next)
 		l.first.next=x
@@ -91,13 +91,13 @@ def appliquer(l,f):
 	l.first.value=f(l.first.value)
 	appliquer(l.queue(),f)
 
-#def filtrer(l,filt):
-#	if l.vide(): return True
-#	if not filtrer(l.queue(),filt):
-#		l.first.next=l.first.next.next
-#	if not filt(l.first.value):
-#		l.first=l.first.next
-#		return False
+def filtrer(l,filt):
+	if l.len()>1 and not filt(l.first.next.value):
+		filtrer(l.queue(),filt)
+		l.first.next=l.first.next.next
+	if l.vide(): return True
+	filtrer(l.queue(),filt)
+	if not filt(l.first.value):	l.first=l.first.next # Due to stupid structure of our Lists
 
 def compter(l,x):
 	if l.vide(): return 0
@@ -108,20 +108,47 @@ def reduire(l,f,x):
 	if l.vide(): return x
 	return reduire(l.queue(),f,f(l.first.value,x))
 
+##############################
+# Definition des Fonctions 2
+
+def ajoute(l,x): return appliquer(l,lambda y: x+y) # Explication: L'exo est bidon donc 1 ligne suffit
+
+def paire(l): return filtrer(l,lambda x: x%2==0) # Idem: J'utilise la fonction filter qui est plus haut
+
+def avant_dernier(l):
+	if longeur(l)<1: return l.first # avant_dernier(List())=None Par definition
+	if l.first.next.next==None: return l.first
+	return avant_dernier(l.queue())
+
+def incremente(l,i=0):
+	if l.first==None: return None
+	l.first.value+=i
+	incremente(l.queue(),i=i+1)
+
+def repete(l,n,i):
+	if l.first.next==None and i:
+		return True
 
 ##############################
 # Corps du programme
 
-addresse="metal--addict@hotmail.fr"
 l=liste(1,2,3,7,42)
 
 def f(x): return 3*x
-def fil(x): return x<42
+def fil(x): return x>5
 def somme(a,b): return a+b
 
+#print longeur(l)
 #appliquer(l,f)
 #ajouter(l,1212,2)
 #print compter(l,2)
 
 #print reduire(l,somme,0)
+#filtrer(l,fil)
+
+#paire(l)
+#print avant_dernier(l)
+
+#incremente(l)
+
 print l
