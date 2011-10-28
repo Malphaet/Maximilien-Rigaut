@@ -129,6 +129,25 @@ def repete(l,n,i):
 	if l.first.next==None and i:
 		return True
 
+def pgcd(m,n):
+	while m%n: n,m=m%n,n
+	return n
+
+ppcm = lambda m,n: (n*m)/pgcd(m,n)
+
+def multiple(l):
+	if l.vide(): return 0 # Pas de ppcm sur une liste vide
+	if l.first.next==None: return l.first.value
+	return ppcm(l.first.value,multiple(l.queue()))
+
+def applique(l,l2,f):
+	if l.vide() or l2.vide(): return True
+	if l2.first.value!=0:
+		l2.first.value-=1
+		l.first.value=f(l.first.value)
+		applique(l,l2,f)
+	applique(l.queue(),l2.queue(),f)
+	
 ##############################
 # Corps du programme
 
@@ -150,5 +169,8 @@ def somme(a,b): return a+b
 #print avant_dernier(l)
 
 #incremente(l)
+#print multiple(l)
+#l2=liste(2,3,1,1,3)
+#applique(l,l2,f)
 
 print l
