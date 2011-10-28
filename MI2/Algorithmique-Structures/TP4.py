@@ -2,17 +2,15 @@
 
 ##############################
 # Copyleft Maximilien Rigaut
-# 
+# Fonctions recusives sur listes chainées
 ##############################
-
-
-
-##############################
-# Importation des Modules
 
 
 ##############################
 # Definition des Classes
+# Nb: Les classes contiennent ici des methodes
+#     càd des fonctions propres ainsi qu'une initialisation.
+#     Bonne chance et bonne lecture :)
 
 class Node():
 	def __init__(self,x,next=None):
@@ -147,11 +145,23 @@ def applique(l,l2,f):
 		l.first.value=f(l.first.value)
 		applique(l,l2,f)
 	applique(l.queue(),l2.queue(),f)
-	
+
+def alternance(l):
+	if l.len()<3: return True # Plus facile que cela n'en a l'air
+	if (l.first.value > l.first.next.value) == (l.first.next.value < l.first.next.next.value): return alternance(l.queue())
+	return False
+
+def repete(l,i,n):
+	if l.vide() or n==0: return True
+	if i>0: return repete(l.queue(),i-1,n)
+	l.first.next=Node(l.first.value,next=l.first.next) # D'ou l'importance d'une bonne méthode d'initialisation de ses objets
+	repete(l,i,n-1)
+
 ##############################
 # Corps du programme
 
 l=liste(1,2,3,7,42)
+print l
 
 def f(x): return 3*x
 def fil(x): return x>5
@@ -161,16 +171,19 @@ def somme(a,b): return a+b
 #appliquer(l,f)
 #ajouter(l,1212,2)
 #print compter(l,2)
-
+#
 #print reduire(l,somme,0)
 #filtrer(l,fil)
-
+#
 #paire(l)
 #print avant_dernier(l)
-
+#
 #incremente(l)
 #print multiple(l)
-#l2=liste(2,3,1,1,3)
+#l2=liste(3,1,2,1,3)
 #applique(l,l2,f)
+#print l2
+#print alternance(l2)
+#repete(l,2,5)
 
 print l
