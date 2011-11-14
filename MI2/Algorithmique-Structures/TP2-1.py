@@ -1,3 +1,10 @@
+# -*- Coding: UTF-8 -*-
+
+##############################
+# Copyleft Maximilien Rigaut
+# TP 3.5 Tri recursif
+##############################
+
 from TP2 import *
 
 ############################
