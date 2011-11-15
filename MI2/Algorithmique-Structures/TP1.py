@@ -1,4 +1,4 @@
-# -*- Coding: UTF-8 -*-
+# -*- coding:utf8 -*-
 
 ##############################
 # Copyleft Maximilien Rigaut
