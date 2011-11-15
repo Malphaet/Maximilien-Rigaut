@@ -68,5 +68,5 @@ lang['maux']='woe'
 #print a,b
 #print h(a),h(b)
 
-print anniversaire(23) # La date d'anniversaire n'est pas un bon hash pour une base de noms, 50% probs de collision (meme date d'anniv)
+print anniversaire(23) # La date d'anniversaire n'est pas un bon hash pour une base de noms, 50% probs de collision (meme date d'anniv) dès 23 noms
 print collision(12,24)
