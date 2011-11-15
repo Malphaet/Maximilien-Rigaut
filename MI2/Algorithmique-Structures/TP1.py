@@ -2,7 +2,7 @@
 
 ##############################
 # Copyleft Maximilien Rigaut
-# TP 3.5 Tri recursif
+# TP 1 Tri / Tri recursif
 ##############################
 
 import random

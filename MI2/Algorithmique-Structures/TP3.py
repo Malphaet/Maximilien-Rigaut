@@ -14,7 +14,7 @@
 # Definition des Classes
 
 class grapheP():
-	"Graphe pondetre"
+	"Graphe pondéré"
 	def __init__(self,*l):
 		mx=0
 		for elt in l: mx=max(mx,elt[1])
