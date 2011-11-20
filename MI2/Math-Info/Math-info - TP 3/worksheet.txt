@@ -1,0 +1,237 @@
+Math-info : TP 3
+system:sage
+
+
+<p><span style="font-size: small;">Le TP d'aujourd'hui portera sur l'arithm&eacute;tique. On va notamment faire des calculs sur Z/nZ. De m&ecirc;me que la semaine derni&egrave;re il ne fallait pas confondre l'objet math&eacute;matique (ensemble) et sa repr&eacute;sentation informatique (liste), il faudra prendre garde cette semaine que les entiers peuvent r&eacute;pr&eacute;senter un entier math&eacute;matique ou bien un &eacute;l&eacute;ment de Z/nZ (une classe), suivant le contexte. </span></p>
+<p><span style="font-size: small;">Si par exemple n=5 et qu'on veut tester l'&eacute;galit&eacute; entre 2 et 7, &eacute;crire 2==7 peut &ecirc;tre la r&eacute;ponse... ou pas.</span></p>
+
+<p><span style="font-size: small;">Exercice 1 : &Eacute;crivez  une fonction DivEucl(a,b) qui renvoie le quotient et le reste de la  division euclidienne de a par b (entiers), en n'utilisant que la  soustraction (avec if, for et while, bien s&ucirc;r).</span></p>
+
+{{{id=22|
+def DivEucl(a,b):
+    q = 0
+    r = a
+    while r>=b:
+        q+=1
+        r-=b
+    return (q,r)
+///
+}}}
+
+<p><span style="font-size: small;">Exercice 2 : Programmez l'algorithme d'Euclide en utilisant l'exercice 1. On  rappelle que l'algorithme se d&eacute;roule de la mani&egrave;re suivante :</span></p>
+<p><span style="font-size: small;">- On divise a par b, obtenant q et r ;</span></p>
+<p><span style="font-size: small;">- on divise b par r, obtenant q' et r'</span></p>
+<p><span style="font-size: small;">- et ainsi de suite. Le r&eacute;sultat renvoy&eacute; correspond au dernier reste non nul.</span></p>
+
+{{{id=21|
+def Euclide(a,b):
+    q,r=DivEucl(a,b)
+    if r==0: 
+def Euclide(a,b):
+    r1 = a
+    r2 = b
+    while r2!=0:
+        q,r = DivEucl(r1,r2)
+        r1=r2
+        r2=r
+    return r1
+///
+}}}
+
+{{{id=38|
+Euclide(26,39)
+///
+13
+}}}
+
+<p><span style="font-size: small;">Exercice 3  : Gr&acirc;ce &agrave; l'exercice 1, &eacute;crivez une fonction qui &agrave; un entier associe  l'&eacute;l&eacute;ment de sa classe compris entre 0 et n-1. Puis, &eacute;crivez des  fonctions qui testent l'&eacute;galit&eacute; et qui effectuent l'addition et la  multiplication dans Z/nZ.</span></p>
+
+{{{id=37|
+#def Classe(a,n):
+#    q,r = DivEucl(a,n)
+#    return r                                 # En fait, on peut aussi écrire a%n, mais je voulais utiliser l'exercice 1.
+
+def Classe(a,n): return a%n
+   
+def Egalite(a,b,n):
+    return (Classe(a,n) == Classe(b,n))
+
+def Addition (a,b,n):
+    return Classe(a+b,n)
+    
+def Multplication (a,b,n):
+    return Classe(a,n)*Classe(b,n)
+
+print (2**12%3)*(5**12%3)%3
+#print Multplication(2**12,5**12,3)
+///
+1
+}}}
+
+<p><span style="font-size: small;">En d&eacute;duire une fonction Divise(a,b,n) qui teste si a divise b dans Z/nZ </span><span style="font-size: small;">(il existe k tel que ka=b).</span></p>
+
+{{{id=26|
+def Divise (a,b,n):
+    for k in range(n):
+        if Egalite(k*a,b,n): return True
+    return False
+///
+}}}
+
+<p><span style="font-size: small;">Vous avez appris qu'un &eacute;l&eacute;ment de Z/nZ est soit inversible (i.e. diviseur de 1), soit diviseur de z&eacute;ro. En vous inspirant de la question pr&eacute;c&eacute;dente, &eacute;crivez une fonction Diviseur(a,n) qui indique dans quel cas on est et qui renvoie un &eacute;l&eacute;ment k de Z/nZ tel que ka = 0 ou 1, suivant le cas (k non nul, bien sur). <br /></span></p>
+
+{{{id=53|
+def Diviseur(a,n):
+    for k in range(1,n):
+        res=Classe(a*k,n)
+        if res==1 or res==0: return k
+///
+}}}
+
+<p><span style="font-size: small;">Exercice 4 : On va repr&eacute;senter un polyn&ocirc;me de degr&eacute; 3&nbsp; aX&sup3;+bX&sup2;+cX+d comme un tuple (a,b,c,d). &Eacute;crivez une fonction Polynul(a,b,c,d,n) qui teste si </span><span style="font-size: small;">aX&sup3;+bX&sup2;+cX+d = 0</span><span style="font-size: small;"> pour toute valeur de X </span><span style="font-size: small;">(dans Z/nZ)</span><span style="font-size: small;">.&nbsp;</span></p>
+
+{{{id=20|
+def Polynul(*l):
+    l=list(l)
+    n,l=l[-1],l[:-1]
+    res,Tres,mx=0,[],len(l)
+    for i in range(n):
+        for j in range(mx): res+=Classe(l[-j]*i**j,n)
+        if Classe(res,n)==0: Tres.append(i)
+        res=0
+    return Tres
+
+print Polynul(2,1,1,4)
+///
+[1, 2]
+}}}
+
+<p><span style="font-size: small;">Exercice  5 : &Eacute;crivez  une fonction CribleErathost&egrave;ne(n) qui construit une liste  allant de 2 &agrave;  n, puis ne laisse que les nombre premiers. Pour cela : </span></p>
+<p><span style="font-size: small;">- Prendre les &eacute;l&eacute;ments de la liste un par un ; </span></p>
+<p><span style="font-size: small;">- Supprimer tous ses multiples de la liste (sauf lui-m&ecirc;me !) ; </span></p>
+<p><span style="font-size: small;">- Prendre l'&eacute;l&eacute;ment suivant, et ainsi de suite. </span></p>
+<p><span style="font-size: small;">Vous   aurez sans doute besoin de [0]*n qui construit une liste de taille n   remplie de 0. Pour faire une boucle for qui fait des sauts, consultez   l'aide de "range" (avec "range?").</span></p>
+
+{{{id=29|
+def CribleErathostene(n):
+    liste=[2]+range(3,n,2)
+    i,j=1,3
+    while i<n/2-1:
+        j=1
+        while liste[i] !=0 and j<((n-1)/2-i)/liste[i]:
+            liste[i+liste[i]*j]=0
+            #print '%ix%i:%i'%(list[i],j,i+list[i]*j),list
+            j+=1
+        i+=1
+    #liste.sort(reverse=True)
+    #return liste[:liste.index(0)]
+    #return [x for x in liste if x]
+timeit("CribleErathostene(1000000)")
+///
+5 loops, best of 3: 11.1 s per loop
+}}}
+
+{{{id=49|
+def primes(n): 
+	if n==2: return [2]
+	elif n<2: return []
+	s=range(3,n+1,2)
+	mroot = n ** 0.5
+	half=(n+1)//2-1
+	i,m=0,3
+	while m <= mroot:
+		if s[i]:
+			j=(m*m-3)//2
+			s[j]=0
+			while j<half:
+				s[j]=0
+				j+=m
+		i=i+1
+		m=2*i+3
+	return [2]+[x for x in s if x]
+timeit("primes(1000000)")
+///
+5 loops, best of 3: 345 ms per loop
+}}}
+
+{{{id=50|
+# fast prime number list generator using a sieve algorithm
+ 
+def primes(n):
+  """ returns a list of prime numbers from 2 to < n """
+  if n < 2:  return []
+  if n == 2: return [2]
+  # do only odd numbers starting at 3
+  s = range(3, n, 2)
+  # n**0.5 may be slightly faster than math.sqrt(n)
+  mroot = n ** 0.5
+  half = (n+1)//2-1#len(s)
+  i = 0
+  m = 3
+  while m <= mroot:
+    if s[i]:
+      j = (m * m - 3)//2
+      #s[j] = 0
+      while j < half:
+        s[j] = 0
+        j += m
+    i = i + 1
+    m = 2 * i + 3
+  # make exception for 2
+  return [2]+[x for x in s if x]
+
+timeit("primes(1000000)")
+#primes(1000000)
+///
+5 loops, best of 3: 335 ms per loop
+}}}
+
+<p><span style="font-size: small;">Exercice bonus  (*) : &Eacute;crivez une fonction Reste(a,b,n) qui prend en entr&eacute;e un entier a,  un entier b (tr&egrave;s grand) et un entier n&gt;1, et qui calcule le reste  de a^b&nbsp; modulo n, le plus vite possible. Notamment, &eacute;viter de multiplier  par a b fois. Indice : observer la p&eacute;riodicit&eacute; et utiliser la division  euclidienne.</span></p>
+
+{{{id=34|
+def Reste(a,b,n):
+    reste=1
+    nb=0
+    a%=n
+    while b>0:
+        reste*=a
+        nb+=1
+        reste%=n
+        b-=1
+        if reste==0: return 0
+        if reste==1:
+            b=b%nb
+            nb=1
+    return reste
+///
+}}}
+
+<p><span style="font-size: small;"><br /></span></p>
+
+{{{id=43|
+a,b,n=11,12121255121212,42
+print timeit("Reste(a,b,n)")
+///
+625 loops, best of 3: 6.46 µs per loop
+None
+}}}
+
+{{{id=46|
+print timeit("a.powermod(b,n)")
+///
+625 loops, best of 3: 4.05 µs per loop
+None
+}}}
+
+{{{id=48|
+timeit("10000000**(1/2)")
+timeit("sqrt(10000000)")
+///
+625 loops, best of 3: 721 µs per loop
+625 loops, best of 3: 986 µs per loop
+}}}
+
+{{{id=51|
+
+///
+}}}
