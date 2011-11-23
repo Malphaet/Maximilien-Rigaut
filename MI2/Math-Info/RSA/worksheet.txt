@@ -3,6 +3,10 @@ system:sage
 
 
 {{{id=1|
+# --------------------- #
+# Fonctions Utilitaires #
+# --------------------- #
+
 def ExpoRapide(x,p,n):
     if p==0: return 1
     if p%2==0:
@@ -12,93 +16,245 @@ def ExpoRapide(x,p,n):
         temp=ExpoRapide(x,(p-1)/2,n)%n
         return x*temp*temp%n
 
-def div(a,b):
-    d = 0
-    while a%b==0: d,a=d+1,a/2
-    return (d,a)
+def div(d,b):
+    s = 0
+    while d%b==0: s,d=s+1,d/b
+    return (s,d)
 ///
 }}}
 
 {{{id=2|
-def MillerRabinTest(a, s, d, n):
-    x=ExpoRapide(a,d,n)
-    if x==1: return True
-    for i in xrange(s-1):
-        if x==n-1: return True
-        x=(x*x)%n
-    return x==n-1
+# --------------------- #
+# Fonctions Importantes #
+# --------------------- #
 
 def MillerRabin(n):
+    test=[2,3,5,7,13,17,31,71]
     if n<4: return True
-    d,s=div(n-1,2)
-    for a in [2,3,5,7]:
-        if not MillerRabinTest(a,s,d,n): return False
+    if n%2==0: return False
+    d,s=n-1,0
+    while d%2==0: s,d=s+1,d/2
+    if log(d)<100: test=test[:4]
+    def EssaiCompose(a):
+        x=ExpoRapide(a,d,n)
+        if x==1: return False
+        for i in range(s):
+            x=x*x%n
+            if x==n-1: return False 
+        return True # Composé
+    for a in test: 
+        if EssaiCompose(a): return False
     return True
-///
-}}}
 
-{{{id=4|
-MillerRabin2(77)
-///
-False
-}}}
+def Prim(i):
+    j=4
+    while not MillerRabin(j):
+        j=0
+        for ex in range(i):
+            j+=randint(0,9)*(10**ex)
+        while not MillerRabin(j):
+            j+=randint(1,10)
+            if j.digits()>i: break
+    return j
 
-{{{id=9|
-def MillerRabin2(n):
-    if n<4: return True
-    d,s=div(n-1,2)
-    def try_composite(a):
-        if pow(a, d, n) == 1:
-            return False
-        for i in range(s):
-            if pow(a, 2**i * d, n) == n-1:
-                return False
-        return True # n is definitely composite
-    for a in [2,3,5,7]:
-        if try_composite(a):
-            return False
- 
-    return True # no base tested showed n as composite
-///
-}}}
-
-{{{id=10|
-import random
-_mrpt_num_trials = 5
-def is_probable_prime(n):
-    if n<4: return True
-    if n % 2 == 0: return False
-    d,s=div(n-1,2)
-    # test the base a to see whether it is a witness for the compositeness of n
-    def try_composite(a):
-        if pow(a, d, n) == 1:
-            return False
-        for i in range(s):
-            if pow(a, 2**i * d, n) == n-1:
-                return False
-        return True # n is definitely composite
- 
-    for i in range(12):
-        a = randint(2,n)
-        if try_composite(a):
-            return False
- 
-    return True # no base tested showed n as composite
+def PremierAvec(a,n):
+    while True:
+        i=randint(2,n)
+        b,j=a,i
+        k,l=b%2,j%2
+        while k!=l:
+            k,l=b%2,j%2
+            if j==b or b==0:
+                print j
+                if b==1: return i
+                break
+            if k==0:
+                b=b/2
+            elif l==0:
+                l=l/2
+            if b>j:
+                b=j-b
+            else:
+                j=j-b
+        print a.gcd(i)
+    
+    return i
 ///
 }}}
 
 {{{id=11|
-#is_probable_prime(1000000000000066600000000000001),is_probable_prime(13),is_probable_prime(55644787)
-is_probable_prime(55644787)
+# -------------------- #
+# Programme Principal  #
+# -------------------- #
+
+print Prim(42)
+print PremierAvec(42,12)
+a=12
+///
+WARNING: Output truncated!  
+<html><a target='_new' href='/home/admin/8/cells/11/full_output.txt' class='file_link'>full_output.txt</a></html>
+
+
+
+238228294955526982544258216047861913864129
+7
+6
+6
+7
+2
+2
+6
+2
+6
+2
+1
+3
+3
+1
+7
+3
+3
+2
+6
+1
+6
+7
+6
+7
+1
+6
+6
+1
+3
+3
+2
+2
+3
+2
+2
+3
+6
+3
+7
+1
+2
+7
+3
+7
+6
+2
+1
+1
+2
+1
+2
+1
+2
+7
+1
+7
+7
+2
+
+...
+
+2
+1
+3
+2
+2
+3
+2
+2
+2
+1
+2
+2
+1
+3
+3
+1
+2
+1
+1
+2
+7
+3
+3
+2
+2
+2
+2
+3
+2
+2
+1
+6
+2
+6
+7
+6
+2
+3
+6
+7
+1
+7
+7
+3
+2
+2
+1
+1
+^C
+Traceback (most recent call last):    a=12
+  File "", line 1, in <module>
+    
+  File "/private/var/folders/Tk/Tks3RfQREqGxd1aWcYcvwU+++TI/-Tmp-/tmpbqIdGe/___code___.py", line 7, in <module>
+    print PremierAvec(_sage_const_42 ,_sage_const_12 )
+  File "/private/var/folders/Tk/Tks3RfQREqGxd1aWcYcvwU+++TI/-Tmp-/tmpfCXgSm/___code___.py", line 54, in PremierAvec
+    print a.gcd(i)
+  File "/Applications/Maths/sage/local/lib/python2.6/site-packages/sage/interfaces/get_sigs.py", line 9, in my_sigint
+    raise KeyboardInterrupt
+KeyboardInterrupt
+__SAGE__
+}}}
+
+{{{id=24|
+
 ///
 }}}
 
-{{{id=14|
+{{{id=25|
 
 ///
 }}}
 
-{{{id=15|
+{{{id=18|
+# -------------- #
+# Fonctions Test #
+# -------------- #
+
+def test_prime_function(f):
+    dic={643808006803554439230129854961492699151386107534013432918073439524138264842370630061369715394739134090922937332590384720397133335969549256322620979036686633213903952966175107096769180017646161851573147596390153: False,
+1000000000000066600000000000001:True,
+    270568443558689485333633588052890364054007893892773601191557514831184795421181950854385181053591716234181701274608324778811433964142183708836456011872051376743012138953416240415328311:True,
+    13:True,
+    7859845794865794857984567984:False,
+    55644787:False,
+743808006803554439230129854961492699151386107534013432918073439524138264842370630061369715394739134090922937332590384720397133335969549256322620979036686633213903952966175107096769180017646161851573147596390153: False}
+    errors=[]
+    for i in dic:
+        if not f(i)==dic[i]: errors.append([f(i),"f(%i)=%s != %s"%(i,f(i),dic[i])])
+    return errors
+    
+
+for i in test_prime_function(MillerRabin): print i[0]
+///
+False
+}}}
+
+{{{id=19|
 
 ///
 }}}
