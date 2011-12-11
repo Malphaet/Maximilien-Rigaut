@@ -112,6 +112,14 @@ def CleInit(i):
 
 def Chiffrement(m,c): 
     #return ExpoRapide(m,c[0],c[1])
+    if m>c.modulo:
+        n,l,temp=str(m),len(str(c.modulo)),''
+        lm=len(n)
+        for i in range(int(lm//l)):
+            x=Chiffrement(m[i*l,i*(l+1)],c)
+            print x,len(x)
+            temp=temp+x
+        return int(temp)
     return m.powermod(c.clef,c.modulo)
 
 def Dechiffrement(m,c1,c2):
@@ -123,15 +131,17 @@ def Dechiffrement(m,c1,c2):
     h = (c2.q_inv * (ad)) % c2.p
     return m2+h*c2.q
 
-def Encodage(s):
+def Encodage(s,size):
     mx=len(s)
     msg,i=10**(3*mx),0
     for char in s:
         msg+=ord(char)*10**(3*(mx-i-1))
         i+=1
+    table=[msg[i*size,i*(size+1)] for i in range(len(msg)/size)]
+    print table 
     return msg
 
-def Decodage(m):
+def Decodage(m,c):
     msg,m='',str(m)
     i,mx=0,(len(m)-1)/3
     while i<mx:
@@ -140,15 +150,16 @@ def Decodage(m):
     return msg
 
 def RSA(s,i):
-    c1,c2= CleInit(42)
+    c1,c2= CleInit(i)
+    size=len(str(c1.modulo))
     print 'Clef 1',c1
     print 'Clef 2',c2
-    m=Encodage(s)
+    m=Encodage(s,size)
     m_enc=Chiffrement(m,c1)
     print 'Message Encodé:',m
     print 'Message Encripté:',m_enc
     m_dec=Dechiffrement(m_enc,c1,c2)
-    m=Decodage(m_dec)
+    m=Decodage(m_dec,size)
     print 'Message Decripté:',m_dec
     print 'Message Decodé:',m
 ///
@@ -168,14 +179,22 @@ def RSA(s,i):
 #m_dec=Dechiffrement(m_enc,c1,c2)
 #print m,m_enc,m_dec
 
-RSA("Mon Nom Est Quelqu'un",42)
+RSA("Mon Nom Est Quelqu'un",12)
 ///
-Clef 1 (200288793736180631871232643587749976714660480132239454388469143462677981347823628759L, 314927706579538920544776715290959934969311035660396753676371736835284433634832790001)
-Clef 2 (1433730755580854317742142258073657675378132744548457304262202590986620242027542247, 314927706579538920544776715290959934969311035660396753676371736835284433634832790001)
-Message Encodé: 1077111110032078111109032069115116032081117101108113117039117110
-Message Encripté: 132992025951997870607372909924055776280854906674954612454066582088605572618403453613
-Message Decripté: 1077111110032078111109032069115116032081117101108113117039117110
-Message Decodé: Mon Nom Est Quelqu'un
+Clef 1 (36894273598311447964507L, 101126366303709662980957)
+Clef 2 (87263689646558928950483, 101126366303709662980957)
+Traceback (most recent call last):    #print Inverse(44,7)
+  File "", line 1, in <module>
+    
+  File "/private/var/folders/Tk/Tks3RfQREqGxd1aWcYcvwU+++TI/-Tmp-/tmpP9UomH/___code___.py", line 15, in <module>
+    exec compile(u'RSA("Mon Nom Est Quelqu\'un",_sage_const_12 )' + '\n', '', 'single')
+  File "", line 1, in <module>
+    
+  File "/private/var/folders/Tk/Tks3RfQREqGxd1aWcYcvwU+++TI/-Tmp-/tmp6IR9Ve/___code___.py", line 109, in RSA
+    m=Encodage(s,size)
+  File "/private/var/folders/Tk/Tks3RfQREqGxd1aWcYcvwU+++TI/-Tmp-/tmp6IR9Ve/___code___.py", line 92, in Encodage
+    table=[msg[i*size,i*(size+_sage_const_1 )] for i in range(len(msg)/size)]
+TypeError: object of type 'sage.rings.integer.Integer' has no len()
 }}}
 
 {{{id=18|
@@ -203,6 +222,16 @@ False
 }}}
 
 {{{id=26|
+
+///
+}}}
+
+{{{id=28|
+
+///
+}}}
+
+{{{id=29|
 
 ///
 }}}
