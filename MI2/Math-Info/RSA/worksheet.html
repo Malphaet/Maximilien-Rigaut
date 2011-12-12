@@ -37,6 +37,7 @@ class Clef_pub(object):
         for cle in self.__dict__: print cle,self.__dict__[cle]
 class Clef_priv(Clef_pub):
     def __init__(self,e,d,n,p,q):
+        "*<int> - Clef publique, Clef privée, modulo, p et q"
         Clef_pub.__init__(self,d,n)
         self.clef_p=d%(p-1)
         self.clef_q=d%(q-1)
@@ -52,6 +53,7 @@ class Clef_priv(Clef_pub):
 # --------------------- #
 
 def MillerRabin(n):
+    "(<int>:n) - Renvoie (<bool>:Pseudo-Premier)"
     test=[2,3,5,7,13,17,31,71]
     if n<4: return True
     if n%2==0: return False
@@ -70,17 +72,18 @@ def MillerRabin(n):
     return True
 
 def Prim(i):
+    "(<int>:nb decimales) - Renvoie un Pseudo Premier de taille i"
     j=4
     while not MillerRabin(j):
         j=0
-        for ex in range(i):
-            j+=randint(0,9)*(10**ex)
+        for ex in range(i): j+=randint(0,9)*(10**ex)
         while not MillerRabin(j):
             j+=randint(1,10)
             if j.digits()>i: break
     return j
 
 def PremierAvec(a,n):
+    "(<int>:nombre,<int>:modulo) - Renvoie un nombre premier avec a modulo n"
     assert(a>2)
     while True:
         i=randint(2,n)
@@ -96,13 +99,14 @@ def EuclideEtendu(a, n):
     s,t = EuclideEtendu(n,r)
     return (t, s - q * t)
 
-def Inverse(a,n): 
+def Inverse(a,n):
+    "(<int>:nombre,<int>:modulo) - Renvoie l'inverse de a modulo n"
     res=EuclideEtendu(a,n)[0]
     if res<0: return res+n
     return res
 
 def CleInit(i):
-    "Génère deux clef de taille > <2i> chacune renvoie <pub>,<priv>"
+    "(<int>:taille) - Renvoie (<Clef_pub>,<Clef_priv>) deux clef de taille superieure a 2i chacune."
     p,q=Prim(i),Prim(i)
     n,mx=p*q,(p-1)*(q-1)
     e=PremierAvec(mx,mx)
@@ -110,11 +114,12 @@ def CleInit(i):
     c1,c2=Clef_pub(e,n),Clef_priv(e,d,n,p,q)     # Old fashion: ((d,n),(e,n))
     return c1,c2
 
-def Chiffrement(m,c): 
+def Chiffrement(m,c):
+    "(<list>:messages a encripter,<Clef_pub>:Clef) - Renvoie le message cripte"
     return [(int(i)*1).powermod(c.clef,c.modulo) for i in m]
 
 def Dechiffrement(msgs,c1,c2):
-    #return Chiffrement(m,c2)
+    "(<list>:messages a décrypter,<Clef_pub>:clef,<Clef_priv>:clef) - Renvoie le message déchiffré"
     table=[]
     for m in msgs:
         m1=m.powermod(c2.clef_p,c2.p)
@@ -208,44 +213,34 @@ print "Factorisation test sur",139,197,":", Pollard(139*197,13*19),139*197/Polla
 
 clef_pu,clef_pr= CleInit(4)
 message=1337.powermod(clef_pu.clef,clef_pu.modulo)
-print "Message Intercepte:",message
+print "Message Intercepté:",message
 print "Clef publique:",clef_pu.modulo,clef_pu.clef
 
 clef,message=AttaqueRSA(message,clef_pu)
-print "Clef privee:",clef
-print "Message decripte:",message
+print "Clef privée:",clef
+print "Message décrypté:",message
 ///
 +--------------------+
 | Implementation RSA |
 +--------------------+
-Clef 1 (7892915, 29828629)
-Clef 2 (17666715, 29828629)
-Message Encodé: ['1177211', '1210132', '1178211', '1209132', '1169215', '1216132', '1181217', '1201208', '1213217', '1139217', '1210']
-Message Encripté: [9011423, 6549477, 16753270, 1984335, 15146558, 12911141, 16695671, 3618091, 26543914, 11402771, 16202195]
-Message Decripté: ['1177211', '1210132', '1178211', '1209132', '1169215', '1216132', '1181217', '1201208', '1213217', '1139217', '1210']
+Clef 1 (1046205869, 2521586759)
+Clef 2 (1107189029, 2521586759)
+Message Encodé: ['117721121', '101321782', '111209132', '116921521', '161321812', '117201208', '121321713', '19217210']
+Message Encripté: [876932417, 76725851, 645297924, 1906238654, 1685106018, 2228408869, 1831107983, 1785998853]
+Message Decripté: ['117721121', '101321782', '111209132', '116921521', '161321812', '117201208', '121321713', '19217210']
 Message Decodé: Mon Nom Est Quelqu'un
 
 +--------------------+
 | Attaque de Pollard |
 +--------------------+
 Factorisation test sur 139 197 : 139 197
-Message Intercepte: 8302773
-Clef publique: 31128841 10331565
-Clef privee: (21189013, 31128841)
-Message decripte: 1337
+Message Intercepté: 14958411
+Clef publique: 16765223 9939767
+Clef privée: (15920903, 16765223)
+Message décrypté: 1337
 }}}
 
-{{{id=30|
-
-///
-}}}
-
-{{{id=33|
-
-///
-}}}
-
-{{{id=34|
+{{{id=35|
 
 ///
 }}}
