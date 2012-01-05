@@ -1,6 +1,18 @@
+# -*- coding:utf8 -*-
+
+##############################
+# Copyleft Maximilien Rigaut
+# Devoir a la maison
+##############################
+
+
+##############################
+# Importation des Modules
 import random
 
-# Definition des classes et des constructeurs
+##############################
+# Definition des Classes
+
 class SkipList:
 	pass
 class Noeud:
@@ -16,7 +28,7 @@ def noeud(x):
 	return n
 
 def debut():
-	# les elements de type Debut sont des noeuds n'ayant pas de valeur places
+	# les elements de type Debut sont des noeuds n'ayant pas de valeur, placès
 	# en tete des listes. Il faut pouvoir monter et descendre d'un niveau a
 	# partir d'un Debut.
 	d = Debut()
@@ -48,6 +60,8 @@ def inserer(x, l):
 		if premier == None: # si ce niveau n'existe pas
 			premier = debut()
 			premier.inferieur = l.haut
+			if l.haut != None:
+				l.haut.superieur = premier
 			l.haut = premier
 			if l.bas == None: # si il n'y avait aucun niveau dans la liste l (elle etait vide)
 				l.bas = premier
@@ -99,10 +113,36 @@ def affiche(l):
 				print "  ",
 		print
 
-# Exemples d'utilisation (pour creer une skip-list contenant les entiers de 0 a 99)
-# A cause des tirages aleatoires, la liste sera differente a chaque execution
+##############################
+# Definitions des Fonctions
 
-l = skiplist()
-for i in range(100):
-	inserer(i, l)
-affiche(l)
+def appartient(x,l):
+    val=l.haut
+    test=True
+    while test:
+        if val.suivant==None or x<val.suivant.valeur:
+            val=val.inferieur
+            if val==None: return False
+        else:
+            val=val.suivant
+            if x==val.valeur: return True
+
+def supprimer(x,l):
+    pass
+
+# Exemples d'utilisation (pour creer une skip-list contenant les entiers de 0 a 39)
+# A cause des tirages aleatoires, la liste sera differente a chaque execution
+if __name__=='__main__':
+    # QUESTIONS #
+    # 4. En moyenne une SkipList possede log2(n)
+    #
+    # 5. Complexité
+    #   log2(x)
+    #
+    # 7. Complexité
+    #   log2(x)
+    
+    l = skiplist()
+    for i in range(40): inserer(i, l)
+    affiche(l)
+    print appartient(99,l)
