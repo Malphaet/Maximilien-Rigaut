@@ -15,7 +15,7 @@ import random
 
 class SkipList:
 	pass
-class Noeud:
+class Noeud(object):
 	pass
 class Debut:
 	pass
@@ -113,92 +113,4 @@ def affiche(l):
 				print "  ",
 		print
 
-###############################
-# ----      Partie 1     ---- #
-###############################
-
-class Liste(object):
-    def __init__(self,first=None):
-        self.first=first
-    
-    def add(self,node):
-        self.first,node.next=node,self.first
-    
-    def delete(self,value):
-        while self.first!=None:
-            if self.first.value==value: self.first=self.first.next
-            else: break
-        node,node0=self.first.next,self.first
-        while node!=None:
-            if node.value==value: node0.next=node.next
-            node,node0=node.next,node
-    
-    def __contains__(self,x):
-        node=self.first
-        while node!=None:
-            if node.value==x: return True
-            node=node.next
-        return False
-
-class Node(object):
-    def __init__(self,value=None,next=None):
-        self.value=value
-        self.next=next
-    
-        
-def ajouter(x,l): return l.add(Node(x))
-def supprimer(x,l): return l.delete(x)
-def appartient(x,l): return x in l
-# 2. Complexité:
-# - ajouter: O(2)
-# - supprimer: O(2n)
-# - appartient: O(2n)
-
-def ajouter(x,l):
-    node,node0,nodeN=l.first,l.first,Node(value=x)
-    while node!=None:
-        if node.value>value: node0.next,nodeN.next=nodeN,node
-        node,node0=node.next,node
-    
-def appartient2(x,l):
-    node=l.first
-    while node!=None:
-        if node.value>x: return False
-        elif node.value==x: return True
-        node=node.next
-    return False
-
-###############################
-# ----      Partie 2     ---- #
-###############################
-
-def appartient(x,l):
-    val=l.haut
-    test=True
-    while test:
-        if val.suivant==None or x<val.suivant.valeur:
-            val=val.inferieur
-            if val==None: return False
-        else:
-            val=val.suivant
-            if x==val.valeur: return True
-
-def supprimer(x,l):
-    pass
-
-###############################
-# ----    Questions      ---- #
-###############################
-# 4. En moyenne une SkipList possede log2(n) niveaux
-#
-# 5. Complexité
-#    
-#   
-# 7. Complexité
-#   
-
-l = skiplist()
-for i in range(40): inserer(i, l)
-affiche(l)
-print appartient(99,l)
     
