@@ -7,8 +7,9 @@
 
 #include <stdio.h>
 
-/* ======== Prototype =========*/
 /* ========= Defines ==========*/
+/* ======== Prototype =========*/
+
 /* =========== Main ===========*/
 
 int main(void){

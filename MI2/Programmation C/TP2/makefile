@@ -7,11 +7,14 @@ EXEC=test_show_table
 
 all: $(EXEC)
 
-test_show_table: test_show_table.o show_table.h constants.h
+test_show_table: test_show_table.o show_table.o constants.h
 	$(CC) $(LDFLAGS) -o $@ $^
 
+show_table.o: show_table.c show_table.h
+	$(CC) $(CFLAGS) -o $@ -c $<
+
 test_show_table.o: test_show_table.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean: 
-    rm *.o
+	rm *.o
