@@ -1,12 +1,11 @@
 /*-----------------------------*/
 /* Copyleft Maximilien Rigaut  */
-/* Show double tables          */
+/* Model                       */
 /*-----------------------------*/
 
 /* ========= Includes =========*/
 
-#include "constants.h"
-
+/* ========= Defines ==========*/
 /* ======== Prototype =========*/
+/* ========= Typedef ==========*/
 
-void show_vector(TYPE_VECT t[],int sizeT);

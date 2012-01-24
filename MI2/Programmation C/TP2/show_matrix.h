@@ -1,12 +1,13 @@
 /*-----------------------------*/
 /* Copyleft Maximilien Rigaut  */
-/* Show double tables          */
+/* Test matrix                 */
 /*-----------------------------*/
 
 /* ========= Includes =========*/
 
 #include "constants.h"
+#include "matrix.h"
 
 /* ======== Prototype =========*/
 
-void show_vector(TYPE_VECT t[],int sizeT);
+void showMatrix(struct matrix m);

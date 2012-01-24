@@ -6,5 +6,6 @@
 /* ========= Defines ==========*/
 
 #define TYPE_VECT double
-#define TYPE_PRECISE double
+#define TYPE_PRECISE float
 #define TYPE_VLONG long long int
+#define TYPE_MATRIX struct matrix
