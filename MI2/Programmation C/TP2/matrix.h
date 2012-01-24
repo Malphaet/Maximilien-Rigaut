@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 /* ========= Defines ==========*/
-#define M(m,x,y) m.t[x+y*m.cols] /* Acces to matrix */
+#define M(m,x,y) m.t[y+x*m.cols] /* Acces to matrix */
 
 /* ========= Typedef =========*/
 
@@ -22,5 +22,5 @@ struct matrix{
 
 /* ======== Prototype =========*/
 
-TYPE_MATRIX newMatrix(int cols, int rows);
+TYPE_MATRIX newMatrix(int roxs, int cols);
 TYPE_MATRIX multMatrix(TYPE_MATRIX a,TYPE_MATRIX b);

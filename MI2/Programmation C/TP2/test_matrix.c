@@ -30,7 +30,7 @@ int main(void){
 	
 	a = newMatrix(MatM,MatN);
 	b = newMatrix(MatN,MatP);
-	u = newMatrix(MatN,MatN);
+	u = newMatrix(MatM,MatM);
 	
 	for (i=0;i<MatM;i++){
 		for (j=0;j<MatN;j++){
@@ -40,12 +40,12 @@ int main(void){
 	
 	for (i=0;i<MatN;i++){
 		for (j=0;j<MatP;j++){
-			M(b,i,j)=(i+j*(MatP));
+			M(b,i,j)=(j+i*(MatN));
 		}
 	}
 	
-	for (i=0; i<MatN;i++){
-		for (j=0;j<MatN;j++){
+	for (i=0; i<MatM;i++){
+		for (j=0;j<MatM;j++){
 			if (i==j) M(u,i,j)=1;
 			else M(u,i,j)=0;
 		}
