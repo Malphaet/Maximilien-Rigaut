@@ -2,19 +2,12 @@
 /* Copyleft Maximilien Rigaut  */
 /* Model                       */
 /*-----------------------------*/
-
+#ifndef MODEL
+#define MODEL
 /* ========= Includes =========*/
 
-#include <stdio.h>
-
 /* ========= Defines ==========*/
+/* ======== Prototype =========*/
+/* ========= Typedef ==========*/
 
-/* =========== Main ===========*/
-
-int main(void){
-	
-	return 0;
-}
-
-/* ========= Functions ========*/
-
+#endif
