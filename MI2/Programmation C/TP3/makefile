@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = 
-EXEC=lib_number
+EXEC=
 TEST=test_lib_rational test_lib_complex test_lib_number
 
-all: $(EXEC)
+all: $(TEST)
 
 test: $(TEST)
 
