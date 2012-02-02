@@ -11,7 +11,7 @@
 
 /* ========= Typedef ==========*/
 
-enum TypeNumber {integer, floating, rational, complex};
+enum TypeNumber {integer, rational, floating, complex};
 
 typedef struct nb {
 	enum TypeNumber tn;
@@ -26,10 +26,13 @@ typedef struct nb {
 /* ======== Prototype =========*/
 
 void printNumber(Number n);
-/*Number addNumber(Number n1, Number n2);
+void convertNumber(Number *n1, enum TypeNumber type);
+void equaliseNumber(Number *n1, Number *n2);
+
+Number addNumber(Number n1, Number n2);
 Number mulNumber(Number n1, Number n2);
 Number subNumber(Number n1, Number n2);
 Number divNumber(Number n1, Number n2);
-Number isequalNumber(Number n1, Number n2);
-*/
+int isequalNumber(Number n1, Number n2);
+
 #endif

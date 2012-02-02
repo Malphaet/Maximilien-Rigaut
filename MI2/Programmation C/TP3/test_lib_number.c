@@ -33,7 +33,28 @@ int main(void){
 	PRINTN("n2 : ",n2);
 	PRINTN("n3 : ",n3);
 	
-	/*PRINTN("divnumber(mulnumber(n1,n2),n3)",divnumber(mulnumber(n1,n2),n3));*/
+	/*
+	Number divNumber(Number n1, Number n2);
+	Number isequalNumber(Number n1, Number n2);
+	*/
+	
+	PRINTN("addNumber(n1,n2) : ",addNumber(n1, n2));
+	PRINTN("addNumber(n2,n3) : ",addNumber(n2, n3));
+	
+	PRINTN("mulNumber(n2,n2) : ",mulNumber(n2, n2));
+	PRINTN("mulNumber(n3,n1) : ",mulNumber(n1, n3));
+	
+	PRINTN("subNumber(n3,n3) : ",subNumber(n2, n2));
+	PRINTN("subNumber(n3,n2) : ",subNumber(n1, n3));
+	
+	PRINTN("divNumber(n3,n1) : ",divNumber(n3, n1));
+	PRINTN("divNumber(n3,n2) : ",divNumber(n3, n2));
+	
+	printf("isequalNumber(n1,n1) : %d\n",isequalNumber(n1, n1));
+	printf("isequalNumber(n1,n2) : %d\n",isequalNumber(n1, n2));
+	
+	
+	PRINTN("divnumber(mulnumber(n1,n2),n3) : ",divNumber(mulNumber(n1,n2),n3));
 	
 	return 0;
 }

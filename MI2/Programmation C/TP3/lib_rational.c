@@ -17,15 +17,12 @@ void printRational(Rational r){
 }
 
 Rational addRational(Rational r1,Rational r2){
-	int gc;
 	Rational r;
 	if (r1.num==0) return r=r2;
 	if (r2.num==0) return r=r1;
 	
-	gc=gcd(r1.den,r2.den);
-	
-	r.num=r1.num*(r2.den/gc)+r2.num*(r1.den/gc);
-	r.den=r1.den*r2.den/gc;
+	r.num=(r1.num*r2.den)+(r2.num*r1.den);
+	r.den=(r1.den*r2.den);
 	
 	return r;
 }
