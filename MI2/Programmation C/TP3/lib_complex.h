@@ -2,8 +2,8 @@
 /* Copyleft Maximilien Rigaut  */
 /*-----------------------------*/
 
-#ifndef MODEL
-#define MODEL
+#ifndef LIB_COMPLEX_H
+#define LIB_COMPLEX_H
 /* ========= Defines ==========*/
 /* ========= Typedef ==========*/
 typedef struct {double re,im;} Complex;

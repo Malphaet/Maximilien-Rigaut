@@ -21,6 +21,7 @@ typedef struct {
 void printRational(Rational r);
 Rational addRational(Rational r1,Rational r2);
 Rational mulRational(Rational r1,Rational r2);
+Rational int2Rational(int i);
 double Rational2double(Rational r);
 int gcd(int a,int b);
 

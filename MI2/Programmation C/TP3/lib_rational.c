@@ -13,7 +13,7 @@
 /* ========= Functions ========*/
 
 void printRational(Rational r){
-	printf("%d/%d\n",r.num,r.den);
+	printf("%d/%d",r.num,r.den);
 }
 
 Rational addRational(Rational r1,Rational r2){
@@ -36,6 +36,13 @@ Rational mulRational(Rational r1,Rational r2){
 	r.num=r1.num*r2.num;
 	r.den=r1.den*r2.den;
 
+	return r;
+}
+
+Rational int2Rational(int i){
+	Rational r;
+	r.num=i;
+	r.den=1;
 	return r;
 }
 

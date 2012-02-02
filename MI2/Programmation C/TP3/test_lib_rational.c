@@ -5,12 +5,11 @@
 /* ========= Includes =========*/
 
 #include <stdio.h>
-#include "test_lib_rational.h"
 #include "lib_rational.h"
 
 /* ========= Defines ==========*/
 
-#define RPRINT(text,command) printf(text); printRational(command)
+#define RPRINT(text,command) printf(text); printRational(command); printf("\n")
 
 /* =========== Main ===========*/
 
