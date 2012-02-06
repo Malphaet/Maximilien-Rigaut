@@ -14,8 +14,8 @@ $(EXEC): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ -c $< -lm
 
 clean: 
-	rm *.o
+	rm -f *.o
 	
-mrproprer: clean
-	rm $(EXEC)
+cleaner: clean
+	rm -f $(EXEC)
 
