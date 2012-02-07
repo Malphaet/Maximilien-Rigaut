@@ -5,6 +5,7 @@
 /* ========= Includes =========*/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "lib_string.h"
 /* ========= Defines ==========*/
 
@@ -67,13 +68,38 @@ void melting_sort(char **t1,int N){
 	melt(t1,t2,N/2,N-N/2);
 }
 
-/* Static array of pointer Melting */
+/* Array of pointer Melting */
 void melt(char **t1,char **t2,int N1,int N2){
+	char **t=(char**) malloc(sizeof(char)*(N1));
+	int i=0,j=0;
+	/* Save first table */
+	while (i<N1) {*(t+i)=*(t1+i);i++;} i=0; 
+	while (i<N1 && j<N2){
+		if (string_cmp(*(t+i),*(t2+j))<0){
+			*(t1+i+j)=*(t+i);
+			i++;
+		}else{
+			*(t1+i+j)=*(t2+j);
+			j++;
+		}
+	}
+	while (N2>j){
+		*(t1+i+j)=*(t2+j);
+		j++;
+	}
+	while (N1>i) {
+		*(t1+i+j)=*(t+i);
+		i++;
+	}
+}
+
+/* Static array of pointer Melting */
+void melt_size(char **t1,char **t2,int N1,int N2){
 	int i=0,j=0;
 	char *p; /* Melting pointer */
 	while (i<N1 && j<N2){
-		switch (string_cmp( *(t1+i),  *(t2+j) )){
-			case 0:
+		switch (string_length_cmp(*(t1+i),*(t2+j))){
+			case 0:	
 				i++;
 				break;
 			case 1:
@@ -112,17 +138,11 @@ int string_length_cmp(char *s1,char *s2){
 
 void print_table_strings(char **t,int N){
 	int i=-1;
-	while (N-++i) print_string(*(t+(char)i));
+	while (N-++i) print_string(*(t+i));
 }
 
 void print_string(char *s){
 	int i=0;
 	while (*(s+i)) printf("%c",*(s+++i));
-	printf("\n");
-}
-
-void print_slice(char *s,int N){
-	int i=0;
-	while (i<N) printf("%c",*(s+++i));
 	printf("\n");
 }

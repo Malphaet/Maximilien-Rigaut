@@ -21,5 +21,6 @@ void print_slice(char *s,int N);
 
 void melting_sort(char **t1,int N);
 void melt(char **t1,char **t2,int N1,int N2);
+void melt_size(char **t1,char **t2,int N1,int N2);
 
 #endif
