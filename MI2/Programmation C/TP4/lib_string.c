@@ -11,43 +11,42 @@
 /* =========== Main ===========*/
 
 int main(void){
-	char t[]="This is a sentence";
-	char m1[]="HUMANS";
-	char m2[]="AFTER";
-	char m3[]="ALL";
+	char m1[]="Ramadane";
+	char m2[]="Meriem";
+	char m3[]="Charly";
+	char m4[]="Mamadou";
+	char m5[]="Thomas";
+	char m6[]="Stephane";
+	char m7[]="Aboucadar Sidy";
+	char m8[]="Etc.";
+	char *table[8];
+	table[0]=m1;
+	table[1]=m2;
+	table[2]=m3;
+	table[3]=m4;
+	table[4]=m5;
+	table[5]=m6;
+	table[6]=m7;
+	table[7]=m8;
 	
-	char *table[3];
-	table[0]=m1;table[1]=m2;table[2]=m3;
+	printf("=> Array before sorting <=\n");
+	print_table_strings(table,8);
 	
+	/*printf("%d\n",string_length_cmp(m7,m1));*/
 	
-	printf("%d\n",string_length("This sentence is 31 letter long"));
-	printf("%d\n",string_cmp("ffa","ffe"));
-	print_string(t); string_flip(t); print_string(t);
+	melting_sort(table,8);
+	printf("=> Static array of pointers melting <=\n");
+	print_table_strings(table,8);
 	
-	print_table_strings(table,3);
 	return 0;
 }
 
 /* ========= Functions ========*/
+/*---------------------*/
+/*     Sorting      */
+/*---------------------*/
 
-int string_length(char *s){
-	if (*s=='\0') return 0;
-	return 1+string_length(s+1);
-}
-
-/*Do a copy and change pointers*/
-/*void string_flip(char *s){
-	int i=0;
-	char *t= (char *) malloc(sizeof(s));
-	if (*t==NULL) return;
-	while (*(s+i)!=0){
-		*t=*(s+i)
-		i+=1;
-	}
-	return;
-}*/
-
-/*switch in place */
+/* Switch in place */
 void string_flip(char *s){
 	int i=0; char t;
 	int size=string_length(s);
@@ -56,11 +55,60 @@ void string_flip(char *s){
 	}
 }
 
+/* Recursive melting sort */
+void melting_sort(char **t1,int N){
+	char **t2;
+	if (N<=1) return;
+	t2=(char **)(t1+N/2);
+	
+	melting_sort(t1,N/2);
+	melting_sort(t2,N-N/2);
+	
+	melt(t1,t2,N/2,N-N/2);
+}
+
+/* Static array of pointer Melting */
+void melt(char **t1,char **t2,int N1,int N2){
+	int i=0,j=0;
+	char *p; /* Melting pointer */
+	while (i<N1 && j<N2){
+		switch (string_cmp( *(t1+i),  *(t2+j) )){
+			case 0:
+				i++;
+				break;
+			case 1:
+				p=*(t1+i); *(t1+i)=*(t2+j); *(t2+j)=p;
+				i++;
+				break;
+			case -1:
+				j++;
+				break;
+		}
+	}
+	
+}
+
+/*---------------------*/
+/*     Comparison      */
+/*---------------------*/
+
+int string_length(char *s){
+	return !*s?0:1+string_length(s+1);
+}
+
 int string_cmp(char *s1,char *s2){	
 	if (!*s1 && !*s2) return 0;
 	if (*s1==*s2) return string_cmp(s1+1,s2+1);
 	return *s1>*s2?1:-1;
 }
+
+int string_length_cmp(char *s1,char *s2){
+	return *s1||!*s2?*s1-*s2?*s1>*s2?1:-1:0:string_length_cmp(s1+1,s2+1);
+}
+
+/*---------------------*/
+/*   Printing thingy   */
+/*---------------------*/
 
 void print_table_strings(char **t,int N){
 	int i=-1;
@@ -70,5 +118,11 @@ void print_table_strings(char **t,int N){
 void print_string(char *s){
 	int i=0;
 	while (*(s+i)) printf("%c",*(s+++i));
+	printf("\n");
+}
+
+void print_slice(char *s,int N){
+	int i=0;
+	while (i<N) printf("%c",*(s+++i));
 	printf("\n");
 }
