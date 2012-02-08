@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "lib_string.h"
 /* ========= Defines ==========*/
+#define LENGTH_SORT 1
 
 /* =========== Main ===========*/
 
@@ -44,7 +45,7 @@ int main(void){
 
 /* ========= Functions ========*/
 /*---------------------*/
-/*     Sorting      */
+/*     Sorting         */
 /*---------------------*/
 
 /* Switch in place */
@@ -75,7 +76,11 @@ void melt(char **t1,char **t2,int N1,int N2){
 	/* Save first table */
 	while (i<N1) {*(t+i)=*(t1+i);i++;} i=0; 
 	while (i<N1 && j<N2){
+		#if LENGTH_SORT==0
 		if (string_cmp(*(t+i),*(t2+j))<0){
+		#else
+		if (!string_length_cmp(*(t+i),*(t2+j))?string_cmp(*(t+i),*(t2+j))<0:string_length_cmp(*(t+i),*(t2+j))>0){
+		#endif
 			*(t1+i+j)=*(t+i);
 			i++;
 		}else{
@@ -83,35 +88,10 @@ void melt(char **t1,char **t2,int N1,int N2){
 			j++;
 		}
 	}
-	while (N2>j){
-		*(t1+i+j)=*(t2+j);
-		j++;
-	}
-	while (N1>i) {
-		*(t1+i+j)=*(t+i);
-		i++;
-	}
-}
-
-/* Static array of pointer Melting */
-void melt_size(char **t1,char **t2,int N1,int N2){
-	int i=0,j=0;
-	char *p; /* Melting pointer */
-	while (i<N1 && j<N2){
-		switch (string_length_cmp(*(t1+i),*(t2+j))){
-			case 0:	
-				i++;
-				break;
-			case 1:
-				p=*(t1+i); *(t1+i)=*(t2+j); *(t2+j)=p;
-				i++;
-				break;
-			case -1:
-				j++;
-				break;
-		}
-	}
-	
+	/* Copy the rest of the longer array */
+	while (N2>j){ *(t1+i+j)=*(t2+j); j++; }
+	while (N1>i){ *(t1+i+j)=*(t+i); i++; }
+	/*free(t);*/
 }
 
 /*---------------------*/
@@ -129,7 +109,7 @@ int string_cmp(char *s1,char *s2){
 }
 
 int string_length_cmp(char *s1,char *s2){
-	return *s1||!*s2?*s1-*s2?*s1>*s2?1:-1:0:string_length_cmp(s1+1,s2+1);
+	return !*s1||!*s2?*s1-*s2?*s1>*s2?1:-1:0:string_length_cmp(s1+1,s2+1);
 }
 
 /*---------------------*/
