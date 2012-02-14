@@ -6,15 +6,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-/* ========= Defines ==========*/
+#include "utils.h"
 
 /* =========== Main ===========*/
 
-int main(void){
-	
-	return 0;
+int main(int nargs, char **argv){
+	int nb=atoi(argv[1]);
+	while (nb--) OUT("%s\n",getenv("USER"));
+	return 0*nargs;
 }
-
-/* ========= Functions ========*/
-

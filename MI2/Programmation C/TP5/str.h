@@ -2,19 +2,14 @@
 /* Copyleft Maximilien Rigaut  */
 /*-----------------------------*/
 
+#ifndef __STR__
+#define __STR__
 /* ========= Includes =========*/
 
-#include <stdio.h>
-#include <stdlib.h>
-
 /* ========= Defines ==========*/
+/* ========= Typedef ==========*/
+/* ======== Prototype =========*/
+char *strcopy(char*);
+char *int2string(int);
 
-/* =========== Main ===========*/
-
-int main(void){
-	
-	return 0;
-}
-
-/* ========= Functions ========*/
-
+#endif

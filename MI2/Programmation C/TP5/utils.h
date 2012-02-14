@@ -2,12 +2,12 @@
 /* Copyleft Maximilien Rigaut  */
 /*-----------------------------*/
 
-#ifndef __MODEL__
-#define __MODEL__
-/* ========= Includes =========*/
+#ifndef __CHECK__
+#define __CHECK__
 
 /* ========= Defines ==========*/
-/* ========= Typedef ==========*/
-/* ======== Prototype =========*/
+
+#define TEST(p) if ((p)==NULL) abort() 
+#define OUT printf
 
 #endif

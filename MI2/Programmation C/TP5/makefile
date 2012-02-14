@@ -1,14 +1,17 @@
 CC = gcc
 CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = 
-EXEC=executable
+EXEC=test exec
 
 all: $(EXEC)
 
-$(EXEC): $(OBJ)
+test: main.o str.o mat.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
-%.o: %.c
+exec: exec.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+%.o: %.c %h utils.h
 	$(CC) $(CFLAGS) -o $@ -c $< -lm
 
 clean: 

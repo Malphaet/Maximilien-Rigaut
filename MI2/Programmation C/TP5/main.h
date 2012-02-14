@@ -2,19 +2,13 @@
 /* Copyleft Maximilien Rigaut  */
 /*-----------------------------*/
 
+#ifndef __MAIN__
+#define __MAIN__
 /* ========= Includes =========*/
 
-#include <stdio.h>
-#include <stdlib.h>
-
 /* ========= Defines ==========*/
+/* ========= Typedef ==========*/
+/* ======== Prototype =========*/
+double f(double);
 
-/* =========== Main ===========*/
-
-int main(void){
-	
-	return 0;
-}
-
-/* ========= Functions ========*/
-
+#endif
