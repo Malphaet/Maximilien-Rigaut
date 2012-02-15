@@ -9,13 +9,13 @@
 #include "mat.h"
 /* ========= Defines ==========*/
 
+#define M(x) (a+(b-a)*(etapes+(x))/n)
+
 /* ========= Functions ========*/
 
-double integrale(double (*funct)(double x),double a, double b, int n){
+double integrale(double (*funct)(double), double a, double b, int n){
 	int etapes=n;
-	long int res=0;
-	while (etapes) {
-		res+=(*funct)(a+(b-a)*etapes--/n);
-	}
+	double res=0;
+	while (etapes) res+=(b-a)*(*funct)(a+(((double)etapes--)*(b-a))/n)/n;
 	return res;
 }

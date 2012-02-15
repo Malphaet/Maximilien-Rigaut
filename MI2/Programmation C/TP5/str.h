@@ -11,5 +11,6 @@
 /* ======== Prototype =========*/
 char *strcopy(char*);
 char *int2string(int);
+double string2double(char *);
 
 #endif
