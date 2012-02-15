@@ -21,5 +21,5 @@ clean:
 	rm -f *.o
 	
 cleaner: clean
-	rm -f $(EXEC)
+	rm -f $(EXEC); rm -f output.txt;
 

@@ -11,7 +11,11 @@
 /* =========== Main ===========*/
 
 int main(int nargs, char **argv){
-	int nb=atoi(argv[1]);
-	while (nb--) OUT("%s\n",getenv("USER"));
+	char *user=getenv("USER");
+	char *nb_c=argv[1];
+	int nb_i;
+	TEST(user); TEST(nb_c);
+	nb_i=atoi(nb_c);
+	while (nb_i--) OUT("%s\n",user);
 	return 0*nargs;
 }

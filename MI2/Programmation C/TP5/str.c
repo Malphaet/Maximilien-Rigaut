@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include "str.h"
 
 /* ========= Defines ==========*/
 
@@ -45,4 +46,29 @@ double string2double(char *str){
 	}
 	if (p==NULL) return *nb;
 	return (*dec+*nb/t);
+}
+
+char *ranger(char *texte){
+	int t_table=0;
+	char *chaine=texte;
+	char **table=malloc(sizeof(char*));
+	TEST(table);
+	while (*texte){
+		if (*texte=='\n') {
+			table=realloc(table,++t_table*sizeof(char*)); TEST(table);
+			*(table+t_table-1)=chaine;
+			chaine=++texte; TEST(chaine);
+		}
+		texte++;
+	}
+	printf("%d\n",comp("Mooo\n","Mooo\nioiiooio"));
+	qsort(texte,t_table,t_table,comp);
+	return "Moo";
+}
+
+int comp(const void *C1,const void *C2){
+	/*Empty string is equal to any string... why not ?*/
+	char *c1=(char*)C1,*c2=(char*)C2;
+	while (*c1!='\n'||*c2!='\n') if (*c1++!=*c2++) return *(c1-1)-*(c2-1);
+	return 0;
 }

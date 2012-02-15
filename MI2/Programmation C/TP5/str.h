@@ -12,5 +12,7 @@
 char *strcopy(char*);
 char *int2string(int);
 double string2double(char *);
+char *ranger(char *);
+int comp(const void *c1,const void *c2);
 
 #endif

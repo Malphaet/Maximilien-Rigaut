@@ -17,14 +17,14 @@
 int main(void){
 	char *c="Mooooo";
 	char *c2;
-	OUT("%p: %s\n",c,c);
+	OUT("%p: ",c); OUT("%s\n",c);
 	c2=strcopy(c);
-	OUT("%p: %s\n",c2,c2);
+	OUT("%p: ",c2); OUT("%s\n",c2);
 	c2=int2string(120445);
 	OUT("%s\n",c2);
 	OUT("%f\n",integrale(f,0,1,10000));
+	ranger("Mou\nLooo\nKooo\n");
 	return 0;
-
 }
 
 /* ========= Functions ========*/
