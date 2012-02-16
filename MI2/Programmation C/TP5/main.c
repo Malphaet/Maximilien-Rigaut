@@ -17,13 +17,23 @@
 int main(void){
 	char *c="Mooooo";
 	char *c2;
+	char *rangerChar="Alice\nBob\nZorglub\nMetatron\nUriel\nZelel\n";
+	OUT("%s\n","############ Nouvelle execution ##########");
+	OUT("%s\n","======== Avant copie ======");
 	OUT("%p: ",c); OUT("%s\n",c);
 	c2=strcopy(c);
+	OUT("%s\n","======== Apres copie ======");
 	OUT("%p: ",c2); OUT("%s\n",c2);
+	OUT("%s\n","======== Conversion en chaine ======");
 	c2=int2string(120445);
 	OUT("%s\n",c2);
+	OUT("%s\n","======== Integrale ======");
 	OUT("%f\n",integrale(f,0,1,10000));
-	ranger("Mou\nLooo\nKooo\n");
+
+	OUT("%s\n","======== Tableau avant rangement ======");
+	OUT("%s",rangerChar);
+	OUT("%s\n","======== Apres rangement ======");
+	OUT("%s",ranger(rangerChar));
 	return 0;
 }
 

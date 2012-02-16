@@ -16,8 +16,8 @@
 /* =========== Main ===========*/
 
 int main(int nbargs, char ** kwargs){
-	int i;
-	double (*t_funct[NB_FUNCT])(double x)={sin,cos,log,sqrt};
+	int i=nbargs; /*Strictement inutile, mais pas de warnings a la compilation*/
+	double (*t_funct[NB_FUNCT])(double)={sin,cos,log,sqrt};
 	char t_names[NB_FUNCT][5]={"sin","cos","log","sqrt"};
 	TEST(kwargs[1]);TEST(kwargs[2]);
 	for (i=0;i<NB_FUNCT;i++)

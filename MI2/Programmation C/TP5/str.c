@@ -49,26 +49,42 @@ double string2double(char *str){
 }
 
 char *ranger(char *texte){
+	/* Ranger renvoie la liste triee dans l'ordre inverse a comp, et je m'en fiche. */
 	int t_table=0;
+	int j=0;
+	char *ret; /* On ne sait si on peut modifier la chaine. */
+	char *pret;
 	char *chaine=texte;
 	char **table=malloc(sizeof(char*));
+	
 	TEST(table);
+
 	while (*texte){
 		if (*texte=='\n') {
 			table=realloc(table,++t_table*sizeof(char*)); TEST(table);
 			*(table+t_table-1)=chaine;
 			chaine=++texte; TEST(chaine);
 		}
+		j++;
 		texte++;
 	}
-	printf("%d\n",comp("Mooo\n","Mooo\nioiiooio"));
-	qsort(texte,t_table,t_table,comp);
-	return "Moo";
+	ret=malloc((1+j)*sizeof(char)); TEST(ret);
+	qsort(table,t_table,sizeof(char*),comp);
+	pret=ret;
+	
+	j=0;
+	while(t_table--) {
+		while(*(*(table+t_table)+j)!='\n') *pret++=*(*(table+t_table)+j++);
+		*pret++='\n'; j=0;
+	}
+	return ret;
 }
 
-int comp(const void *C1,const void *C2){
-	/*Empty string is equal to any string... why not ?*/
-	char *c1=(char*)C1,*c2=(char*)C2;
-	while (*c1!='\n'||*c2!='\n') if (*c1++!=*c2++) return *(c1-1)-*(c2-1);
+static int comp(void const *C1,void const *C2){
+	char * const *c1 = C1;
+	char * const *c2 = C2;
+	int i=0,j=0;
+
+	while (*(*c1+i)!='\n'||*(*c2+j)!='\n') if (*(*c1+i++)!=*(*c2+j++)) return *(*c2+i-1)-*(*c1+j-1);
 	return 0;
 }
