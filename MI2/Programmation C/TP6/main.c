@@ -14,7 +14,8 @@
 int main(void){
     PERSONNE deValois = cree_personne("de Valois","Marguerite",1553,1615);
     PERSONNE henriIV = cree_personne("IV","Henri",1553,1610);
-    PERSONNE deMedicis = cree_personne("de Medicis","Marie",1573,1642);
+    PERSONNE deMedicis = cree_personne("de Medicis","Marie",1573,1642);clear
+
     PERSONNE louisXIII = cree_personne("XIII","Louis",1601,1643);
     PERSONNE anneDAutriche = cree_personne("d'Autriche","Anne",1601,1666);
     PERSONNE louisXIV = cree_personne("XIV","Louis",1643,1715);
