@@ -5,7 +5,7 @@ EXEC=test
 
 all: $(EXEC)
 
-$(EXEC): main.o
+$(EXEC): main.o gene_lib.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c %.h utils.h
