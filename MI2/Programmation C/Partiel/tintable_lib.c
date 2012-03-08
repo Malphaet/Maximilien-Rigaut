@@ -29,25 +29,28 @@
 
 /* ========= Functions ========*/
 
-tintype tintable(int *table,int n){
-	tintype u=malloc((n+1)/2); tintype r=u; TEST(u);
-	if (n%2) *(u+n/2)=*(table+n);
-	n>>=1;
-	while (n--) *u++=(*table++<<4)+*(table+++1);
+/* Under code small number for size gain and fast memory access */
+char *tintable(char *table,char nbits, int nbchars){
+	char dec=8/nbits-1;
+	char *u=malloc((nbchars+1)>>dec); tintype r=u; TEST(u);
+	char temp,i=0;
+	/*if (nbchars%nbits) *(u+(nbchars>>nbits))=*(table+nbchars);*/
+	nbchars>>=dec;
+	for (temp=0;nbchars--;*u++=temp) for (temp=0,i=0;i<(8/nbits);i++) temp+=(*table++<<(i*nbits));
 	return r;
 }
 
-void print_tintable(tintype table,int n){
+void print_tintable(char *table,char dsize, int n){
 	char a,b;
 	while (n--){
-		a=*table>>4; b=*table-(a<<4);
+		a=*table>>dsize; b=*table-(a<<4);
 		/*printf("%s=(%s,%s)\n",bytemap(*table),bytemap(a),bytemap(b));*/
 		printf("%i=(%i,%i)\n",*table,a,b); table++;
 	}
 }
 
-char *bytemap(int x){
-	int i;
+char *bytemap(char x){
+	char i;
 	char *u=malloc(10); char *r=u; TEST(r);
 	for (i=0;i<8;i++){
 		if (x & 0x80) *u++='1';

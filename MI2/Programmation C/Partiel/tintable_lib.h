@@ -27,7 +27,7 @@
 #define tintype char *
 
 /* ======== Prototype =========*/
-tintype tintable(int *,int);
-void print_tintable(tintype,int);
-char *bytemap(int);
+char *tintable(char *,char,int);
+void print_tintable(char *,char,int);
+char *bytemap(char);
 #endif /* __tintable_H__ */

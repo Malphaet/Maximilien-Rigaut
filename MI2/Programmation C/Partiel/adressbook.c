@@ -28,9 +28,9 @@
 /* =========== Main ===========*/
 
 int main(void){
-	int table[]={4,1,2,3,4,5,6,7,8,9};
-	char*u=tintable(table,6);
-	print_tintable(u,3);
+	char table[]={1,8,2,3,4,5,6,7,8,9};
+	char*u=tintable(table,4,6);
+	print_tintable(u,4,3);
 	/*printf("%s\n",tintable(table,10));*/
 	return 0;
 }
