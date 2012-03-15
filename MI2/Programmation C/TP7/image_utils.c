@@ -33,21 +33,16 @@ Image *create_image(int width,int height){
 	float *table=malloc(sizeof(float)*width*height);
 	Image *image=malloc(sizeof(Image));
 	P_TEST(image); P_TEST(table);
-	image->width=width;
-	image->height=height;
-	image->pixels=table;
+	image->width=width; image->height=height; image->pixels=table;
 	return image;
 }
 
 Image *copy_image(Image* image){
-	Image *image_copy=malloc(sizeof(Image));
-	float *table_copy=malloc(sizeof(image->width*image->height));
+	Image *image_copy;
 	int size=image->width*image->height,i;
-	P_TEST(image_copy);P_TEST(table_copy);
-	image_copy->width=image->width;
-	image_copy->height=image->height;
-	for (i=0;i<size;i+=1) table_copy[i]=image->pixels[i];
-	image_copy->pixels=table_copy;
+	image_copy=create_image(image->width,image->height);
+	image_copy->width=image->width; image_copy->height=image->height;
+	for (i=0;i<size;i+=1) image_copy->pixels[i]=image->pixels[i];
 	return image_copy;
 }
 void free_image(Image *image){
@@ -60,16 +55,9 @@ int sub2ind(int i,int j,int width){
 }
 
 int ind2row(int k,int width){
-	return width/k;
+	return k/width;
 }
 
 int ind2col(int k,int width){
 	return k%width;
 }
-
-char colors[]={4,'#','%','+',' '};
-char color(float value){
-	return *(colors + (int) value**colors);
-}
-
-

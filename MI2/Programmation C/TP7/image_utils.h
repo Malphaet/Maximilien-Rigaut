@@ -28,12 +28,11 @@
 /* ========= Typedef ==========*/
 /* ======== Prototype =========*/
 
-Image *create_image(int,int);	/* */
-Image *copy_image(Image*);		/* */
-void free_image(Image*);		/* */
-int sub2ind(int,int,int);		/* */
-int ind2row(int,int);			/* */
-int ind2col(int,int);			/* */
-char color(float);				/* */
+Image *create_image(int,int);		/* Tested */
+Image *copy_image(Image*);			/* Tested */
+void free_image(Image*);			/* Tested */
+int sub2ind(int,int,int);			/* Tested */
+int ind2row(int,int);				/* Seems working*/
+int ind2col(int,int);				/* Seems working */
 
 #endif /* __IMAGE_UTILS_H__ */

@@ -27,33 +27,30 @@
 #include "types_image.h"
 
 /* ========= Defines ==========*/
-
+#define im(i,j) *(image->pixels+sub2ind((i),(j),image->width))
 /* ========= Functions ========*/
 
-void effect_binarization(Image *image){
+void effect_binarization(Image *image,float threshold){
 	int i,j;
-	float val;
+	if (threshold<-1||threshold>1) threshold=0.5;
 	for (i=0;i<image->width;i+=1)
-		for (j=0;j<image->height;j+=1){
-			val=*(image->pixels+sub2ind(i,j,image->width));
-			val=val>0.5?1:0;
-		}
+		for (j=0;j<image->height;j+=1)
+			im(i,j)=(im(i,j)>threshold)?1:0;
 }
 
 void effect_negative(Image *image){
 	int i,j;
-	float val;
 	for (i=0;i<image->width;i+=1)
-		for (j=0;j<image->height;j+=1){
-			val=*(image->pixels+sub2ind(i,j,image->width));
-			val=1-val;
-		}
+		for (j=0;j<image->height;j+=1)
+			im(i,j)=1-im(i,j);
 }
 
-void effect_noise(Image *image, int level){
+void effect_noise(Image *image, float percent){
 	int i,j;
+	int level=(int)(percent*100);
 	srand(time(NULL));
 	for (i=0;i<image->width;i+=1)
 		for (j=0;j<image->height;j+=1)
-			if (rand()%level) *(image->pixels+sub2ind(i,j,image->width))=0;
+			if ((rand()%100)<level) im(i,j)=0;
 }
+#undef im

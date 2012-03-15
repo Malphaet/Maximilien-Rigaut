@@ -25,8 +25,8 @@
 
 /* ========= Typedef ==========*/
 /* ======== Prototype =========*/
-void effect_binarization(Image *);	/* */
-void effect_negative(Image *);		/* */
-void effect_noise(Image *, int);	/* */
+void effect_binarization(Image *,float);	/*  */
+void effect_negative(Image *);		/* Tested */
+void effect_noise(Image *, float);	/* Tested */
 
 #endif /* __IMAGE_EFFECTS_H__ */

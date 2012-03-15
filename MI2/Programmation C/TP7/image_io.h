@@ -24,8 +24,10 @@
 
 /* ========= Typedef ==========*/
 /* ======== Prototype =========*/
-Image *pgm_read(char*);			/* Seems working */
-void pgm_write(char*,Image*);	/* */
+Image *pgm_read(char*);			/* Tested */
+void pgm_write(char*,Image*);	/* Tested */
+char color(float);					/* Tested */
+void print_image(Image*,int,int);	/* Tested */
 
 
 #endif /* __IMAGE_IO_H__ */

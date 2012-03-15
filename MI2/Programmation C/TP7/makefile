@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = 
-EXEC=executable
+EXEC=test
 
 all: $(EXEC)
 

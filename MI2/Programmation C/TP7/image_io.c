@@ -38,6 +38,7 @@ Image *pgm_read(char *nom){
 			fscanf(file,"%d ",&val);
 			*(image->pixels+sub2ind(i,j,width))=(float) val/max_intens;
 		}
+	fclose(file);
 	return image;
 }
 
@@ -49,5 +50,23 @@ void pgm_write(char* nom,Image* image){
 		for (j=0;j<image->width;j+=1)
 			fprintf(file,"%d ",(int) (INTENSITY_MAX**(image->pixels+sub2ind(i,j,image->width))));
 		fprintf(file,"\n");
+	}
+	fclose(file);
+}
+
+char colors[]={5,' ','+','%','#','@'};
+char color(float value){
+	if (value==1) return *(colors+*colors);
+	return *(colors + (int) (value**colors)+1);
+}
+
+void print_image(Image* image,int maxw,int maxh){
+	int i,j;
+	if (maxh<0) maxh=image->height;
+	if (maxw<0) maxw=image->width;
+	for (i=0;i<maxw;i+=1){
+		for (j=0;j<maxh;j+=1)
+			printf("%c ",color(*(image->pixels+sub2ind(i,j,image->width))));
+		printf("\n");
 	}
 }
