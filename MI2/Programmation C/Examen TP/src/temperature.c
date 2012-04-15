@@ -40,20 +40,34 @@ double ecart_type_temperature(Image *p_image)
 
 Stat_Temperature *stat_temperature(Image *p_image)
 {
-	Stat_Temperature stat=malloc(sizeof(Stat_Temperature));
-	if(!stat) exit(EXIT_FAILURE);
-    return NULL; /* A MODIFIER */
+	Stat_Temperature *stat=malloc(sizeof(Stat_Temperature));
+	if (!stat) exit(EXIT_FAILURE);
+	stat->moyenne=moyenne_temperature(p_image);
+	stat->ecart_type=ecart_type_temperature(p_image);
+	return stat;
 }
 
 /* Fonctions de la partie 2 */
+#define VAL p_image->data[i][j]
 double lancer(Image *p_image, int i, int j)
-{    
-    return 0.0; /* A MODIFIER */
+{
+	while (!VAL){
+		i+=rand()%3-1;
+		j+=rand()%3-1;
+	}
+	return VAL;
 }
 
 void estime_temperature(Image *p_image, int nb_lancers)
 {
-    /* A MODIFIER */
+    int k,i=0,j=0;
+    double moy;
+    for (i=0;i<p_image->height;i+=1)
+    	for (j=0;j<p_image->width;j+=1){
+    		moy=0;
+    		for (k=0;k<nb_lancers;k+=1) moy+=lancer(p_image,i,j);
+			p_image->data[i][j]=moy/nb_lancers;
+		}
 }
 
 /* Fonctions de la partie 3 */

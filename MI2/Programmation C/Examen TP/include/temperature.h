@@ -11,6 +11,7 @@
 #define _temperature_h
 #include "image_types.h"
 
+
 typedef struct TEMP_STRUCT
 {
 	double moyenne;

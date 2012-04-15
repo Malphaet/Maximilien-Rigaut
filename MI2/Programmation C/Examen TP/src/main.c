@@ -16,10 +16,15 @@
 /** Programme principal */
 int main(void)
 {
-	Image* image_p=pgm_read("./data/test_stats.pgm");
-	affiche_image(image_p);
-	printf("Moyenne: %f\n",moyenne_temperature(image_p));
-	printf("Ecart Type: %f\n",ecart_type_temperature(image_p));
+	Image* image_p=pgm_read("./data/piece_vide.pgm");
+	Stat_Temperature *stat=stat_temperature(image_p);
+	printf("Moyenne: %f\n",stat->moyenne);
+	printf("Ecart Type: %f\n",stat->ecart_type);
 	
+	estime_temperature(image_p,5);
+	free(stat); stat=stat_temperature(image_p);
+	printf("Moyenne: %f\n",stat->moyenne);
+	printf("Ecart Type: %f\n",stat->ecart_type);
+	pgm_write("./data/test.pgm",image_p,255);
     return 0;
 }
