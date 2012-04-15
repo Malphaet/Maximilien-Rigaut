@@ -14,17 +14,31 @@
 #include "image_utils.h"
 
 /** Programme principal */
+#define SIZE 6
 int main(void)
 {
-	Image* image_p=pgm_read("./data/piece_vide.pgm");
-	Stat_Temperature *stat=stat_temperature(image_p);
-	printf("Moyenne: %f\n",stat->moyenne);
-	printf("Ecart Type: %f\n",stat->ecart_type);
+	int i;
+	char nom[]="./data/out/0.pgm";
+	Image* image_p[SIZE]={
+		pgm_read("./data/config1.pgm"),
+		pgm_read("./data/config2.pgm"),
+		pgm_read("./data/config3.pgm"),
+		pgm_read("./data/config4.pgm"),
+		pgm_read("./data/config5.pgm"),
+		pgm_read("./data/config6.pgm")
+	};
 	
-	estime_temperature(image_p,5);
-	free(stat); stat=stat_temperature(image_p);
-	printf("Moyenne: %f\n",stat->moyenne);
-	printf("Ecart Type: %f\n",stat->ecart_type);
-	pgm_write("./data/test.pgm",image_p,255);
+	Stat_Temperature *stat[SIZE];
+	
+	for (i=0;i<SIZE;i+=1){
+		estime_temperature(image_p[i],30);
+		nom[11]='0'+i;
+		pgm_write(nom,image_p[i],255);
+		stat[i]=stat_temperature(image_p[i]);
+		printf("Image %d:\n    Moyenne: %f\n    Ecart Type: %f\n",i,stat[i]->moyenne,stat[i]->ecart_type);
+	}
+	/* Le meilleur placement predefini est le 3, bien que l'ecart type le plus optimal soit celui du 1 */
+	
+	/* */
     return 0;
 }
