@@ -9,13 +9,13 @@ CFLAGS = -W -Wall -ansi -pedantic -I$(INC) -O3 -g
 all: $(BIN)main
 
 $(BIN)main: $(OBJ)main.o $(OBJ)imageio.o $(OBJ)image_utils.o $(OBJ)temperature.o
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 $(OBJ)main.o: $(SRC)main.c $(INC)imageio.h $(INC)image_utils.h $(INC)image_types.h $(INC)temperature.h
 	$(CC) $(CFLAGS) -c -o$@ $<
 
 $(OBJ)temperature.o: $(SRC)temperature.c $(INC)imageio.h $(INC)image_utils.h $(INC)image_types.h $(INC)temperature.h
-	$(CC) $(CFLAGS) -c -o$@ $<
+	$(CC) $(CFLAGS) -c -o$@ $< -lm
 
 $(OBJ)image_utils.o: $(SRC)image_utils.c $(INC)image_utils.h $(INC)image_types.h
 	$(CC) $(CFLAGS) -c -o$@ $<

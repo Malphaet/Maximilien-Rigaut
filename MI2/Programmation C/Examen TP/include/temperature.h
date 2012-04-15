@@ -11,7 +11,11 @@
 #define _temperature_h
 #include "image_types.h"
 
-typedef void Stat_Temperature; /* A MODIFIER */
+typedef struct TEMP_STRUCT
+{
+	double moyenne;
+	double ecart_type;
+} Stat_Temperature;
 
 double moyenne_temperature(Image *p_image);
 double ecart_type_temperature(Image *p_image);

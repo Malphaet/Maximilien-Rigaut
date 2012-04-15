@@ -16,7 +16,10 @@
 /** Programme principal */
 int main(void)
 {
-    /* A COMPLETER */    
-
+	Image* image_p=pgm_read("./data/test_stats.pgm");
+	affiche_image(image_p);
+	printf("Moyenne: %f\n",moyenne_temperature(image_p));
+	printf("Ecart Type: %f\n",ecart_type_temperature(image_p));
+	
     return 0;
 }
