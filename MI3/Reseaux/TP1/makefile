@@ -1,22 +1,24 @@
 CC = gcc
 CFLAGS = -W -Wall -ansi -pedantic
-LDFLAGS = 
+LDFLAGS =
+LIBS = ../libs/
+LINKLIB =  -L$(LIBS) -l
 EXEC=reboursfils triosig
 
 all: $(EXEC)
 
 reboursfils: reboursfils.o
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $^ $(LDFLAGS) -o $@ 
 
-triosig: triosig.o bor-util.o
+triosig: triosig.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $< -lm
+	$(CC) $(CFLAGS) $^ -o $@ $(LINKLIB)res-bor -c
 
 clean: 
-	rm *.o
+	rm -f *.o
 	
 cleaner: clean
-	rm $(EXEC)
+	rm -f $(EXEC)
 
