@@ -1,9 +1,7 @@
 CC = gcc
 CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = 
-SRC = $(wildcart *.c)
-OBJ = $(SRC:.c=.o)
-EXEC=test_show_table test_vector_operations test_matrix
+EXEC=executable
 
 all: $(EXEC)
 
@@ -14,8 +12,8 @@ $(EXEC): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ -c $< -lm
 
 clean: 
-	rm *.o
+	rm -f *.o
 	
-mrproprer: clean
-	rm $(EXEC)
+cleaner: clean
+	rm -f $(EXEC)
 

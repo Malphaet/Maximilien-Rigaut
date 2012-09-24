@@ -1,0 +1,25 @@
+Break main
+Breakpoint 1 at 0x804843d: file lib_string.c, line 16.
+Break string_flip
+Breakpoint 2 at 0x8048589: file lib_string.c, line 53.
+
+Sont affichés les informations sur la position des fonctions en mémoire et dans le programme.
+
+run
+Le programme est executé. Il s'arrete au premier breakpoint.
+
+step
+Une etape est effectuée (i.e. une instruction)
+L'execution est une ligne plus avant.
+
+continue
+Le programme continue jusqu'au prochain breakpoint.
+
+print i
+Affiche la valeur de la variable
+
+print p1
+Affiche l'emplacement pointé.
+
+print *p1
+Affiche la valeur a l'emplacement pointé.

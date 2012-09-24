@@ -2,12 +2,9 @@
 /* Copyleft Maximilien Rigaut  */
 /*-----------------------------*/
 
-#ifndef MODEL
-#define MODEL
-/* ========= Includes =========*/
-
-/* ========= Defines ==========*/
-/* ========= Typedef ==========*/
+#ifndef __MAT__
+#define __MAT__
 /* ======== Prototype =========*/
+double integrale(double (*funct)(double x),double a, double b, int n);
 
 #endif

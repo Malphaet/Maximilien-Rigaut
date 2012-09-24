@@ -1,0 +1,60 @@
+Marguerite de Valois (1553-1615); Philippe d'Orleans (1640-1701); Louis XIV (1643-1715); Anne d'Autriche (1601-1666); Louis XIII (1601-1643); Marie de Medicis (1573-1642); Henri IV (1553-1610); Marguerite de Valois (1553-1615); Marguerite de Valois (1553-1615); 
+Pere: 
+Mere: 
+Enfant(s): 
+Conjoint(e): 
+Ex-Conjoints(es): Henri IV (1553-1610); 
+Henri IV (1553-1610); 
+Pere: 
+Mere: 
+Enfant(s): Louis XIII (1601-1643); 
+Conjoint(e): Marie de Medicis (1573-1642); 
+Ex-Conjoints(es): Marguerite de Valois (1553-1615); 
+Anne d'Autriche (1601-1666); 
+Pere: 
+Mere: 
+Enfant(s): Louis XIV (1643-1715); Philippe d'Orleans (1640-1701); 
+Conjoint(e): Louis XIII (1601-1643); 
+Ex-Conjoints(es): 
+Louis XIII (1601-1643); 
+Pere: Henri IV (1553-1610); 
+Mere: Marie de Medicis (1573-1642); 
+Enfant(s): Louis XIV (1643-1715); Philippe d'Orleans (1640-1701); 
+Conjoint(e): Anne d'Autriche (1601-1666); 
+Ex-Conjoints(es): 
+
+Une personne:
+Marguerite de Valois (1553-1615); 
+
+Tout le monde:
+Philippe d'Orleans (1640-1701); Louis XIV (1643-1715); Anne d'Autriche (1601-1666); Louis XIII (1601-1643); Marie de Medicis (1573-1642); Henri IV (1553-1610); Marguerite de Valois (1553-1615); 
+
+Quelques personnes:
+Marguerite de Valois (1553-1615); 
+Pere: 
+Mere: 
+Enfant(s): 
+Conjoint(e): 
+Ex-Conjoints(es): Henri IV (1553-1610); 
+
+Henri IV (1553-1610); 
+Pere: 
+Mere: 
+Enfant(s): Louis XIII (1601-1643); 
+Conjoint(e): Marie de Medicis (1573-1642); 
+Ex-Conjoints(es): Marguerite de Valois (1553-1615); 
+
+Anne d'Autriche (1601-1666); 
+Pere: 
+Mere: 
+Enfant(s): Louis XIV (1643-1715); Philippe d'Orleans (1640-1701); 
+Conjoint(e): Louis XIII (1601-1643); 
+Ex-Conjoints(es): 
+
+Louis XIII (1601-1643); 
+Pere: Henri IV (1553-1610); 
+Mere: Marie de Medicis (1573-1642); 
+Enfant(s): Louis XIV (1643-1715); Philippe d'Orleans (1640-1701); 
+Conjoint(e): Anne d'Autriche (1601-1666); 
+Ex-Conjoints(es): 
+

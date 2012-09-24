@@ -5,6 +5,7 @@
 /* ========= Includes =========*/
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* ========= Defines ==========*/
 
