@@ -23,7 +23,8 @@ int main(void){
 		scanf("%d",&val);
 		if (val==0){
 			while (nb_fils--) {
-				wait(&stat);
+				printf("Zombies en attente %d.\n",nb_fils+1);
+				printf("Processus %d eliminé.\n",(int)wait(&stat));
 			}
 			printf("Execution done, you are a wonderful human being.\n");
 			exit(0);

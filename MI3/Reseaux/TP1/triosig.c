@@ -45,8 +45,14 @@ int main(void){
 	bor_signal(SIGALRM,handler,0);
 	
 	sleep(1);
+	srand ((unsigned int) time(NULL)+OWN_PID);
 	kill(REFER_PID,SIGUSR1);
 	
+
+	while (1){
+		sleep(1);
+		printf("[%d] Alive.\n",OWN_PID);
+	}
 	wait(&stat);
 	return 0;
 }
@@ -56,11 +62,15 @@ int main(void){
 int child(int p){
 	bor_signal(SIGUSR1,handler,0);
 	bor_signal(SIGALRM,handler,0);
+	
 	REFER_PID=p;
 	OWN_PID=getpid();
+	srand (OWN_PID);
+	
 	printf("Child %d: Waiting... (Referer: %d)\n",getpid(),REFER_PID);
 	while (1){
 		sleep(1);
+		printf("[%d] Alive.\n",OWN_PID);
 	}
 	exit(0);
 }
@@ -68,8 +78,8 @@ int child(int p){
 void handler(int sig){
 	if (sig==SIGUSR1){
 		printf("%d : Keep-alive received.\nSending keep-alive to %d...\n",OWN_PID,REFER_PID);
-		sleep(1);
-		alarm(4);
+		sleep(rand()%4);
+		alarm(5);
 		kill(REFER_PID,SIGUSR1);
 		return;
 	}
