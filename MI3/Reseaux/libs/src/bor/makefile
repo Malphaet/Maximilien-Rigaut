@@ -1,10 +1,10 @@
+AR = ar rcs
 CC = gcc
-LIN = ar rcs
 
-CFLAGS = -W -Wall -ansi -pedantic -c -fPIC
+CFLAGS = -W -Wall -ansi -pedantic
 LDFLAGS = 
 
-EXEC=libres-bor.so
+EXEC=libres-bor.a
 MAIN=bor-util
 
 DEST = ../../
@@ -13,12 +13,12 @@ PLACE= src/bor/
 all: $(EXEC)
 
 $(EXEC): $(MAIN).o
-	gcc -shared -Wl,-soname,$@ -o $@ $^ -lc
+	$(AR) $@ $^
 	mv $@ $(DEST)
 	ln -sf $(PLACE)$(MAIN).h $(DEST)$(MAIN).h
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $^
 
 clean: 
 	rm -f *.o

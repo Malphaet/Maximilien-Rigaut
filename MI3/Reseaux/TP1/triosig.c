@@ -20,7 +20,7 @@
 
 /* ========= Includes =========*/
 
-#include "bor-util.h"
+#include <bor-util.h>
 
 /* ========= Defines ==========*/
 int child(int);
