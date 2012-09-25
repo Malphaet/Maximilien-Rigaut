@@ -7,12 +7,15 @@ INC = ../libs/
 BIN = bin
 OBJ = obj
 
-EXEC=redir2tub
+EXEC=redir2tub debitub
 
 all: $(EXEC)
 
 redir2tub: redir2tub.o
-	$(CC) -static $(LDFLAGS) $^ $(LDFLAGS) -o $@ -lres-bor
+	$(CC) $(LDFLAGS) $^ -o $@
+
+debitub: debitub.o
+	$(CC) -static $(LDFLAGS) $^ -o $@ -lres-bor
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $^ -o $@ -lres-bor
