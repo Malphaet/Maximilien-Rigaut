@@ -45,8 +45,7 @@ int main(void){
 
 	/* Create Child 1 */
 	if (pipe(tube1)) perror("Tube 1: creation aborted");
-	p1=fork();
-/*	if ((p1=fork())<0) perror("Child 1: Creation aborted");*/
+	if ((p1=fork())<0) perror("Child 1: Creation aborted");
 	if (p1==0) child1();
 	
 	/* Create Child 2 */
@@ -57,37 +56,32 @@ int main(void){
 	/* Execute Main Program */
 	close(tube1[0]); close(tube1[1]);
 	close(tube2[1]);
+	
 	dup2(tube2[0],STDIN_FILENO);
+	execlp("head","/usr/bin","-3",NULL);
 	
-	read(STDIN_FILENO,&buff,SIZEBUFF);
-	write(STDERR_FILENO,buff,SIZEBUFF);
-	
-	while(wait(NULL)>0);
-	return 0;
+	exit(EXIT_FAILURE);
+	return EXIT_FAILURE;
 }
 
 /* ========= Functions ========*/
 noreturn child1(void){
 	close(tube1[0]);
 	dup2(tube1[1],STDOUT_FILENO);
-/*	write(STDERR_FILENO,"Child 1 : Initialised\n",22);*/
+	printf("Moo\n");
+	execlp("ls","/usr/bin","-t",NULL);
 	
-	write(STDOUT_FILENO,"Child 1: OK\n",SIZEBUFF);
-	
-	close(tube1[0]);
-	exit(EXIT_SUCCESS);
+	close(tube1[1]);
+	exit(EXIT_FAILURE);
 }
 
 noreturn child2(void){
 	close(tube1[1]); close(tube2[0]);
 	dup2(tube1[0],STDIN_FILENO);
 	dup2(tube2[1],STDOUT_FILENO);
-/*	write(STDERR_FILENO,"Child 2 : Initialised\n",22);*/
 	
-	read(STDIN_FILENO,&buff,SIZEBUFF);
-	write(STDERR_FILENO,buff,SIZEBUFF);
-	write(STDOUT_FILENO,"Child 2: OK\n",SIZEBUFF);
+	execlp("sort","/usr/bin",NULL);
 	
 	close(tube1[1]); close(tube2[0]);
-	exit(EXIT_SUCCESS);
+	exit(EXIT_FAILURE);
 }
