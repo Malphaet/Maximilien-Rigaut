@@ -36,7 +36,7 @@ long unsigned int readed=0;
 void sig(int signal);
 
 int main(int nbargs,char**kwargs){
-	int nb_pipes, **pipes,tmp,*tmp_fd;
+	int nb_pipes, *pipes,i,tmp_fd[2];
 	char size_buffer,*buffer;
 	int p; /* Process */ 
 	int nb_ready; /* Pipes ready */
@@ -48,61 +48,63 @@ int main(int nbargs,char**kwargs){
 	nb_pipes=atoi(kwargs[1]);
 	if (!size_buffer|!nb_pipes) Exit("Arguments can't be void")
 
-	pipes=malloc(sizeof(int*)*nb_pipes);
+	pipes=malloc(sizeof(int)*nb_pipes*2);
 	if (!pipes) Error("(Malloc) Pipes");
 	
 	
-	tmp=nb_pipes;
-	while (tmp--){
-		tmp_fd=malloc(sizeof(int)*2);
-		if (!tmp_fd) Error("(Malloc) Pipes.");
+	for (i = 0; i < nb_pipes; i += 1){
+/*		tmp_fd=malloc(sizeof(int)*2);*/
+/*		if (!tmp_fd) Error("(Malloc) Pipes.");*/
 		if (pipe(tmp_fd)) Error("(Pipe) Generation error");
-		pipes[tmp]=tmp_fd;
-
+		pipes[2*i]=tmp_fd[0];
+		pipes[2*i+1]=tmp_fd[1];
 		max_fd[0]=max_fd[0]>tmp_fd[0]?max_fd[0]:tmp_fd[0];
 		max_fd[1]=max_fd[1]>tmp_fd[1]?max_fd[1]:tmp_fd[1];
-		
+/*		free(tmp_fd);*/
 	}
 
 	if ((p=fork())<0) Error("(Fork) Generation Error");
 	
 	if (p){ /* Father Process */
-		tmp=nb_pipes; while (tmp--) close(pipes[tmp][0]);
+		
+		for(i=0;i<nb_pipes;i++) close(pipes[i*2+0]);
 		
 		buffer=malloc(sizeof(char)*size_buffer);
 		if (!buffer) Error("(Malloc) Buffer");
-		tmp=size_buffer; while(tmp--) *(buffer+tmp)='*';  *(buffer+size_buffer-1)='\0';
+		for(i=0;i<nb_pipes;i++) buffer[i]='*'; buffer[size_buffer-1]='\0';
 		while (1){
 			FD_ZERO(&liste);
 			
-			tmp=nb_pipes; while(tmp--) FD_SET(pipes[tmp][1],&liste);
+			for(i=0;i<nb_pipes;i++)  FD_SET(pipes[i*2+1],&liste);
 			nb_ready=select(max_fd[1]+1,NULL,&liste,NULL,NULL);
 			if (nb_ready>0){
-				tmp=nb_pipes; while(tmp--) if (FD_ISSET(pipes[tmp][1],&liste)){
-					write(pipes[tmp][1],&buffer,size_buffer);
-				}
-			}	
+				for(i=0;i<nb_pipes;i++) 
+					if (FD_ISSET(pipes[i*2+1],&liste)) write(pipes[i*2+1],&buffer,size_buffer);
+			}
 		}
 		
 		return 0;
 	} else { /* Child Process */
-		tmp=nb_pipes;
-		while (tmp--) close(pipes[tmp][1]);
+		
+		for(i=0;i<nb_pipes;i++) close(pipes[i*2+1]);
 		alarm(1);
 		bor_signal(SIGALRM,&sig,0);
 		
 		while (1){
 			FD_ZERO(&liste);
 			
-			tmp=nb_pipes; while(tmp--) FD_SET(pipes[tmp][0],&liste);
+			for(i=0;i<nb_pipes;i++) FD_SET(pipes[i*2+0],&liste);
 			nb_ready=select(max_fd[0]+1,&liste,NULL,NULL,NULL);
+			
 			if (nb_ready>0){
-				tmp=nb_pipes; while(tmp--) if (FD_ISSET(pipes[tmp][0],&liste)){
-					buffer=malloc(sizeof(char)*size_buffer);
-					if (!buffer) Error("(Read) Buffer creation");
-					read(pipes[tmp][0],&buffer,size_buffer);
-					readed+=(long unsigned int)size_buffer;
-				}
+				for(i=0;i<nb_pipes;i++)
+					if (FD_ISSET(pipes[i*2+0],&liste)){
+						buffer=malloc(sizeof(char)*size_buffer);
+						if (!buffer) Error("(Read) Buffer creation");
+						
+						read(pipes[i*2+0],&buffer,size_buffer);
+						readed+=(long unsigned int)size_buffer;
+					}
 			}
 		}
 		return 0;
@@ -112,7 +114,9 @@ int main(int nbargs,char**kwargs){
 
 void sig(int signal){
 	if (signal==SIGALRM){
-		printf("%li b/s\n",readed);
+		printf("\r%.2f Mb/s ",((float)readed)/1048576);
+		fflush(stdout);
+		readed=0;
 		alarm(1);
 	}
 }
