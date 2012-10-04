@@ -5,8 +5,10 @@
 *.dll
 *.exe
 *.o
+*.a
 *.so
 *.pyc
+*.class
 test
 
 # Packages #
@@ -35,4 +37,3 @@ ehthumbs.db
 Icon?
 Thumbs.db
 .netrc
-.gitignore
