@@ -1,5 +1,5 @@
 all:
-	javac *.java
+	javac *.java -Xlint:unchecked
 
 clean:
 	rm -f *.class

@@ -1,5 +1,3 @@
-import java.util.*;
-
 class Person{
 	String first_name,last_name;
 	boolean alive,sex;
@@ -7,7 +5,7 @@ class Person{
 	Person childs[]=new Person[10];
 	int age;
 	
-	Person(String Fname,String Lname,char Sex,Person Mate){
+	Person(String Fname,String Lname,char Sex){
 		this.first_name=Fname;
 		this.last_name=Lname;
 
@@ -16,7 +14,7 @@ class Person{
 			if(Sex=='f'){this.sex=false;}
 			else System.exit(0);
 		}
-		this.mate=Mate;
+		this.mate=null;
 		this.alive=true;
 		this.age=0;
 	}
@@ -62,30 +60,83 @@ class Person{
 		Person chld;
 		int i=0;
 		if (this.mate==null) return null;
-		chld=new Person(name,this.last_name,gender,null);
+		chld=new Person(name,this.last_name,gender);
 		while (this.childs[i]!=null) {
 			i++;
 			if (i>=10) {
-				System.out.println("Too many childs !");
+				System.out.format("%s got too many childs !",this.first_name);
 				System.exit(0);
 			}
 		}
 		this.childs[i]=chld;
+		i=0;
+		while (this.mate.childs[i]!=null){
+			i++;
+			if (i>=10){
+				System.out.format("%s got too many childs",this.first_name);
+				System.exit(0);				
+			}
+		}
+		this.mate.childs[i]=chld;
 		return chld;
 	}
 	
 	void show(){
-		System.out.format("I'm %s, %s ");
-		if (this.mate!=null) System.out.format("married to %s ",this.mate.first_name);
-		System.out.format("\n I'm %d years old and %s",this.age,this.sex?"male":"female");
+		System.out.format("I'm %s, %s",this.last_name,this.first_name);
+		if (this.mate!=null) System.out.format(". Married to %s",this.mate.first_name);
+		System.out.format(". I'm %d years old and %s.",this.age,this.sex?"male":"female");
+		if (!this.alive) System.out.format(" I'm also dead by the way.");
+		System.out.println("");
 	}
 	
 	void show_all_childs(){
 		int i;
 		this.show();
+		if (this.childs[0]!=null) System.out.println("My childs are:");
 		for (i=0;i<10;i++){
 			if (this.childs[i]!=null) this.childs[i].show_all_childs();
 			else break;
 		}
+	}
+	
+	void show_childs(){
+		int i;
+		for (i=0;i<10;i++){
+			if (this.childs[i]!=null) this.childs[i].show();
+			else break;
+		}
+	}
+	
+	public static void main(String[] args) {
+		int i;
+		Person pierre,marie,jacques;
+		pierre=new Person("Pierre","Martin",'m');
+		marie=new Person("Marie","Duval",'f');
+		jacques=new Person("Jacques","Dupon",'m');
+		
+		for (i=0;i<20;i++) {
+			pierre.grows();
+			marie.grows();
+			jacques.grows();
+		}
+		
+		pierre.marry(marie);
+		pierre.father("Sophie",'f');
+		pierre.father("Jean",'m');
+		
+		pierre.die();
+		
+		marie.marry(jacques);
+		marie.father("Alain",'m');
+		
+//		jacques.show();
+//		marie.show();
+		
+		pierre.show();
+		System.out.println("My childs are:");
+		pierre.show_childs();
+		
+		System.out.println("------------");
+		jacques.show_all_childs();
 	}
 }
