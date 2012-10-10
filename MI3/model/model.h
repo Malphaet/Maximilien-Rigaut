@@ -1,7 +1,3 @@
-/*-----------------------------*/
-/* Copyleft Maximilien Rigaut  */
-/*-----------------------------*/
-
 #ifndef MODEL
 #define MODEL
 /* ========= Includes =========*/

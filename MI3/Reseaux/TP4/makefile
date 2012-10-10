@@ -6,26 +6,27 @@ BIN = bin
 OBJ = obj
 SRC = src
 INC = inc
+DOC = doc
 
 LIBS = ../libs/
 INCS = $(LIBS) $(INC)
-DIRS=$(BIN) $(OBJ) $(SRC) $(INC)
+DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) tmp
 
 EXEC=server client
 
 all: $(EXEC)
 
-server: $(OBJ)/server.o
+server: $(OBJ)/server.o $(OBJ)/libsockets.o
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@
 
-client: $(OBJ)/client.o
+client: $(OBJ)/client.o $(OBJ)/libsockets.o
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 init:
-	mkdir $(DIRS)
+	mkdir -p $(DIRS)
 
 edit:
 	gedit 2> /dev/null $(SRC)/* $(INC)/*
