@@ -25,64 +25,124 @@ int verbose;
 /* ========= Functions ========*/
 
 /** Create a socket from the given informations */
-sk_addr* make_socket(char *p_socket){
-	sk_addr *socket=malloc(sizeof(sk_addr));
+socket* make_socket(char *p_socket){
+	socket *sck=malloc(sizeof(socket));
 	char*addr=malloc(sizeof(char)*SIZE_BUFFER);
-	if (socket==NULL) ERROR("Socket malloc impossible")
+	if (sck==NULL) ERROR("Socket malloc impossible")
 	/* Uber socket creation */
 	if (access(p_socket,F_OK)==-1) mkfifo(p_socket,MODE_SOCKET);
 	
 	if (verbose) printf("Socket created: %s\n",p_socket);
-	strcpy(addr,p_socket); socket->addr=addr;
-	return socket;
+	strcpy(addr,p_socket); sck->addr=addr;
+	return sck;
 }
 
 /** Open the connection of the given socket */
-void open_socket(sk_addr *socket,int mode){
-	if ((socket->file=open(socket->addr,O_RDWR,mode))<0) ERROR("Socket opening was impossible");
+void open_socket(socket *sck,int mode){
+	if ((sck->file=open(sck->addr,O_RDWR,mode))<0) ERROR("Socket opening was impossible");
 }
 
 /** Close a socket connection
  * @param shutdown Is the connection to be shutdown or just delete the pointer
  */
-void close_socket(sk_addr *socket,int shutdown){
-	close(socket->file);
-	if (shutdown) unlink(socket->addr);
-	free(socket);
+void close_socket(socket *sck,int shutdown){
+	close(sck->file);
+	if (shutdown) unlink(sck->addr);
+	free(sck);
 }
 
 /** Send string to the server */
-int socket_send(sk_addr* socket,char*message,int bytes){
-	return write(socket->file,message,bytes);
+int socket_send(socket* sck,char*message,int bytes){
+	return write(sck->file,message,bytes);
 }
 
 /** Receive string from the server */
-int socket_receive(sk_addr* socket, char*message,int bytes){
-	return read(socket->file,message,bytes);
+int socket_receive(socket*sck, char*message,int bytes){
+	return read(sck->file,message,bytes);
 }
 
-/** A nicer way to communicate */
-/** Will need struct packet{
- * int request;
- * char * message
- * }
- * packet_forge();
- * packet_request();
- * packet_message();
- * packet_send();
- * packet_receive();
+/** \defgroup packets A nicer way to communicate
+ * Rely mainly on sockets to have some abstraction
+ * @{ 
  */
+
 /** Sending a message, with less information to provide */
-int socket_message_send(sk_addr *socket, char *type_message,char *message){
-	int size=strlen(type_message)+strlen(message)+5;
-	char *msg=malloc(sizeof(char)*size);
-	if (msg==NULL) ERROR("Malloc error, given message impossible to write");
-	sprintf(msg,"%s %s\n",type_message,message);
-	return socket_send(socket,msg,size);
+int socket_message_send(socket *sck,msg_type type_message,char *message){
+	packet*pck=packet_forge(type_message,message);
+	packet_send(sck,pck);
+	packet_drop(pck);
+	return packet_snd_bytes;
 }
-/** Receiving a message with less information to provide */
-char *socket_message_receive(sk_addr *socket){
+
+/** [Deprecated]
+ * Receive a message with less information to provide,
+ * note that it is advised to use a packet instead
+ */
+char *socket_message_receive(socket*sck){
 	char*message=malloc(sizeof(char)*SIZE_BUFFER);
-	socket_receive(socket,message,SIZE_BUFFER);
+	socket_receive(sck,message,SIZE_BUFFER);
 	return message;
 }
+
+/** \addgroup Packetlib: Small lib build ontop of libsockets
+ * @{
+ */
+
+/** Forge a packet with the given information 
+ * For memory usage reason, the message is copied not linked, free it if needed
+ */
+packet*packet_forge(msg_type request,char *message){
+	packet*pck=malloc(sizeof(packet));
+	char*pck_message=malloc(sizeof(char)*strlen(message));
+	if (pck==NULL) ERROR("Malloc packet");
+	if (pck==NULL) ERROR("Malloc message");
+	strcpy(pck_message,message);
+	pck->request=request;
+	pck->message=pck_message;
+	return pck;
+}
+
+/** Drop a packet */
+void packet_drop(packet*pck){
+	free(pck->message);free(pck);
+}
+
+/** Create a packet from the given message*/
+packet*packet_request(char*message){
+	int request;
+	char*pck_message;
+	request=atoi(strtok(message," "));
+	pck_message=strtok(NULL,"\n");
+	return packet_forge(request,pck_message);
+}
+
+/** Create a message from given packet */
+char *packet_message(packet*pck){
+	int size=strlen(pck->message)+5;
+	char*message=malloc(sizeof(char)*size);
+	if (message==NULL) ERROR("Packet malloc");
+	sprintf(message,"%d %s\n",pck->request,pck->message);
+	return message;
+}
+
+/** Send a packet through the given socket
+ * Note that you will NOT receive the number of readed packets
+ * You can access it through packet_snd_bytes 
+ */
+void packet_send(socket*sck,packet*pck){
+	packet_snd_bytes=socket_send(sck,packet_message(pck),strlen(pck->message)+5);
+}
+
+/** Receive a packet through the given socket
+ * Note that you will receive a socket NOT the number of readed packets
+ * You can access it through packet_rcv_bytes 
+ */
+packet*packet_receive(socket*sck){
+	char*message=malloc(sizeof(char)*SIZE_BUFFER);
+	if (message==NULL) ERROR("Packet malloc");
+	packet_rcv_bytes=socket_receive(sck,message,SIZE_BUFFER);
+	return packet_request(message);
+}
+
+/** }@ */
+/** }@ */
