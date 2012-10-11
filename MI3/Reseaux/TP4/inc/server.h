@@ -21,14 +21,6 @@
 #ifndef SERVER_H
 #define SERVER_H
 /* ========= Includes =========*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include "utils.h"
 #include "libsockets.h"
 

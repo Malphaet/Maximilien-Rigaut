@@ -24,10 +24,12 @@
 
 /* ========= Defines ==========*/
 #define PATH_TEMP_SOCK "tmp/tube"
-
+int verbose;
 /* =========== Main ===========*/
 int main (int argc, char **argv){
+	verbose=0;
 	if (argc<2) OUT("Incorrect number of arguments\nUsage:\nclient <sock_addr>");
+	if (argc>2) verbose=atoi(argv[2]);
 	client_socket(argv[1]);
 	return 0;
 }
@@ -39,11 +41,9 @@ void client_socket(char *path){
 	sk_addr* main_socket=make_socket(path);
 	sk_addr**new_socket;
 	/** Connect to the given socket address */
-	open_socket(main_socket,MODE_SOCKET);
+	open_socket(main_socket,S_IWUSR/*MODE_SOCKET*/);
 	/** Creation of the two sockets */
 	new_socket=open_communication();
-/*	printf("%s:%s\n",new_socket[0]->addr,new_socket[1]->addr);*/
-	
 	if (handshake(main_socket,new_socket)<0) OUT("The server didn't accepted connection");
 	
 	/* Handshake (&Verification)
@@ -74,15 +74,6 @@ int handshake(sk_addr*main_socket,sk_addr**sockets){
 /*	printf("%s:%s\n",sockets[0]->addr,sockets[1]->addr);*/
 	sprintf(message,"%s:%s\n",sockets[0]->addr,sockets[1]->addr);
 /*	printf("%s",message);*/
-	socket_send(main_socket,message,SIZE_BUFFER*2);
+	return socket_send(main_socket,message,strlen(message));
 	return 1;
-}
-
-/** Send string to the server */
-int socket_send(sk_addr* socket,char*message,int bytes){
-	return write(socket->file,message,bytes);
-}
-
-int socket_receive(sk_addr* socket, char*message,int bytes){
-	return read(socket->file,message,bytes);
 }

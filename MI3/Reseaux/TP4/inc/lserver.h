@@ -1,5 +1,5 @@
 /*
- * client.h
+ * lserver.h
  * This file is part of TP4
  *
  * Copyright (C) 2012 - Maximilien Rigaut
@@ -18,19 +18,4 @@
  * along with TP4. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_H
-#define CLIENT_H
-/* ========= Includes =========*/
-#include "utils.h"
-#include "libsockets.h"
 
-/* ========= Defines ==========*/
-/* ========= Typedef ==========*/
-/* ======== Prototype =========*/
-
-void 		client_socket		(char*);
-sk_addr** 	open_communication	();
-int 		handshake			(sk_addr*,sk_addr**);
-
-
-#endif

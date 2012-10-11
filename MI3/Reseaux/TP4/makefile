@@ -12,7 +12,7 @@ LIBS = ../libs/
 INCS = $(LIBS) $(INC)
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) tmp
 
-EXEC=server client
+EXEC=server client lserver
 
 all: $(EXEC)
 
@@ -20,6 +20,9 @@ server: $(OBJ)/server.o $(OBJ)/libsockets.o
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@
 
 client: $(OBJ)/client.o $(OBJ)/libsockets.o
+	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
+
+lserver: $(OBJ)/lserver.o $(OBJ)/libsockets.o
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h

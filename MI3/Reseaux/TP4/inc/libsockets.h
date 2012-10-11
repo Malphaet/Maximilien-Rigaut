@@ -47,6 +47,8 @@ typedef struct sk_fifo sk_addr;
 sk_addr* make_socket	(char *);
 void 	 open_socket	(sk_addr*,int);
 void 	 close_socket	(sk_addr*,int);
+int 	 socket_send	(sk_addr*,char*,int);
+int 	 socket_receive	(sk_addr*,char*,int);
 
 #endif /* __LIBSOCKETS_H__ */
 
