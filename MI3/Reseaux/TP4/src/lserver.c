@@ -23,10 +23,10 @@
 
 
 int main (int argc, char *argv[]){
-	sk_addr* sck;
+	socket* sck;
 	char message[1024];
 	char*socks[2];
-	sk_addr *sockets[2];
+	socket *sockets[2];
 	if (argc<2) OUT("Not enought parameters");
 	sck=make_socket(argv[1]);
 	

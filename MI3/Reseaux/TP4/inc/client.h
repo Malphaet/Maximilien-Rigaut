@@ -29,8 +29,8 @@
 /* ======== Prototype =========*/
 
 void 		client_socket		(char*);
-sk_addr** 	open_communication	();
-int 		handshake			(sk_addr*,sk_addr**);
+socket** 	open_communication	();
+int 		handshake			(socket*,socket**);
 
 
 #endif

@@ -38,8 +38,8 @@ int main (int argc, char **argv){
 
 /** A basic client, note that he will create the sockets not the server */
 void client_socket(char *path){
-	sk_addr* main_socket=make_socket(path);
-	sk_addr**new_socket;
+	socket* main_socket=make_socket(path);
+	socket**new_socket;
 	/** Connect to the given socket address */
 	open_socket(main_socket,S_IWUSR/*MODE_SOCKET*/);
 	/** Creation of the two sockets */
@@ -54,34 +54,36 @@ void client_socket(char *path){
 }
 
 /** Open a new communication to the server */
-sk_addr** open_communication(){
-	sk_addr** sockets=malloc(sizeof(sk_addr*)*2);
+socket** open_communication(){
+	socket** new_socket=malloc(sizeof(socket*)*2);
 	char paths[2][SIZE_BUFFER];
-	if (sockets==NULL) ERROR("Sockets malloc error");
+	if (new_socket==NULL) ERROR("Socket malloc error");
 	/** Generating names */
 	sprintf(paths[0],"%s_r_%d.sock",PATH_TEMP_SOCK,getpid());
 	sprintf(paths[1],"%s_w_%d.sock",PATH_TEMP_SOCK,getpid());
 	/** Generating sockets */
-	sockets[0]=make_socket(paths[0]);
-	sockets[1]=make_socket(paths[1]);
+	new_socket[0]=make_socket(paths[0]);
+	new_socket[1]=make_socket(paths[1]);
 	/** Opening sockets */
-	open_socket(sockets[0],S_IRUSR);
-	open_socket(sockets[1],S_IWUSR);
-	if (verbose) printf("The following sockets were created: %s:%s\n",sockets[0]->addr,sockets[1]->addr);
-	return sockets;
+	open_socket(new_socket[0],S_IRUSR);
+	open_socket(new_socket[1],S_IWUSR);
+	if (verbose) printf("The following sockets were created: %s:%s\n",new_socket[0]->addr,new_socket[1]->addr);
+	return new_socket;
 }
 
 /** Have a handshake with the server, return -1 if the communication cannot be established */
-int handshake(sk_addr*main_socket,sk_addr**sockets){
+int handshake(socket*main_socket,socket**sockets){
 	char message[SIZE_BUFFER*2];
+	packet* feedback;
 	/** Forging message */
 	sprintf(message,"%s:%s\n",sockets[0]->addr,sockets[1]->addr);
+	
 	if (verbose) printf("The following message wil be send to the server: %s",message);
-	if (socket_send(main_socket,message,strlen(message))<0) OUT("Cannot send message to the server");
+	socket_message_send(main_socket,msg_text,message);
 	if (verbose) printf("Waiting for server response...\n");
 	
-	socket_receive(sockets[0],message,SIZE_BUFFER);
-	if (verbose) printf("Received %s from the server\n",message);
-	if (strcmp(message,SOCKET_RECEIVED)==0) return 1;
+	feedback=packet_receive(sockets[0]);
+	if (verbose) printf("Received %s from the server\n",feedback->message);
+	if (feedback->request==msg_text) return 1;
 	else return -1;
 }
