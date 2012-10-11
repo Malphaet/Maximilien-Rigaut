@@ -32,7 +32,7 @@ init:
 	mkdir -p $(DIRS)
 
 edit:
-	gedit 2> /dev/null $(SRC)/* $(INC)/*
+	gedit 2> /dev/null $(SRC)/* $(INC)/* &
 	
 clean: 
 	rm -f $(OBJ)/*.o

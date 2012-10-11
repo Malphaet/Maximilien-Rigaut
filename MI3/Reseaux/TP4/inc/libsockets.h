@@ -35,12 +35,25 @@
 #define MODE_RW S_IRUSR|S_IWUSR
 #define MODE_SOCKET MODE_RW
 
+#define SOCKET_RECEIVED "RCV"
+#define SOCKET_KEEPALIVE "K-A"
+#define SOCKET_MESSAGE "MSG"
+
+#define SOCKET_MODE_READ S_IRUSR
+#define SOCKET_MODE_WRITE S_IWUSR
+
 /* ========= Typedef ==========*/
 struct sk_fifo{
 	char* addr;
 	int file;
 };
+struct pk_struct {
+	int request;
+	char*message;
+};
+
 typedef struct sk_fifo sk_addr;
+typedef struct pk_struct packet;
 
 /* ======== Prototype =========*/
 

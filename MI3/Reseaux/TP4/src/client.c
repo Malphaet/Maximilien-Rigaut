@@ -44,12 +44,10 @@ void client_socket(char *path){
 	open_socket(main_socket,S_IWUSR/*MODE_SOCKET*/);
 	/** Creation of the two sockets */
 	new_socket=open_communication();
+	/** Handshake with the server
+	 * Send the socket to listen to */
 	if (handshake(main_socket,new_socket)<0) OUT("The server didn't accepted connection");
-	
-	/* Handshake (&Verification)
-	 * Sending socket to listen
-	 * Closing connection
-	 */
+	/** Wait for user requests */
 	close_socket(main_socket,0);
 	close_socket(new_socket[0],1);
 	close_socket(new_socket[1],1);
@@ -60,20 +58,30 @@ sk_addr** open_communication(){
 	sk_addr** sockets=malloc(sizeof(sk_addr*)*2);
 	char paths[2][SIZE_BUFFER];
 	if (sockets==NULL) ERROR("Sockets malloc error");
+	/** Generating names */
 	sprintf(paths[0],"%s_r_%d.sock",PATH_TEMP_SOCK,getpid());
 	sprintf(paths[1],"%s_w_%d.sock",PATH_TEMP_SOCK,getpid());
+	/** Generating sockets */
 	sockets[0]=make_socket(paths[0]);
 	sockets[1]=make_socket(paths[1]);
-/*	printf("%s:%s\n",sockets[0]->addr,sockets[1]->addr);*/
+	/** Opening sockets */
+	open_socket(sockets[0],S_IRUSR);
+	open_socket(sockets[1],S_IWUSR);
+	if (verbose) printf("The following sockets were created: %s:%s\n",sockets[0]->addr,sockets[1]->addr);
 	return sockets;
 }
 
 /** Have a handshake with the server, return -1 if the communication cannot be established */
 int handshake(sk_addr*main_socket,sk_addr**sockets){
 	char message[SIZE_BUFFER*2];
-/*	printf("%s:%s\n",sockets[0]->addr,sockets[1]->addr);*/
+	/** Forging message */
 	sprintf(message,"%s:%s\n",sockets[0]->addr,sockets[1]->addr);
-/*	printf("%s",message);*/
-	return socket_send(main_socket,message,strlen(message));
-	return 1;
+	if (verbose) printf("The following message wil be send to the server: %s",message);
+	if (socket_send(main_socket,message,strlen(message))<0) OUT("Cannot send message to the server");
+	if (verbose) printf("Waiting for server response...\n");
+	
+	socket_receive(sockets[0],message,SIZE_BUFFER);
+	if (verbose) printf("Received %s from the server\n",message);
+	if (strcmp(message,SOCKET_RECEIVED)==0) return 1;
+	else return -1;
 }
