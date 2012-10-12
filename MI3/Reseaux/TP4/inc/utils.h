@@ -26,7 +26,5 @@
 #define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
 #define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
 
-#define SIZE_BUFFER 1024
-
 #endif /* __UTILS_H__ */
 

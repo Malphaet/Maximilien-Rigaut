@@ -102,10 +102,11 @@ int handshake(socket*main_socket,socket**sockets){
 	/* Sending to server */
 	if (verbose) printf("The following message wil be send to the server:\n    > %s",message);
 	socket_message_send(main_socket,msg_text,message);
-	if (verbose) printf("Waiting for server response...\n");
+	if (verbose) {printf("Waiting for server response...");fflush(stdout);}
 	
 	/* Handshake received */
-	feedback=packet_receive(sockets[0]); ret_code=feedback->request;
+	feedback=packet_receive(sockets[0]); ret_code=feedback->type;
+	if (verbose) printf("Received !\n");
 	packet_drop(feedback);
 	if (ret_code==msg_recv) return 1;
 	else return -1;
@@ -114,7 +115,21 @@ int handshake(socket*main_socket,socket**sockets){
 /** Analyse user requests from stdin
  * @return 0 if ^D, empty line or timeout, 1 otherwise
  */
-int user_request(socket*sockets){
-	sockets++;
-	return 0;
+int user_request(socket**sockets){
+	char message[SIZE_BUFFER];
+	char*answer;
+	
+	/* Read user imput */
+	printf("Awaiting request > ");
+	fgets(message,SIZE_BUFFER,stdin);
+	
+	/* Process request */
+	if (strlen(message)<2) {printf("No requests sent, shutting down...\n"); return 0;}
+	
+	/* Exchange message with the server */
+	answer=message_exchange(sockets[1],msg_text,message,sockets[0],msg_text);
+	
+	/* Display it */
+	printf("The server answered: %s\n",answer);
+	return 1;
 }

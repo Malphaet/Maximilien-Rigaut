@@ -43,7 +43,11 @@ int main (int argc, char *argv[]){
 	open_socket(sockets[1],S_IRUSR);
 	
 	socket_message_send(sockets[0],msg_recv,"");
-	
+	while(1){
+		pck=packet_receive(sockets[1]);
+		printf("Received %s\n",packet_message(pck));
+		socket_message_send(sockets[0],msg_text,"Moo\n");
+	}
 	close_socket(sck,0);
 	return 0;
 }

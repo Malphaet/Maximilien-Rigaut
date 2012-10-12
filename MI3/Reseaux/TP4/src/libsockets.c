@@ -20,10 +20,65 @@
 
 #include "libsockets.h"
 
+
 /* ========= Defines ==========*/
 int verbose; /*< Verbosity of the program */
 
 /* ========= Functions ========*/
+
+/** \defgroup Wrappers Communication Managers
+ * Two functions for managing communications, take care of everithing for you
+ */
+/** @{ */
+
+/** Big sending function 
+ * Note that it will just call socket_message_send() because it's actually the best function for that.
+ */
+int message_send(socket*sck,msg_type type_message,char*msg){
+	return socket_message_send(sck,type_message,msg);
+}
+
+/** Kinda deprecated but well, you can't have everything */
+char*message_receive(socket*sck){
+	packet*pck=packet_receive(sck);
+	char*msg=malloc(sizeof(char)*strlen(pck->message));
+	strcpy(pck->message,msg);
+	packet_drop(pck);
+	return msg;
+}
+
+/** Initiate an exchange
+ * Send a message, wait for a correct answer 
+ * @param sck_send Socket used for sending
+ * @param type_message_send Type of the sended message
+ * @param msg The sended message
+ * @param sck_recv Socket used for reception
+ * @param type_message_recv Type expected for reception
+ */
+char*message_exchange(socket*sck_send,msg_type type_message_send,char*msg,socket*sck_recv,msg_type type_message_recv){
+	int count=KEEP_ALIVE; /** <Time to keep-alive connection */
+	packet*pck; char*answer;
+	
+	/* Force good formated answer */
+	if (verbose) {printf("Awaiting answer..");fflush(stdout);}
+	do{
+		socket_message_send(sck_send,type_message_send,msg);
+		if (KEEP_ALIVE-count) sleep(LATENCY); /* [ILL IMPLEMENTED] Find a damn smaller function */
+		pck=packet_receive(sck_recv);
+		if (verbose) {printf(".");fflush(stdout);}
+		if (!count--) {printf("\n");OUT("Server didn't sent expected message")};
+	} while (pck->type!=type_message_recv);
+	if (verbose) printf("server replied !\n");
+	/* Copy answer */
+	answer=malloc(sizeof(char)*strlen(pck->message));
+	strcpy(answer,pck->message);
+	
+	/* Free it and return */
+	packet_drop(pck);
+	return answer;
+}
+
+/** @} */
 
 /** \defgroup Libsockets
  * A very small lib, made mainly to avoid direct socket handling
@@ -74,12 +129,12 @@ int socket_receive(socket*sck, char*message,int bytes){
  * Packetlib is a small lib build ontop of libsockets.
  * 
  * It is used extensively to avoid any interference with the implementation of the sockets.
- * The main function you should use for communication is packet_receive().
+ * The main function you should use for communication is packet_receive() and socket_message_send().
  *
  * However, the following will allow you to handle basic communication:
  * \li packet_forge()
- * \li packet_drop()
  * \li packet_send()
+ * \li packet_drop()
  *
  * Moreover, the following function should be avoided:
  * \li packet_message()
@@ -107,14 +162,14 @@ char *socket_message_receive(socket*sck){
  *
  * For memory usage reason, the message is copied not linked, free it if needed.
  */
-packet*packet_forge(msg_type request,char *message){
+packet*packet_forge(msg_type type,char *message){
 	packet*pck=malloc(sizeof(packet));
 	char*pck_message=malloc(sizeof(char)*(strlen(message)+1));
 	if (pck==NULL) ERROR("Malloc packet");
 	if (pck==NULL) ERROR("Malloc message");
 	if (!strcmp(message,"")) pck_message[0]=42;
 	else strcpy(pck_message,message);
-	pck->request=request;
+	pck->type=type;
 	pck->message=pck_message;
 	return pck;
 }
@@ -126,11 +181,11 @@ void packet_drop(packet*pck){
 
 /** Create a packet from the given message. */
 packet*packet_request(char*message){
-	int request;
+	int type;
 	char*pck_message;
-	request=atoi(strtok(message," "));
+	type=atoi(strtok(message," "));
 	pck_message=strtok(NULL,"\n");
-	return packet_forge(request,pck_message);
+	return packet_forge(type,pck_message);
 }
 
 /** Create a message from given packet. */
@@ -138,7 +193,7 @@ char *packet_message(packet*pck){
 	int size=strlen(pck->message)+5;
 	char*message=malloc(sizeof(char)*size);
 	if (message==NULL) ERROR("Packet malloc");
-	sprintf(message,"%d %s\n",pck->request,pck->message);
+	sprintf(message,"%d %s\n",pck->type,pck->message);
 	return message;
 }
 

@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -32,13 +33,15 @@
 #include "utils.h"
 
 /* ========= Defines ==========*/
-#define SOCKET_RECEIVED "RCV"
-#define SOCKET_KEEPALIVE "K-A"
-#define SOCKET_MESSAGE "MSG"
+
 
 #define SOCKET_MODE_READ S_IRUSR
 #define SOCKET_MODE_WRITE S_IWUSR
 #define MODE_SOCKET SOCKET_MODE_READ|SOCKET_MODE_WRITE
+
+#define KEEP_ALIVE 42
+#define LATENCY 1
+#define SIZE_BUFFER 1024
 
 /* Global variables */
 int packet_rcv_bytes; /** Number of received bytes */
@@ -55,7 +58,10 @@ int packet_snd_bytes; /** Number of sended bytes */
 enum msg_enum{
 	msg_recv,	/**< Message received */
 	msg_keep,	/**< Keep-alive */
-	msg_text	/**< String sent */
+	msg_text,	/**< String sent */
+	msg_err,	/**< (Unknown) Error in received socket */
+	msg_wait	/**< Server overloaded, wait */
+	
 }; typedef enum msg_enum msg_type;
 
 /**
@@ -72,11 +78,16 @@ struct sk_addr{
  * Note that a socket MUST be newline free, as it is used to end packets (see packet_forge() for details)
  */
 struct pk_struct {
-	msg_type request;	/**< The request being done, important for having normalised communications */
+	msg_type type;	/**< The request being done, important for having normalised communications */
 	char*message;		/**< The body of the message, can be empty */
 }; typedef struct pk_struct packet;
 
 /* ======== Prototype =========*/
+
+/* Wrappers */
+int 	message_send			(socket*,msg_type,char*);
+char*	message_receive			(socket*);
+char*	message_exchange		(socket*,msg_type,char*,socket*,msg_type);
 
 /* Low level communication */
 socket*	 make_socket	(char *);
