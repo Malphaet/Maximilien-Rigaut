@@ -72,7 +72,7 @@ struct sk_addr{
  * Note that a socket MUST be newline free, as it is used to end packets (see packet_forge() for details)
  */
 struct pk_struct {
-	msg_type request;	/**< The request done, important for having normalised communications */
+	msg_type request;	/**< The request being done, important for having normalised communications */
 	char*message;		/**< The body of the message, can be empty */
 }; typedef struct pk_struct packet;
 

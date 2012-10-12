@@ -20,12 +20,11 @@
 
 #ifndef CLIENT_H
 #define CLIENT_H
+
 /* ========= Includes =========*/
 #include "utils.h"
 #include "libsockets.h"
 
-/* ========= Defines ==========*/
-/* ========= Typedef ==========*/
 /* ======== Prototype =========*/
 
 void 		client_socket		(char*);

@@ -58,7 +58,7 @@ void client_socket(char *path){
 	if (handshake(main_socket,new_socket)<0) OUT("The server didn't accepted connection");
 	
 	/* Acknoledge user requests */
-	while (user_request());
+	while (user_request(new_socket));
 	
 	/* Properly close connection */
 	close_socket(main_socket,0);
@@ -89,7 +89,7 @@ socket** open_communication(){
 /** Have a handshake with the server
  * @param main_socket The server socket, used to initiate the handshake
  * @param sockets The newly created sockets
- * return -1 if the communication cannot be established
+ * @return -1 if the communication cannot be established, 1 otherwise
  */
 int handshake(socket*main_socket,socket**sockets){
 	char message[SIZE_BUFFER*2];
@@ -111,9 +111,10 @@ int handshake(socket*main_socket,socket**sockets){
 	else return -1;
 }
 
-/** Analyse user requests from stdin.
- * Will return 0 if ^D, empty line or timeout.
+/** Analyse user requests from stdin
+ * @return 0 if ^D, empty line or timeout, 1 otherwise
  */
-int user_request(){
+int user_request(socket*sockets){
+	sockets++;
 	return 0;
 }

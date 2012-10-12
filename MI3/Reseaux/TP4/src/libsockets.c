@@ -21,10 +21,16 @@
 #include "libsockets.h"
 
 /* ========= Defines ==========*/
-int verbose; /** Verbosity of the program */
+int verbose; /*< Verbosity of the program */
 
 /* ========= Functions ========*/
 
+/** \defgroup Libsockets
+ * A very small lib, made mainly to avoid direct socket handling
+ * 
+ */
+/** @{ */
+ 
 /** Create a socket from the given informations */
 socket* make_socket(char *p_socket){
 	socket *sck=malloc(sizeof(socket));
@@ -54,7 +60,7 @@ void close_socket(socket *sck,int shutdown){
 }
 
 /** Send string to the server */
-int socket_send(socket* sck,char*message,int bytes){
+int socket_send(socket*sck,char*message,int bytes){
 	return write(sck->file,message,bytes);
 }
 
@@ -62,10 +68,22 @@ int socket_send(socket* sck,char*message,int bytes){
 int socket_receive(socket*sck, char*message,int bytes){
 	return read(sck->file,message,bytes);
 }
+/**@}*/
 
-/** \defgroup packets A nicer way to communicate
- * Rely mainly on sockets to have some abstraction
- * @{ 
+/** \defgroup Packetlib 
+ * Packetlib is a small lib build ontop of libsockets.
+ * 
+ * It is used extensively to avoid any interference with the implementation of the sockets.
+ * The main function you should use for communication is packet_receive().
+ *
+ * However, the following will allow you to handle basic communication:
+ * \li packet_forge()
+ * \li packet_drop()
+ * \li packet_send()
+ *
+ * Moreover, the following function should be avoided:
+ * \li packet_message()
+ * @{
  */
 
 /** Sending a message, with less information to provide */
@@ -76,9 +94,8 @@ int socket_message_send(socket *sck,msg_type type_message,char *message){
 	return packet_snd_bytes;
 }
 
-/** [Deprecated]
- * Receive a message with less information to provide,
- * note that it is advised to use a packet instead
+/** [Deprecated] Receive a message with less information to provide,
+ * note that it is advised to use a packet instead.
  */
 char *socket_message_receive(socket*sck){
 	char*message=malloc(sizeof(char)*SIZE_BUFFER);
@@ -86,12 +103,9 @@ char *socket_message_receive(socket*sck){
 	return message;
 }
 
-/** \defgroup Packetlib: Small lib build ontop of libsockets
- * @{
- */
-
-/** Forge a packet with the given information 
- * For memory usage reason, the message is copied not linked, free it if needed
+/** Forge a packet with the given information.
+ *
+ * For memory usage reason, the message is copied not linked, free it if needed.
  */
 packet*packet_forge(msg_type request,char *message){
 	packet*pck=malloc(sizeof(packet));
@@ -105,12 +119,12 @@ packet*packet_forge(msg_type request,char *message){
 	return pck;
 }
 
-/** Drop a packet */
+/** Drop a packet and free the allocated memory. */
 void packet_drop(packet*pck){
 	free(pck->message);free(pck);
 }
 
-/** Create a packet from the given message*/
+/** Create a packet from the given message. */
 packet*packet_request(char*message){
 	int request;
 	char*pck_message;
@@ -119,7 +133,7 @@ packet*packet_request(char*message){
 	return packet_forge(request,pck_message);
 }
 
-/** Create a message from given packet */
+/** Create a message from given packet. */
 char *packet_message(packet*pck){
 	int size=strlen(pck->message)+5;
 	char*message=malloc(sizeof(char)*size);
@@ -128,17 +142,19 @@ char *packet_message(packet*pck){
 	return message;
 }
 
-/** Send a packet through the given socket
- * Note that you will NOT receive the number of readed packets
- * You can access it through packet_snd_bytes 
+/** Send a packet through the given socket.
+ *
+ * Note that you will NOT receive the number of readed packets.
+ * You can access that information through ::packet_snd_bytes.
  */
 void packet_send(socket*sck,packet*pck){
 	packet_snd_bytes=socket_send(sck,packet_message(pck),strlen(pck->message)+5);
 }
 
 /** Receive a packet through the given socket
- * Note that you will receive a socket NOT the number of readed packets
- * You can access it through packet_rcv_bytes 
+ *
+ * Note that you will receive a socket not the number of readed packets. 
+ * You can access that information through packet_rcv_bytes.
  */
 packet*packet_receive(socket*sck){
 	char*message=malloc(sizeof(char)*SIZE_BUFFER);
@@ -146,6 +162,4 @@ packet*packet_receive(socket*sck){
 	packet_rcv_bytes=socket_receive(sck,message,SIZE_BUFFER);
 	return packet_request(message);
 }
-
-/** }@ */
 /** }@ */
