@@ -23,17 +23,18 @@
 
 
 int main (int argc, char *argv[]){
-	socket* sck;
-	char message[1024];
+	socket* sck,*sockets[2];
+	packet* pck;
 	char*socks[2];
-	socket *sockets[2];
+	
 	if (argc<2) OUT("Not enought parameters");
 	sck=make_socket(argv[1]);
 	
 	open_socket(sck,S_IRUSR);
-	socket_receive(sck,message,1024);
-	printf("Message: %s \n",message);
-	socks[0]=strtok(message,":");
+	pck=packet_receive(sck);
+	printf("Message: %s \n",pck->message);
+	
+	socks[0]=strtok(pck->message,":");
 	socks[1]=strtok(NULL,"\n");
 	printf("Sockets: %s,%s\n",socks[0],socks[1]);
 	sockets[0]=make_socket(socks[0]);
@@ -41,7 +42,7 @@ int main (int argc, char *argv[]){
 	open_socket(sockets[0],S_IWUSR);
 	open_socket(sockets[1],S_IRUSR);
 	
-	socket_send(sockets[0],SOCKET_RECEIVED,1024);
+	socket_message_send(sockets[0],msg_recv,"");
 	
 	close_socket(sck,0);
 	return 0;

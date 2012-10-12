@@ -31,6 +31,9 @@ $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 init:
 	mkdir -p $(DIRS)
 
+doc: .PHONY
+	doxygen doxyconf
+
 edit:
 	gedit 2> /dev/null $(SRC)/* $(INC)/* &
 	
@@ -39,5 +42,7 @@ clean:
 	
 cleaner: clean
 	rm -f $(BIN)/*
-	
+	rm -rf $(DOC)/*
 
+.PHONY:
+	

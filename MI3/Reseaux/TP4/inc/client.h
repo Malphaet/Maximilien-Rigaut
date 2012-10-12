@@ -31,6 +31,6 @@
 void 		client_socket		(char*);
 socket** 	open_communication	();
 int 		handshake			(socket*,socket**);
-
+int			user_request		();
 
 #endif

@@ -21,19 +21,21 @@
 #include "libsockets.h"
 
 /* ========= Defines ==========*/
-int verbose;
+int verbose; /** Verbosity of the program */
+
 /* ========= Functions ========*/
 
 /** Create a socket from the given informations */
 socket* make_socket(char *p_socket){
 	socket *sck=malloc(sizeof(socket));
 	char*addr=malloc(sizeof(char)*SIZE_BUFFER);
-	if (sck==NULL) ERROR("Socket malloc impossible")
-	/* Uber socket creation */
-	if (access(p_socket,F_OK)==-1) mkfifo(p_socket,MODE_SOCKET);
+	if (sck==NULL) ERROR("Socket malloc impossible");
 	
+	/* Socket creation */
+	if (access(p_socket,F_OK)==-1) mkfifo(p_socket,MODE_SOCKET);
 	if (verbose) printf("Socket created: %s\n",p_socket);
 	strcpy(addr,p_socket); sck->addr=addr;
+	
 	return sck;
 }
 
@@ -84,7 +86,7 @@ char *socket_message_receive(socket*sck){
 	return message;
 }
 
-/** \addgroup Packetlib: Small lib build ontop of libsockets
+/** \defgroup Packetlib: Small lib build ontop of libsockets
  * @{
  */
 
@@ -93,10 +95,11 @@ char *socket_message_receive(socket*sck){
  */
 packet*packet_forge(msg_type request,char *message){
 	packet*pck=malloc(sizeof(packet));
-	char*pck_message=malloc(sizeof(char)*strlen(message));
+	char*pck_message=malloc(sizeof(char)*(strlen(message)+1));
 	if (pck==NULL) ERROR("Malloc packet");
 	if (pck==NULL) ERROR("Malloc message");
-	strcpy(pck_message,message);
+	if (!strcmp(message,"")) pck_message[0]=42;
+	else strcpy(pck_message,message);
 	pck->request=request;
 	pck->message=pck_message;
 	return pck;

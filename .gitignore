@@ -9,8 +9,11 @@
 *.so
 *.pyc
 *.class
+# Folders #
+###########
 test
 bin
+doc
 
 # Packages #
 ############
