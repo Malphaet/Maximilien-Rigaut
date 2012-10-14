@@ -46,24 +46,25 @@ int main (int argc, char **argv){
  */
 void client_socket(char *path){
 	socket* main_socket=make_socket(path);
-	socket**new_socket;
+	socket**new_sockets;
 	
 	/* Connect to the given socket address */
 	open_socket(main_socket,S_IWUSR/*MODE_SOCKET*/); 
 	
 	/* Creation of the two sockets */
-	new_socket=open_communication();
+	new_sockets=open_communication();
 	
 	/* Send the socket to listen to */
-	if (handshake(main_socket,new_socket)<0) OUT("The server didn't accepted connection");
+	if (handshake(main_socket,new_sockets)<0) OUT("The server didn't accepted connection");
 	
 	/* Acknoledge user requests */
-	while (user_request(new_socket));
+	while (user_request(new_sockets));
 	
 	/* Properly close connection */
+	socket_message_send(new_sockets[1],msg_kill,"");
 	close_socket(main_socket,0);
-	close_socket(new_socket[0],1);
-	close_socket(new_socket[1],1);
+	close_socket(new_sockets[0],1);
+	close_socket(new_sockets[1],1);
 }
 
 /** Open a new communication to the server */
@@ -100,7 +101,7 @@ int handshake(socket*main_socket,socket**sockets){
 	sprintf(message,"%s:%s\n",sockets[0]->addr,sockets[1]->addr); 
 	
 	/* Sending to server */
-	if (verbose) printf("The following message wil be send to the server:\n    > %s",message);
+	if (verbose) printf("The following message will be send to the server:\n    %s",message);
 	socket_message_send(main_socket,msg_text,message);
 	if (verbose) {printf("Waiting for server response...");fflush(stdout);}
 	
@@ -113,7 +114,7 @@ int handshake(socket*main_socket,socket**sockets){
 }
 
 /** Analyse user requests from stdin
- * @return 0 if ^D, empty line or timeout, 1 otherwise
+ * @return 0 if no request is done, 1 otherwise
  */
 int user_request(socket**sockets){
 	char message[SIZE_BUFFER];

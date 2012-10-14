@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -W -Wall -ansi -pedantic -L$(LIBS) -I$(INC)
+CFLAGS = -W -Wall -ansi -pedantic -L$(LIBS) $(INCS:%=-I%)
 LDFLAGS = -L$(LIBS) $(INCS:%=-I%)
 
 BIN = bin

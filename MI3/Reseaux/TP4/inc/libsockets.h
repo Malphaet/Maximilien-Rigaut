@@ -39,6 +39,7 @@
 #define SOCKET_MODE_WRITE S_IWUSR
 #define MODE_SOCKET SOCKET_MODE_READ|SOCKET_MODE_WRITE
 
+
 #define KEEP_ALIVE 42
 #define LATENCY 1
 #define SIZE_BUFFER 1024
@@ -54,14 +55,24 @@ int packet_snd_bytes; /** Number of sended bytes */
  * 
  * Keep in mind that, as an enum, this will be integers during runtime.
  * Beside that, don't be afraid if you see strange int in your packets.
+ * 
+ * Explanations of tags:
+ * \li The tag [core] means it's only meant for the core program (you're the boss though)
+ * \li The tag [program] means it's meant to be used by the program to cmmunicate.
+ * \li The tag [msg] means the packet is carring a text-based message
+ * \li The tag [nfo] means the packet is carring an information
+ * \li The tag [wrn] means the packet is reporting a warning
+ * \li The tag [err] means the packet is reporting an error
  */
 enum msg_enum{
-	msg_recv,	/**< Message received */
-	msg_keep,	/**< Keep-alive */
-	msg_text,	/**< String sent */
-	msg_err,	/**< (Unknown) Error in received socket */
-	msg_wait	/**< Server overloaded, wait */
-	
+	msg_recv,	/**< [nfo]:[program] Message received */
+	msg_keep,	/**< [nfo]:[core] [TBI] Keep-alive */
+	msg_text,	/**< [msg]:[program] String sent */
+	msg_wait,	/**< [wrn]:[core] [NYI] Server overloaded, wait */
+	msg_kill,	/**< [wrn]:[program] The connection is to be shutdown, process now */
+	msg_err,	/**< [err]:[core] [NYI] (Unknown) Error in received socket */
+	msg_die,	/**< [err]:[core] [NYI] Server died, will not process requests anymore */
+	msg_wtf		/**< [err]:[program] Request isn't the the one expected, I don't know what to do ! Abort ! Abort !*/
 }; typedef enum msg_enum msg_type;
 
 /**
@@ -78,7 +89,7 @@ struct sk_addr{
  * Note that a socket MUST be newline free, as it is used to end packets (see packet_forge() for details)
  */
 struct pk_struct {
-	msg_type type;	/**< The request being done, important for having normalised communications */
+	msg_type type;		/**< The request being done, important for having normalised communications */
 	char*message;		/**< The body of the message, can be empty */
 }; typedef struct pk_struct packet;
 

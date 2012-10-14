@@ -25,6 +25,6 @@
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
 #define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
 #define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
-
+#define FPRINT(msg)	{fprintf(stdout,msg);fflush(stdout);}
 #endif /* __UTILS_H__ */
 

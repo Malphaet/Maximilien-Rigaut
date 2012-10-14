@@ -60,15 +60,15 @@ char*message_exchange(socket*sck_send,msg_type type_message_send,char*msg,socket
 	packet*pck; char*answer;
 	
 	/* Force good formated answer */
-	if (verbose) {printf("Awaiting answer..");fflush(stdout);}
+	if (verbose>1) {printf("Awaiting answer...");fflush(stdout);}
 	do{
 		socket_message_send(sck_send,type_message_send,msg);
 		if (KEEP_ALIVE-count) sleep(LATENCY); /* [ILL IMPLEMENTED] Find a damn smaller function */
 		pck=packet_receive(sck_recv);
-		if (verbose) {printf(".");fflush(stdout);}
+		if (verbose>1) {printf("%c",pck->type==msg_recv?'*':'.');fflush(stdout);}
 		if (!count--) {printf("\n");OUT("Server didn't sent expected message")};
 	} while (pck->type!=type_message_recv);
-	if (verbose) printf("server replied !\n");
+	if (verbose>1) printf("\nServer replied !\n");
 	/* Copy answer */
 	answer=malloc(sizeof(char)*strlen(pck->message));
 	strcpy(answer,pck->message);
@@ -94,7 +94,7 @@ socket* make_socket(char *p_socket){
 	
 	/* Socket creation */
 	if (access(p_socket,F_OK)==-1) mkfifo(p_socket,MODE_SOCKET);
-	if (verbose) printf("Socket created: %s\n",p_socket);
+	if (verbose>1) printf("Socket created: %s\n",p_socket);
 	strcpy(addr,p_socket); sck->addr=addr;
 	
 	return sck;

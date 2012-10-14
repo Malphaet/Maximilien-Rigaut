@@ -23,6 +23,7 @@
 /* ========= Includes =========*/
 #include "utils.h"
 #include "libsockets.h"
+#include "tinybor.h"
 
 /* ========= Defines ==========*/
 
@@ -34,11 +35,13 @@ struct dict{
 	char *numero;
 };
 
-typedef struct dict annuary;
+typedef struct dict dictionnary;
 
 
 /* ======== Prototype =========*/
-void load_dict(char*,struct dict **);
-void child_socket(char*,char*);
-
+void		child_socket		(packet*);
+socket**	create_from_feed	(char*);
+void		load_dict			(char*);
+char*		seek_dict			(char*);
+int			Salem 				(FILE*); /* Line count */
 #endif
