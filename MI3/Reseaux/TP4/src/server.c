@@ -27,15 +27,17 @@
 
 /* =========== Main ===========*/
 
+int p=1; /** Name of the current process */
 dictionnary **addr_book;
 int addr_book_size;
 int verbose=0;
 int running=1;
-lsocket**sockets;
 
+/** Sockets needs to be global to be closed properly */
+lsocket**sockets;
+lsocket*main_sck;
+	
 int main(int nbargs,char **argv){
-	int p; /* Name of the current process */
-	lsocket*main_sck;
 	lpacket*pck;
 	
 	/** Checking variables */
@@ -48,7 +50,7 @@ int main(int nbargs,char **argv){
 	open_socket(main_sck,S_IRUSR|S_IWUSR);
 	load_dict(argv[2]);
 	bor_signal(SIGCHLD,gotcha,SA_RESTART);
-	bor_signal(SIGINT,gotcha,SA_RESTART);
+	bor_signal(SIGINT,gotcha,0);
 		
 	if (verbose) printf("[Server] Initialisation done.\n");
 	
@@ -80,7 +82,7 @@ void gotcha(int signal){
 			break;
 		case SIGINT:
 			running=0;
-			exit(EXIT_SUCCESS);
+			self_terminate();
 			break;
 	}
 }
@@ -100,7 +102,7 @@ void child_socket(lpacket*rcv_pck){
 		if (verbose) printf("[%d] Received: %s\n",getpid(),pck->message);
 		
 		/* Analyse request */
-/*		if (pck->type==msg_kill) break;*/
+		if (pck->type==msg_kill) break;
 		if (pck->type!=msg_text) continue;
 		
 		/* Process it */
@@ -114,14 +116,8 @@ void child_socket(lpacket*rcv_pck){
 	}
 	
 	/* Closing communications */
-	socket_message_send(sockets[1],msg_kill,"");
-	
-	close_socket(sockets[0],0);
-	close_socket(sockets[1],0);
 	packet_drop(pck);
-	
-	printf("[%d] Communications closed.\n",getpid());
-	exit(EXIT_SUCCESS);
+	self_terminate();
 }
 
 /** Create the two sockets from given request */
@@ -181,6 +177,20 @@ void load_dict(char*path){
 	if (verbose) printf("[Server] Sucessfully read %d lines from file %s.\n",lines,path);
 	addr_book_size=lines;
 	addr_book=dic;
+}
+
+void self_terminate(){
+	if (!p){
+		socket_message_send(sockets[0],msg_kill,"Server terminated by user");
+		socket_message_send(sockets[1],msg_kill,"Server terminated by user");
+		
+		close_socket(sockets[0],0);
+		close_socket(sockets[1],0);
+	} else {
+		close_socket(main_sck,0);
+	}
+	printf("[%d] Communications closed.\n",getpid());
+	exit(EXIT_SUCCESS);
 }
 
 /** Search into the dictionnary */

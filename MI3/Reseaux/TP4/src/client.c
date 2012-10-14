@@ -21,10 +21,14 @@
 
 /* ========= Includes =========*/
 #include "client.h"
+#include "bor-util.h"
 
 /* ========= Defines ==========*/
 #define PATH_TEMP_SOCK "tmp/tube"
 int verbose; /** Verbosity of the program */
+/** Sockets needs to be global to be shut properly */
+
+lsocket**sockets; /** Main communicating sockets */
 
 /* =========== Main ===========*/
 /** Main function of the client
@@ -45,26 +49,23 @@ int main (int argc, char **argv){
  * @param path Path to the server socket
  */
 void client_socket(char *path){
-	lsocket* main_socket=make_socket(path);
-	lsocket**new_sockets;
+	lsocket*main_socket=make_socket(path);
 	
 	/* Connect to the given socket address */
 	open_socket(main_socket,S_IWUSR); 
 	
 	/* Creation of the two sockets */
-	new_sockets=open_communication();
+	sockets=open_communication();
 	
 	/* Send the socket to listen to */
-	if (handshake(main_socket,new_sockets)<0) OUT("The server didn't accepted connection");
+	if (handshake(main_socket,sockets)<0) OUT("The server didn't accepted connection");
 	
 	/* Acknoledge user requests */
-	while (user_request(new_sockets));
+	bor_signal(SIGINT,gotcha,0);
+	while (user_request(sockets));
 	
 	/* Properly close connection */
-	socket_message_send(new_sockets[1],msg_kill,"");
-	close_socket(main_socket,0);
-	close_socket(new_sockets[0],1);
-	close_socket(new_sockets[1],1);
+	self_terminate();
 }
 
 /** Open a new communication to the server */
@@ -82,7 +83,7 @@ lsocket** open_communication(){
 	new_socket[1]=make_socket(paths[1]);
 	
 	/* Opening sockets */
-	open_socket(new_socket[0],S_IRUSR);
+	open_socket(new_socket[0],S_IRUSR|S_IWUSR); /* The client will self terminate */
 	open_socket(new_socket[1],S_IWUSR);
 	return new_socket;
 }
@@ -108,7 +109,12 @@ int handshake(lsocket*main_socket,lsocket**sockets){
 	/* Handshake received */
 	feedback=packet_receive(sockets[0]); ret_code=feedback->type;
 	if (verbose) printf("Received !\n");
+	
+	/* Clean */
 	packet_drop(feedback);
+	close_socket(main_socket,0);
+	
+	/* Return */
 	if (ret_code==msg_recv) return 1;
 	else return -1;
 }
@@ -118,7 +124,7 @@ int handshake(lsocket*main_socket,lsocket**sockets){
  */
 int user_request(lsocket**sockets){
 	char message[SIZE_BUFFER];
-	char*answer;
+	lpacket*pck;
 	
 	/* Read user imput */
 	printf("Awaiting request > ");
@@ -128,9 +134,42 @@ int user_request(lsocket**sockets){
 	if (strlen(message)<2) {printf("No requests sent, shutting down...\n"); return 0;}
 	
 	/* Exchange message with the server */
-	answer=message_exchange(sockets[1],msg_text,message,sockets[0],msg_text);
+	message_send(sockets[1],msg_text,message);
+	pck=packet_receive(sockets[0]);
+	
+	if (pck->type>msg_errors) {
+		printf("[Server] Error (%d): %s\n",pck->type,pck->message);
+		self_terminate();
+	}
+	if (pck->type>msg_errors) {
+		printf("[Server] Warning (%d): %s\n",pck->type,pck->message);
+		return -1;
+	}
 	
 	/* Display it */
-	printf("The server answered: %s\n",answer);
+	printf("The server answered: %s\n",pck->message);
 	return 1;
+}
+
+void gotcha(int signal){
+	switch (signal){
+		case SIGINT:
+			self_terminate();
+			break;
+		case SIGALRM:
+			printf("Timeout, exiting.\n");
+			self_terminate();
+			break;
+	}
+}
+
+void self_terminate(){
+	socket_message_send(sockets[0],msg_kill,"");
+	socket_message_send(sockets[1],msg_kill,"");
+	
+	close_socket(sockets[0],1);
+	close_socket(sockets[1],1);
+	
+	printf("Client exited properly\n");
+	exit(EXIT_SUCCESS);
 }

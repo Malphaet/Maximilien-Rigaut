@@ -68,8 +68,10 @@ enum msg_enum{
 	msg_recv,	/**< [nfo]:[program] Message received */
 	msg_keep,	/**< [nfo]:[core] [TBI] Keep-alive */
 	msg_text,	/**< [msg]:[program] String sent */
+	msg_warnings, 	/**< Not a message: Upper that this are warnings */
 	msg_wait,	/**< [wrn]:[core] [NYI] Server overloaded, wait */
-	msg_kill,	/**< [wrn]:[program] The connection is to be shutdown, process now */
+	msg_errors, 	/**< Not a message: Upper that this are errors */
+	msg_kill,	/**< [err]:[program] The connection is to be shutdown, process now */
 	msg_err,	/**< [err]:[core] [NYI] (Unknown) Error in received socket */
 	msg_die,	/**< [err]:[core] [NYI] Server died, will not process requests anymore */
 	msg_wtf		/**< [err]:[program] Request isn't the the one expected, I don't know what to do ! Abort ! Abort !*/

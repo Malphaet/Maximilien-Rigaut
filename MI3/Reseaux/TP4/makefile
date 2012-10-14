@@ -21,7 +21,7 @@ server: $(OBJ)/server.o $(LNKS)
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ -lres-bor
 
 client: $(OBJ)/client.o $(LNKS)
-	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
+	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ -lres-bor
 
 lserver: $(OBJ)/lserver.o $(LNKS)
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 

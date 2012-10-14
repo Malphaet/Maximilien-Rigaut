@@ -47,7 +47,7 @@ char*message_receive(lsocket*sck){
 	return msg;
 }
 
-/** Initiate an exchange
+/** [Deprecated] Initiate an exchange
  * Send a message, wait for a correct answer 
  * @param sck_send Socket used for sending
  * @param type_message_send Type of the sended message

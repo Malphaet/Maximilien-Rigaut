@@ -42,6 +42,7 @@ void		child_socket		(lpacket*);
 lsocket**	create_from_feed	(char*);
 void		load_dict			(char*);
 char*		seek_dict			(char*);
+void 		self_terminate		();
 void		gotcha				(int);
 int			Salem 				(FILE*); /* Line count */
 #endif

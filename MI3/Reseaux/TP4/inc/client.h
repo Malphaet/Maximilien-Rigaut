@@ -31,5 +31,6 @@ void 		client_socket		(char*);
 lsocket** 	open_communication	();
 int 		handshake			(lsocket*,lsocket**);
 int			user_request		();
-
+void 		gotcha				(int);
+void 		self_terminate		();
 #endif
