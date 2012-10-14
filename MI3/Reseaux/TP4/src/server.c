@@ -28,7 +28,10 @@
 /* =========== Main ===========*/
 
 dictionnary **addr_book;
+int addr_book_size;
 int verbose=0;
+int running=1;
+lsocket**sockets;
 
 int main(int nbargs,char **argv){
 	int p; /* Name of the current process */
@@ -44,11 +47,13 @@ int main(int nbargs,char **argv){
 	main_sck=make_socket(argv[1]);
 	open_socket(main_sck,S_IRUSR|S_IWUSR);
 	load_dict(argv[2]);
-	bor_signal(SIGCHLD,gotcha,0);
+	bor_signal(SIGCHLD,gotcha,SA_RESTART);
+	bor_signal(SIGINT,gotcha,SA_RESTART);
+		
 	if (verbose) printf("[Server] Initialisation done.\n");
 	
 	/* Server core */
-	while(1){
+	while(running){
 		/* Receving request */
 		if (verbose) printf("[Server] Waiting for new incoming transmissions...\n");
 		pck=packet_receive(main_sck);
@@ -58,8 +63,9 @@ int main(int nbargs,char **argv){
 		
 		/* Forking the program */
 		if ((p=fork())<0) ERROR("Forking child");
-		if (!p) {child_socket(pck);break;}
+		if (!p) child_socket(pck);
 	}
+	close_socket(main_sck,1);
 	return 0;
 }
 
@@ -67,34 +73,34 @@ int main(int nbargs,char **argv){
 
 void gotcha(int signal){
 	int pid,status;
-	printf("MOOOO\n");
 	switch (signal){
 		case SIGCHLD:
 			pid=wait(&status);
-			printf("%d exited %s\n",pid,WIFEXITED(status)?"normally":"with error, see the logs and good luck !");
+			printf("[Server] %d exited %s\n",pid,WIFEXITED(status)?"normally":"with error, see the logs and good luck !");
 			break;
-		case SIGTERM:
-			printf("Nuuuuu");
+		case SIGINT:
+			running=0;
+			exit(EXIT_SUCCESS);
 			break;
 	}
 }
 
 void child_socket(lpacket*rcv_pck){
-	lsocket**sockets=create_from_feed(rcv_pck->message);
 	lpacket*pck;
 	char*message;
+	sockets=create_from_feed(rcv_pck->message);
 	packet_drop(rcv_pck);
 	
 	/* Everything went fine, proceed */
 	socket_message_send(sockets[1],msg_recv,"");
 	
-	while(1){
+	while(running){
 		/* Wait for user request */
 		pck=packet_receive(sockets[0]);
 		if (verbose) printf("[%d] Received: %s\n",getpid(),pck->message);
 		
 		/* Analyse request */
-		if (pck->type==msg_kill) break;
+/*		if (pck->type==msg_kill) break;*/
 		if (pck->type!=msg_text) continue;
 		
 		/* Process it */
@@ -106,8 +112,16 @@ void child_socket(lpacket*rcv_pck){
 		
 		packet_drop(pck);
 	}
-	printf("[%d] Communication closed.\n",getpid());
+	
+	/* Closing communications */
+	socket_message_send(sockets[1],msg_kill,"");
+	
+	close_socket(sockets[0],0);
+	close_socket(sockets[1],0);
 	packet_drop(pck);
+	
+	printf("[%d] Communications closed.\n",getpid());
+	exit(EXIT_SUCCESS);
 }
 
 /** Create the two sockets from given request */
@@ -151,7 +165,6 @@ void load_dict(char*path){
 	if (fd==NULL) ERROR("Dictionnary file doesn't exists");
 	
 	lines=Salem(fd); rewind(fd);
-/*	printf("%d lines in %s\n",lines,path);*/
 	
 	for (i=0;i<lines;i++){
 		fgets(buffer,SIZE_BUFFER,fd);
@@ -166,14 +179,17 @@ void load_dict(char*path){
 		strcpy(dic[i]->numero,number);
 	}
 	if (verbose) printf("[Server] Sucessfully read %d lines from file %s.\n",lines,path);
+	addr_book_size=lines;
 	addr_book=dic;
 }
 
 /** Search into the dictionnary */
 char*seek_dict(char*key){
-	/* Heavy search process :) */
-	key++;
-	return "Mooo";
+	int i;
+	/* Heavy search process */
+	for (i=0;i<addr_book_size;i+=1) if (strcmp(key,addr_book[i]->name)==0) return addr_book[i]->numero;
+	
+	return "No results found";
 }
 
 /** Line counter by Salem */
