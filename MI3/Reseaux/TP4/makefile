@@ -13,7 +13,7 @@ INCS = $(LIBS) $(INC)
 LNKS = $(OBJ)/liblsockets.o
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) tmp
 
-EXEC=server client lserver
+EXEC=server client
 
 all: $(EXEC)
 

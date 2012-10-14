@@ -40,7 +40,7 @@ int main(int nbargs,char **argv){
 	if (nbargs>3) verbose=atoi(argv[3]);
 
 	/** Initialisation of main variables */
-	if (verbose) printf("[Server] Initialising...\n");
+	if (verbose) printf("[Server] Initialising on pid %d\n",getpid());
 	main_sck=make_socket(argv[1]);
 	open_socket(main_sck,S_IRUSR|S_IWUSR);
 	load_dict(argv[2]);
@@ -58,7 +58,7 @@ int main(int nbargs,char **argv){
 		
 		/* Forking the program */
 		if ((p=fork())<0) ERROR("Forking child");
-		if (p) {child_socket(pck);break;}
+		if (!p) {child_socket(pck);break;}
 	}
 	return 0;
 }
@@ -66,9 +66,15 @@ int main(int nbargs,char **argv){
 /* ========== Functions ==========*/
 
 void gotcha(int signal){
+	int pid,status;
+	printf("MOOOO\n");
 	switch (signal){
 		case SIGCHLD:
-			wait(NULL);
+			pid=wait(&status);
+			printf("%d exited %s\n",pid,WIFEXITED(status)?"normally":"with error, see the logs and good luck !");
+			break;
+		case SIGTERM:
+			printf("Nuuuuu");
 			break;
 	}
 }
