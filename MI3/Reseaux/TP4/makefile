@@ -10,19 +10,20 @@ DOC = doc
 
 LIBS = ../libs/
 INCS = $(LIBS) $(INC)
+LNKS = $(OBJ)/liblsockets.o
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) tmp
 
 EXEC=server client lserver
 
 all: $(EXEC)
 
-server: $(OBJ)/server.o $(OBJ)/libsockets.o
-	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@
+server: $(OBJ)/server.o $(LNKS)
+	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ -lres-bor
 
-client: $(OBJ)/client.o $(OBJ)/libsockets.o
+client: $(OBJ)/client.o $(LNKS)
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
 
-lserver: $(OBJ)/lserver.o $(OBJ)/libsockets.o
+lserver: $(OBJ)/lserver.o $(LNKS)
 	$(CC) $^ $(LDFLAGS) -o $(BIN)/$@ 
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h

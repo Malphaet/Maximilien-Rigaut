@@ -45,11 +45,11 @@ int main (int argc, char **argv){
  * @param path Path to the server socket
  */
 void client_socket(char *path){
-	socket* main_socket=make_socket(path);
-	socket**new_sockets;
+	lsocket* main_socket=make_socket(path);
+	lsocket**new_sockets;
 	
 	/* Connect to the given socket address */
-	open_socket(main_socket,S_IWUSR/*MODE_SOCKET*/); 
+	open_socket(main_socket,S_IWUSR); 
 	
 	/* Creation of the two sockets */
 	new_sockets=open_communication();
@@ -68,8 +68,8 @@ void client_socket(char *path){
 }
 
 /** Open a new communication to the server */
-socket** open_communication(){
-	socket** new_socket=malloc(sizeof(socket*)*2);
+lsocket** open_communication(){
+	lsocket** new_socket=malloc(sizeof(lsocket*)*2);
 	char paths[2][SIZE_BUFFER];
 	if (new_socket==NULL) ERROR("Socket malloc error");
 	
@@ -92,9 +92,9 @@ socket** open_communication(){
  * @param sockets The newly created sockets
  * @return -1 if the communication cannot be established, 1 otherwise
  */
-int handshake(socket*main_socket,socket**sockets){
+int handshake(lsocket*main_socket,lsocket**sockets){
 	char message[SIZE_BUFFER*2];
-	packet* feedback;
+	lpacket* feedback;
 	int ret_code;
 	
 	/* Forging message */
@@ -116,7 +116,7 @@ int handshake(socket*main_socket,socket**sockets){
 /** Analyse user requests from stdin
  * @return 0 if no request is done, 1 otherwise
  */
-int user_request(socket**sockets){
+int user_request(lsocket**sockets){
 	char message[SIZE_BUFFER];
 	char*answer;
 	

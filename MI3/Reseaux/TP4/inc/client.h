@@ -23,13 +23,13 @@
 
 /* ========= Includes =========*/
 #include "utils.h"
-#include "libsockets.h"
+#include "liblsockets.h"
 
 /* ======== Prototype =========*/
 
 void 		client_socket		(char*);
-socket** 	open_communication	();
-int 		handshake			(socket*,socket**);
+lsocket** 	open_communication	();
+int 		handshake			(lsocket*,lsocket**);
 int			user_request		();
 
 #endif

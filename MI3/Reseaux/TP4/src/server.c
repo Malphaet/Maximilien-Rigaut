@@ -19,7 +19,9 @@
  */
 
 /* ========= Includes =========*/
+#include "bor-util.h"
 #include "server.h"
+
 
 /* ========= Defines ==========*/
 
@@ -30,8 +32,8 @@ int verbose=0;
 
 int main(int nbargs,char **argv){
 	int p; /* Name of the current process */
-	socket*main_sck;
-	packet*pck;
+	lsocket*main_sck;
+	lpacket*pck;
 	
 	/** Checking variables */
 	if (nbargs<3) OUT("Syntax incorrect\nUsage:\n  server <path_fifo> <path_dict>");
@@ -42,6 +44,7 @@ int main(int nbargs,char **argv){
 	main_sck=make_socket(argv[1]);
 	open_socket(main_sck,S_IRUSR|S_IWUSR);
 	load_dict(argv[2]);
+	bor_signal(SIGCHLD,gotcha,0);
 	if (verbose) printf("[Server] Initialisation done.\n");
 	
 	/* Server core */
@@ -70,9 +73,9 @@ void gotcha(int signal){
 	}
 }
 
-void child_socket(packet*rcv_pck){
-	socket**sockets=create_from_feed(rcv_pck->message);
-	packet*pck;
+void child_socket(lpacket*rcv_pck){
+	lsocket**sockets=create_from_feed(rcv_pck->message);
+	lpacket*pck;
 	char*message;
 	packet_drop(rcv_pck);
 	
@@ -102,10 +105,10 @@ void child_socket(packet*rcv_pck){
 }
 
 /** Create the two sockets from given request */
-socket**create_from_feed(char*feed){
+lsocket**create_from_feed(char*feed){
 	char*sock_names[2];
-	socket**new_sockets;
-	new_sockets=malloc(sizeof(socket*)*2);
+	lsocket**new_sockets;
+	new_sockets=malloc(sizeof(lsocket*)*2);
 	if (new_sockets==NULL) ERROR("Sockets creation");
 	
 	/* Split sockets */
@@ -168,7 +171,7 @@ char*seek_dict(char*key){
 }
 
 /** Line counter by Salem */
-int Salem (FILE *fd) {
+int Salem (FILE*fd){
 	int nlines=0, partial=0;
 	char buff[SIZE_BUFFER] = "";
 	

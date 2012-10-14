@@ -19,12 +19,12 @@
  */
 
 #include "utils.h"
-#include "libsockets.h"
+#include "liblsockets.h"
 
 
 int main (int argc, char *argv[]){
-	socket* sck,*sockets[2];
-	packet* pck;
+	lsocket*sck,*sockets[2];
+	lpacket*pck;
 	char*socks[2];
 	
 	if (argc<2) OUT("Not enought parameters");

@@ -22,7 +22,7 @@
 #define SERVER_H
 /* ========= Includes =========*/
 #include "utils.h"
-#include "libsockets.h"
+#include "liblsockets.h"
 #include "tinybor.h"
 
 /* ========= Defines ==========*/
@@ -39,9 +39,10 @@ typedef struct dict dictionnary;
 
 
 /* ======== Prototype =========*/
-void		child_socket		(packet*);
-socket**	create_from_feed	(char*);
+void		child_socket		(lpacket*);
+lsocket**	create_from_feed	(char*);
 void		load_dict			(char*);
 char*		seek_dict			(char*);
+void		gotcha				(int);
 int			Salem 				(FILE*); /* Line count */
 #endif
