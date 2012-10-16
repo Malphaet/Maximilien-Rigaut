@@ -60,6 +60,7 @@ int lpacket_snd_bytes; /** Number of sended bytes */
  * \li The tag [err] means the packet is reporting an error
  */
 enum msg_enum{
+	msg_sync,	/**< [nfo]:[Program] Program seeking first connection*/
 	msg_recv,	/**< [nfo]:[program] Message received */
 	msg_keep,	/**< [nfo]:[core] [TBI] Keep-alive */
 	msg_text,	/**< [msg]:[program] String sent */
@@ -103,11 +104,10 @@ char*	message_receive			(lsocket*);
 
 /* Low level communication */
 lsocket* make_lsocket	(char*); 					/* TODO: Check */
-void 	 open_lsocket	(lsocket*,int,int);			/* TODO: Check */
-void 	 close_lsocket	(lsocket*);					/* TODO: Check */
+void 	 open_lsocket	(lsocket*,int,int,int);	/* TODO: Check */
+void 	 close_lsocket	(lsocket*,int);				/* TODO: Check */
 int 	 lsocket_send	(lsocket*,char*,int); 		/* TODO: Check */
 int 	 lsocket_receive	(lsocket*,char*,int);	/* TODO: Check */
-
 
 /* High level communication */
 int 	 lsocket_message_send	(lsocket*,msg_type,char*);		/* Public: Send message */

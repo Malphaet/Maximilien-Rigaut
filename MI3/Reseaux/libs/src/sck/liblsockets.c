@@ -68,15 +68,16 @@ lsocket* make_lsocket(char*name){
 	/* Socket creation */
 	if (verbose>1) printf("Socket created: %s\n",name);
 	strcpy(addr,name); sck->addr=addr;
-	
+
 	return sck;
 }
 
 /** Open the connection of the given socket 
  * @param type Type of the connection AF_UNIX or other
  * @param more Mode of the connection SOCK_DGRAM or other
+ * @param bnd Only solution for now: should I bind it or not ? 1: Local, 0:Distant
  */
-void open_lsocket(lsocket*sck,int type,int mode){
+void open_lsocket(lsocket*sck,int type,int mode,int bnd){
 	struct sockaddr_un*sock_un;
 /*	struct sockaddr*sock;*/
 	if ((sck->file=socket(type,mode,0))<0) ERROR("Socket opening was impossible");
@@ -89,7 +90,10 @@ void open_lsocket(lsocket*sck,int type,int mode){
 			sck->socket=sock_un;
 			sck->mode=mode;
 			sck->type=type;
-			bind(sck->file,(struct sockaddr*)&sock_un,sizeof(sock_un));
+			if (bnd) {
+				unlink(sck->addr);
+				if (bind(sck->file,(struct sockaddr*)sock_un,sizeof(*sock_un))<0) ERROR("Binding socket failed");
+			}
 			break;
 		default:
 			OUT("Unhandled mode");
@@ -99,11 +103,18 @@ void open_lsocket(lsocket*sck,int type,int mode){
 
 
 /** Close a socket connection
+ * @param Shutdown shall I shutdown or just free the memory ?
  */
-void close_lsocket(lsocket*sck){
+void close_lsocket(lsocket*sck,int shutdown){
+	switch (sck->type){
+		case AF_UNIX:
+			if (shutdown) unlink(sck->addr);
+			break;
+		default:
+			break;
+	}
+	
 	close(sck->file);
-	if (sck->type==AF_UNIX) unlink(sck->addr);
-	free(sck->socket->sun_path);
 	free(sck->socket);
 	free(sck);
 }
@@ -112,7 +123,7 @@ void close_lsocket(lsocket*sck){
 int lsocket_send(lsocket*sck,char*message,int bytes){
 	switch (sck->mode){
 		case SOCK_DGRAM:
-			return sendto(sck->file,message,0,bytes,(struct sockaddr*)sck->socket,sizeof(sck->socket));
+			return sendto(sck->file,message,bytes,0,(struct sockaddr*)sck->socket,sizeof(*(sck->socket)));
 		default:
 			return write(sck->file,message,bytes);
 	}
@@ -120,7 +131,7 @@ int lsocket_send(lsocket*sck,char*message,int bytes){
 
 /** Receive string from the server */
 int lsocket_receive(lsocket*sck, char*message,int bytes){
-	unsigned int bsize=sizeof(sck->socket);
+	unsigned int bsize=sizeof(*(sck->socket));
 	switch (sck->mode){
 		case SOCK_DGRAM:
 			return recvfrom(sck->file,message,bytes,0,(struct sockaddr*)sck->socket,&bsize);
