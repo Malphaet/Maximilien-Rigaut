@@ -1,7 +1,7 @@
 MAKE = make
 PLACE = src
 
-DIRS = src/bor
+DIRS = src/bor src/sck
 # the sets of directories to do various things in
 BUILDDIRS = $(DIRS:%=build-%)
 #INSTALLDIRS = $(DIRS:%=install-%)
