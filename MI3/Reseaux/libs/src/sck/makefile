@@ -20,6 +20,10 @@ $(EXEC): $(MAIN).o
 %.o: %.c %.h utils.h
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+test: test.c liblsockets.o
+	$(CC) $(CFLAGS) -o $@.o -c $<
+	$(CC) $(LDFLAGS) liblsockets.o $@.o -o $@
+
 doc: .PHONY
 
 	doxygen Doxyfile

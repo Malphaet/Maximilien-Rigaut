@@ -31,6 +31,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
 #include <sys/un.h>
 #include "utils.h"
 
@@ -40,8 +42,8 @@
 #define SIZE_ADDR 108
 
 /* Global variables */
-int lpacket_rcv_bytes; /** Number of received bytes */
-int lpacket_snd_bytes; /** Number of sended bytes */
+volatile int lpacket_rcv_bytes; /** Number of received bytes */
+volatile int lpacket_snd_bytes; /** Number of sended bytes */
 
 /* ========= Typedef ==========*/
 
@@ -66,9 +68,9 @@ enum msg_enum{
 	msg_text,	/**< [msg]:[program] String sent */
 	msg_cont,	/**< [msg]:[program] Message is not finished ! */
 	msg_fnsh,	/**< [msg]:[program] Message is finished */
-	msg_warnings, 	/**< Not a message: Upper that this are warnings */
+	msg_warnings, 	/**< Not a message: Upper this value this are warnings */
 	msg_wait,	/**< [wrn]:[core] [NYI] Server overloaded, wait */
-	msg_errors, 	/**< Not a message: Upper that this are errors */
+	msg_errors, 	/**< Not a message: Upper this value this are errors */
 	msg_kill,	/**< [err]:[program] The connection is to be shutdown, process now */
 	msg_err,	/**< [err]:[core] [NYI] (Unknown) Error in received socket */
 	msg_die,	/**< [err]:[core] [NYI] Server died, will not process requests anymore */
@@ -83,7 +85,7 @@ struct sk_addr{
 	int file;					/**< The file descriptor to use */
 	int type;					/**< The type of connection (AF_UNIX)*/
 	int mode;					/**< The mode of connection (SOCK_DGRAM) */
-	struct sockaddr_un* socket;	/** The linked socket */
+	struct sockaddr* socket;	/** The linked socket */
 }; typedef struct sk_addr lsocket;
 
 /**
@@ -99,26 +101,28 @@ struct pk_struct {
 /* ======== Prototype =========*/
 
 /* Wrappers */
-int 	message_send			(lsocket*,msg_type,char*);
-char*	message_receive			(lsocket*);
+int 	message_send			(lsocket*,msg_type,char*,lsocket*);	/* [Public]: Send a message through the socket */
+lpacket*message_receive			(lsocket*,lsocket*);			/* [Public]: Return the received socket, save the sending socket */
 
 /* Low level communication */
-lsocket* make_lsocket	(char*); 					/* TODO: Check */
-void 	 open_lsocket	(lsocket*,int,int,int);	/* TODO: Check */
-void 	 close_lsocket	(lsocket*,int);				/* TODO: Check */
-int 	 lsocket_send	(lsocket*,char*,int); 		/* TODO: Check */
-int 	 lsocket_receive	(lsocket*,char*,int);	/* TODO: Check */
+lsocket* make_lsocket	(char*);								/* [Public]: Create new socket */ 				/* TODO: Improve */
+void 	 open_lsocket	(lsocket*,int,int);						/* [Privte] */
+void	 bind_lsocket	(lsocket*);								/* [Public]: Bind the socket for answers */
+void 	 close_lsocket	(lsocket*,int);							/* [Public]: Terminate the connection */
+int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/* [Public]: Send a message through the socket */
+lsocket* lsocket_receive(lsocket*,char*,int);					/* [Privte] */ 									/* TODO: Reply to + FIX */
 
 /* High level communication */
-int 	 lsocket_message_send	(lsocket*,msg_type,char*);		/* Public: Send message */
-char*	 lsocket_message_receive	(lsocket*);					/* Deprecated */
+int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/* [Public]: Send message */
+char*	 lsocket_message_receive	(lsocket*);					/* [Public]: DPR - Return a raw message */
+
 /* Packet lib */
-lpacket* lpacket_forge		(msg_type,char*);
-void 	 lpacket_drop		(lpacket*);
-lpacket* lpacket_request	(char*);
-char*	 lpacket_message	(lpacket*);
-void 	 lpacket_send		(lsocket*,lpacket*);
-lpacket* lpacket_receive	(lsocket*);							/* Public: Receive packet */
+lpacket* lpacket_forge		(msg_type,char*);					/* [Privte] */
+void 	 lpacket_drop		(lpacket*);							/* [Privte] */
+lpacket* lpacket_request	(char*);							/* [Privte] */
+char*	 lpacket_message	(lpacket*);							/* [Privte] */
+void 	 lpacket_send		(lsocket*,lpacket*,lsocket*);		/* [Privte] */
+lpacket* lpacket_receive	(lsocket*);							/* [Public]: Receive packet */
 
 #endif /* __liblsockets_H__ */
 
