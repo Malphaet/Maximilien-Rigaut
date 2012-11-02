@@ -1,37 +1,53 @@
 AR = ar rcs
 CC = gcc
 
-CFLAGS = -W -Wall -ansi -pedantic
-LDFLAGS = 
+BIN = bin
+OBJ = obj
+SRC = src
+INC = inc
+DOC = doc
+TMP = tmp
+
+CFLAGS = -W -Wall -ansi -pedantic -I$(INC)
+LDFLAGS = -L../../
 
 EXEC=liblsockets.a
 MAIN=liblsockets
 
-DEST = ../../
-PLACE= src/sck/
+DEST = ../..
+PLACE= src/sck
+DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
 all: $(EXEC)
 
-$(EXEC): $(MAIN).o 
+init:
+	mkdir -p $(DIRS)
+
+$(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o
 	$(AR) $@ $^
-	mv $@ $(DEST)
-	ln -sf $(PLACE)$(MAIN).h $(DEST)$(MAIN).h
+	mv $@ $(DEST)/
+	ln -sf $(PLACE)/$(INC)/$(MAIN).h $(DEST)/$(MAIN).h
 
-%.o: %.c %.h utils.h
-	$(CC) $(CFLAGS) -o $@ -c $<
+$(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h $(INC)/structures.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
-test: test.c liblsockets.o
-	$(CC) $(CFLAGS) -o $@.o -c $<
-	$(CC) $(LDFLAGS) liblsockets.o $@.o -o $@
+test: $(SRC)/test.c $(DEST)/$(EXEC)
+	$(CC) $(CFLAGS) -o $(OBJ)/test.o -c $<
+	$(CC) $(LDFLAGS) $(OBJ)/test.o -o $(BIN)/$@ -llsockets
 
 doc: .PHONY
-
 	doxygen Doxyfile
+
+edit:
+	gedit 2> /dev/null $(SRC)/* $(INC)/* makefile &
+	
 clean: 
-	rm -f *.o
+	rm -f $(OBJ)/*.o
 	
 cleaner: clean
-	rm -f $(EXEC)
-	rm -f $(DEST)$(MAIN).h
+	rm -f $(BIN)/*
+	rm -f $(DEST)/$(EXEC)
+	rm -f $(DEST)/$(MAIN).h
+	rm -f $(BIN)/test
 
 .PHONY:

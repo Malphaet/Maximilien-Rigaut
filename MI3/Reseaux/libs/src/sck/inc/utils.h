@@ -21,6 +21,8 @@
 #define __UTILS_H__
 
 /* ========= Defines ==========*/
+int verbose; /*< Verbosity of the program */
+
 /* Functions */
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
 #define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}

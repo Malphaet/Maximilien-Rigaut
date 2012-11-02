@@ -1,5 +1,5 @@
 /*
- * liblsockets.h
+ * structures.h
  * This file is part of liblsockets
  *
  * Copyright (C) 2012 - Maximilien Rigaut
@@ -18,32 +18,9 @@
  * along with liblsockets. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __liblsockets_H__
-#define __liblsockets_H__
 
-/* ========= Includes =========*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/ip.h>
-#include <arpa/inet.h>
-#include <sys/un.h>
-#include "utils.h"
-
-/* ========= Defines ==========*/
-
-#define SIZE_BUFFER 1024
-#define SIZE_ADDR 108
-
-/* Global variables */
-volatile int lpacket_rcv_bytes; /** Number of received bytes */
-volatile int lpacket_snd_bytes; /** Number of sended bytes */
+#ifndef __LIBLSOCKETS_STRUCTURES_H__
+#define __LIBLSOCKETS_STRUCTURES_H__
 
 /* ========= Typedef ==========*/
 
@@ -68,9 +45,9 @@ enum msg_enum{
 	msg_text,	/**< [msg]:[program] String sent */
 	msg_cont,	/**< [msg]:[program] Message is not finished ! */
 	msg_fnsh,	/**< [msg]:[program] Message is finished */
-	msg_warnings, 	/**< Not a message: Upper this value this are warnings */
+	msg_warnings, 	/**< Not a message: Upper this value are warnings */
 	msg_wait,	/**< [wrn]:[core] [NYI] Server overloaded, wait */
-	msg_errors, 	/**< Not a message: Upper this value this are errors */
+	msg_errors, 	/**< Not a message: Upper this value are errors */
 	msg_kill,	/**< [err]:[program] The connection is to be shutdown, process now */
 	msg_err,	/**< [err]:[core] [NYI] (Unknown) Error in received socket */
 	msg_die,	/**< [err]:[core] [NYI] Server died, will not process requests anymore */
@@ -98,32 +75,29 @@ struct pk_struct {
 	char*message;		/**< The body of the message, can be empty */
 }; typedef struct pk_struct lpacket;
 
-/* ======== Prototype =========*/
+/**
+ * @brief A basement made of sockets
+ *
+ * The name podrum is croatian for basement.
+ *
+ */
+typedef struct sk_podr {
+	int 		cur_size;		/**< Current size of the basement */ 
+	int			max_size;		/**< Maximum size of the basement */ 
+	int			type;			/**< 0 Reading fd, 1 Writing fd */
+	lsocket**	sockets;		/**< Basement itself */
+/*	lclist*		del_list;*/		/**< List of elements to delete */
+} lpodrum;
 
-/* Wrappers */
-int 	message_send			(lsocket*,msg_type,char*,lsocket*);	/* [Public]: Send a message through the socket */
-lpacket*message_receive			(lsocket*,lsocket*);			/* [Public]: Return the received socket, save the sending socket */
 
-/* Low level communication */
-lsocket* make_lsocket	(char*);								/* [Public]: Create new socket */ 				/* TODO: Improve */
-void 	 open_lsocket	(lsocket*,int,int);						/* [Privte] */
-void	 bind_lsocket	(lsocket*);								/* [Public]: Bind the socket for answers */
-void 	 close_lsocket	(lsocket*,int);							/* [Public]: Terminate the connection */
-int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/* [Public]: Send a message through the socket */
-lsocket* lsocket_receive(lsocket*,char*,int);					/* [Privte] */ 									/* TODO: Reply to + FIX */
+/** 
+ * @brief A chanined list structure
+ */
 
-/* High level communication */
-int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/* [Public]: Send message */
-char*	 lsocket_message_receive	(lsocket*);					/* [Public]: DPR - Return a raw message */
+struct int_chained_list {
+	int val;
+	struct int_chained_list*next;
+} lclist;
 
-/* Packet lib */
-lpacket* lpacket_forge		(msg_type,char*);					/* [Privte] */
-void 	 lpacket_drop		(lpacket*);							/* [Privte] */
-lpacket* lpacket_request	(char*);							/* [Privte] */
-char*	 lpacket_message	(lpacket*);							/* [Privte] */
-void 	 lpacket_send		(lsocket*,lpacket*,lsocket*);		/* [Privte] */
-lpacket* lpacket_receive	(lsocket*);							/* [Public]: Receive packet */
-
-#endif /* __liblsockets_H__ */
-
+#endif /* __STRUCTURES_H__ */
 

@@ -21,39 +21,57 @@
 #include "liblsockets.h"
 
 void child_process(){
-	lsocket*chld=make_lsocket("child");
-	lsocket*serv=make_lsocket("serv");
+	char name[101];
+	lsocket*chld,*serv=make_lsocket("tmp/serv");
+	
+	sprintf(name,"tmp/chld_%d",getpid());
+	chld=make_lsocket(name);
+	
 	open_lsocket(chld,AF_UNIX,SOCK_DGRAM);
 	open_lsocket(serv,AF_UNIX,SOCK_DGRAM);
 	bind_lsocket(chld);
-/*	printf("%s\n",((struct sockaddr_un*)chld->socket)->sun_path);*/
-	message_send(chld,1,"Moo",serv);
+	
+	message_send(serv,1,"Marina is lovely",chld);
 
 	close_lsocket(serv,0);
 	close_lsocket(chld,1);
+	OUT("FINISHED");
 }
 
 void father_process(){
-	lsocket*serv=make_lsocket("serv");
-	lsocket*chld=malloc(sizeof(lsocket));
+	lsocket*serv=make_lsocket("tmp/serv");		/* Listener */
+	lsocket*sndr=malloc(sizeof(lsocket));	/* Replyto */
+	
+	int*actives,i=0;
 	lpacket*pck;
+	lpodrum*podr=make_lpodrum(20,0);
+	
 	open_lsocket(serv,AF_UNIX,SOCK_DGRAM);
 	bind_lsocket(serv);
-
-	printf("%p:%s (%d)\n",(void*)chld,chld->addr,(int)chld->file);
-	pck=message_receive(serv,chld);
-
-	printf("%p:%s (%d) %i %s \n",(void*)chld,chld->addr,(int)chld->file,pck->type,pck->message);
 	
+	add_lsocket(podr,serv);
+	while (1){
+		actives=listen_lpodrum(podr,-1);
+		for(i=0;actives[i]>=0;i++) {
+			printf("%d,%s\n",actives[i],get_lsocket(podr,actives[i])->addr);
+			pck=message_receive(get_lsocket(podr,actives[i]),sndr);
+			printf("%s\n",pck->message);
+			printf("%p:%s (%d) %i %s \n",(void*)sndr, sndr->addr ,(int)sndr->file,pck->type,pck->message);
+		}
+		free(actives);
+	}
 	close_lsocket(serv,1);
-	close_lsocket(chld,0);
+	close_lsocket(sndr,0);
 }
 
 int main (){
 	int p;
 	p=fork();
 	if (p) father_process();
-	else child_process();
+	else {
+		fork();
+		child_process();
+	}
 	return 0;
 }
 
