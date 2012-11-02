@@ -98,14 +98,24 @@ int del_lsocket(lpodrum*podr,int nb){
 	return -1;
 }
 
+/** Purge the podrum before using it 
+ *
+ * Note that it is NOT supposed to be user-trigerred
+ */
+
+void purge_lpodrum(lpodrum*podrum){
+	podrum++;
+	return;
+}
+
 /** Return the list from all the socket ready to communicate 
  * @param podr The lpodrum for the listening
  * @param timeout Timeout before forced return (-1 for disabling)
  */
 int*listen_lpodrum(lpodrum*podr,int time){
-	int nbs,*ret;
 	int i,j=0;
-	fd_set set;
+	int nbs,*ret;
+	fd_set set,*r_ser=NULL,*w_set=NULL,*e_set=NULL;
 	struct timeval timeout;
 	if (time>0) {timeout.tv_sec=time;timeout.tv_usec=0;}
 	
@@ -113,15 +123,20 @@ int*listen_lpodrum(lpodrum*podr,int time){
 	FD_ZERO (&set);
 	
 	/* Purge lpodrum */
+	purge_lpodrum(podr);
 	
 	/* Set the fdset */
 	for (i=0;i<(podr->cur_size);i+=1) FD_SET((get_lsocket(podr,i))->file,&set);
 	
 	/* Listen for awaiting requests */
-	nbs=select(podr->cur_size*sizeof(set),podr->type==0?&set:NULL,podr->type==1?&set:NULL,podr->type==2?&set:NULL,time>0?&timeout:NULL);
+	switch(podr->type){
+		case 0: r_ser=&set; break;
+		case 1: w_set=&set;	break;
+		case 2: e_set=&set;	break;
+		default: OUT("Unhandled mode");
+	}
+	nbs=select(podr->cur_size*sizeof(set),r_ser,w_set,e_set,time>0?&timeout:NULL);
 	if (nbs<0) ERROR("Podrum select");
-	
-	printf("%d\n",nbs);
 	
 	/* Create the return list */
 	ret=malloc(sizeof(int)*(nbs+1));

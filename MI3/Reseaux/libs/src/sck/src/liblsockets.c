@@ -160,6 +160,7 @@ lsocket* lsocket_receive(lsocket*sck, char*message,int bytes){
 				ERROR("Reciving packet");
 			}
 			if (sock!=NULL) recv_sck=make_from_socket((struct sockaddr*)sock,sck->type,sck->mode);
+
 			return recv_sck;
 		default:
 			lpacket_rcv_bytes=read(sck->file,message,bytes);

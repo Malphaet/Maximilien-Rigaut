@@ -34,6 +34,6 @@ void	 add_lsocket			(lpodrum*,lsocket*);				/* [Public]: Add a num socket to the
 lsocket* get_lsocket			(lpodrum*,int);						/* [Public]: Get the socket number */
 int		 del_lsocket			(lpodrum*,int);						/* [Public]: Delete the socket (int) from the basement */
 int* 	 listen_lpodrum			(lpodrum*,int timeout);				/* [Public]: Return the list from all the socket ready to communicate */
-
+void	 purge_lpodrum			(lpodrum*);							/* [Prvate]: Purge the lpodrum before usage */
 #endif /* __WRAPPERS_H__ */
 

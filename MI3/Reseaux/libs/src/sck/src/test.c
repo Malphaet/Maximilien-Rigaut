@@ -23,6 +23,7 @@
 void child_process(){
 	char name[101];
 	lsocket*chld,*serv=make_lsocket("tmp/serv");
+	lpacket*pck;
 	
 	sprintf(name,"tmp/chld_%d",getpid());
 	chld=make_lsocket(name);
@@ -31,11 +32,27 @@ void child_process(){
 	open_lsocket(serv,AF_UNIX,SOCK_DGRAM);
 	bind_lsocket(chld);
 	
-	message_send(serv,1,"Marina is lovely",chld);
-
+	/* Hardcore setup actions */
+	srand(getpid());
+/*	sleep(rand()%4);*/
+	
+	/* Handshake */
+	message_send(serv,msg_sync,"",chld);
+	pck=message_receive(chld,NULL);
+	printf("[%d] %i %s\n",getpid(),pck->type,pck->message);
+	
+	/* Hardcore actions again */
+/*	sleep(rand()%4);*/
+	
+	/* Send results */
+	message_send(chld,msg_text,"Here I am",chld);
+	
+/*	pck=message_receive(chld,NULL);*/
+/*	printf("[%d] %i %s\n",getpid(),pck->type,pck->message);*/
 	close_lsocket(serv,0);
 	close_lsocket(chld,1);
-	OUT("FINISHED");
+	
+	exit(EXIT_SUCCESS);
 }
 
 void father_process(){
@@ -53,10 +70,16 @@ void father_process(){
 	while (1){
 		actives=listen_lpodrum(podr,-1);
 		for(i=0;actives[i]>=0;i++) {
-			printf("%d,%s\n",actives[i],get_lsocket(podr,actives[i])->addr);
+			printf("Waiting for %s:%d\n",get_lsocket(podr,actives[i])->addr,actives[i]);
 			pck=message_receive(get_lsocket(podr,actives[i]),sndr);
-			printf("%s\n",pck->message);
-			printf("%p:%s (%d) %i %s \n",(void*)sndr, sndr->addr ,(int)sndr->file,pck->type,pck->message);
+			
+			/* 0 is the server address: new connections comes from here*/
+			if (i==0 && pck->type==msg_sync) {
+				add_lsocket(podr,sndr);
+				message_send(sndr,msg_recv,"",NULL);
+			}
+			
+			printf("[%s:%d] %i %s\n", sndr->addr ,(int)sndr->file,pck->type,pck->message);
 		}
 		free(actives);
 	}
@@ -69,6 +92,7 @@ int main (){
 	p=fork();
 	if (p) father_process();
 	else {
+		fork();
 		fork();
 		child_process();
 	}

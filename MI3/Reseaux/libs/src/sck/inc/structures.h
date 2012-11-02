@@ -39,7 +39,7 @@
  * \li The tag [err] means the packet is reporting an error
  */
 enum msg_enum{
-	msg_sync,	/**< [nfo]:[Program] Program seeking first connection*/
+	msg_sync,	/**< [nfo]:[program] Program seeking first connection*/
 	msg_recv,	/**< [nfo]:[program] Message received */
 	msg_keep,	/**< [nfo]:[core] [TBI] Keep-alive */
 	msg_text,	/**< [msg]:[program] String sent */
