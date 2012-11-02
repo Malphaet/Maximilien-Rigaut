@@ -118,8 +118,7 @@ void close_lsocket(lsocket*sck,int shutdown){
 		default:
 			break;
 	}
-
-
+	
 	close(sck->file);
 	free(sck->socket);
 	free(sck);

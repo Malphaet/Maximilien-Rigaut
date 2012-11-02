@@ -22,7 +22,7 @@
 
 void child_process(){
 	char name[101];
-	lsocket*chld,*serv=make_lsocket("tmp/serv");
+	lsocket*chld,*nserv=malloc(sizeof(lsocket)),*serv=make_lsocket("tmp/serv");
 	lpacket*pck;
 	
 	sprintf(name,"tmp/chld_%d",getpid());
@@ -34,52 +34,68 @@ void child_process(){
 	
 	/* Hardcore setup actions */
 	srand(getpid());
-/*	sleep(rand()%4);*/
+	sleep(rand()%4);
 	
 	/* Handshake */
-	message_send(serv,msg_sync,"",chld);
-	pck=message_receive(chld,NULL);
-	printf("[%d] %i %s\n",getpid(),pck->type,pck->message);
+	printf("[%d] Awake, sending message\n",getpid());
+	message_send(serv,msg_sync,"syn",chld);
+	pck=message_receive(chld,nserv);
+	printf("[%d] Server answered <%i> %s\n",getpid(),pck->type,pck->message);
+	close_lsocket(serv,0);
 	
 	/* Hardcore actions again */
-/*	sleep(rand()%4);*/
+	sleep(2);
 	
 	/* Send results */
-	message_send(chld,msg_text,"Here I am",chld);
+	message_send(nserv,msg_text,"Here I am",chld);
 	
-/*	pck=message_receive(chld,NULL);*/
-/*	printf("[%d] %i %s\n",getpid(),pck->type,pck->message);*/
-	close_lsocket(serv,0);
+	message_send(nserv,msg_kill,"Ciao",NULL);
+	printf("[%d] Exiting\n",getpid());
+	
+	close_lsocket(nserv,0);
 	close_lsocket(chld,1);
-	
 	exit(EXIT_SUCCESS);
 }
 
 void father_process(){
 	lsocket*serv=make_lsocket("tmp/serv");		/* Listener */
-	lsocket*sndr=malloc(sizeof(lsocket));	/* Replyto */
+	lsocket*sndr,*clnt;							/* Replyto */
 	
 	int*actives,i=0;
+	unsigned int nb_clients=0;
+	char name[42];
 	lpacket*pck;
-	lpodrum*podr=make_lpodrum(20,0);
+	lpodrum*podr=make_lpodrum(20);
 	
 	open_lsocket(serv,AF_UNIX,SOCK_DGRAM);
 	bind_lsocket(serv);
 	
-	add_lsocket(podr,serv);
+	add_lsocket(podr,serv,POLLIN);
 	while (1){
 		actives=listen_lpodrum(podr,-1);
 		for(i=0;actives[i]>=0;i++) {
-			printf("Waiting for %s:%d\n",get_lsocket(podr,actives[i])->addr,actives[i]);
+			sndr=malloc(sizeof(lsocket));
+			if (sndr==NULL) ERROR("Receiving malloc");
+			
+			printf("[Server] Waiting at %s:%d (%d)\n",get_lsocket(podr,actives[i])->addr,get_lsocket(podr,actives[i])->file,actives[i]);
 			pck=message_receive(get_lsocket(podr,actives[i]),sndr);
+			printf("[Server] (%s:%d) sended <%i> %s\n", sndr->addr ,(int)sndr->file,pck->type,pck->message);
 			
 			/* 0 is the server address: new connections comes from here*/
 			if (i==0 && pck->type==msg_sync) {
-				add_lsocket(podr,sndr);
-				message_send(sndr,msg_recv,"",NULL);
+				/* Create particular socket for him (note that it is generally not usefull)*/
+				sprintf(name,"tmp/nw_clnt_%d",nb_clients++);
+				
+				clnt=make_lsocket(name);
+				open_lsocket(clnt,AF_UNIX,SOCK_DGRAM);
+				bind_lsocket(clnt);
+				add_lsocket(podr,clnt,POLLIN);
+				
+				message_send(sndr,msg_recv,"ack",clnt);
+			} else if (pck->type==msg_kill){
+				del_lsocket(podr,actives[i]);
 			}
-			
-			printf("[%s:%d] %i %s\n", sndr->addr ,(int)sndr->file,pck->type,pck->message);
+			close_lsocket(sndr,0);
 		}
 		free(actives);
 	}
@@ -87,7 +103,24 @@ void father_process(){
 	close_lsocket(sndr,0);
 }
 
-int main (){
+void test_lists(){
+	lclist*liste=make_lclist();
+	lclist*curr;
+	add_lclist(liste,12);
+	add_lclist(liste,42);
+	add_lclist(liste,'$');
+	
+	printf("Liste contains %d elts\n",len_lclist(liste));
+	curr=liste; while((curr=curr->next)!=NULL) printf("%d\n",curr->data);
+	
+	printf("Poped %d\n",pop_lclist(liste));
+	printf("Liste contains %d elts\n",len_lclist(liste));
+	
+	curr=liste; while((curr=curr->next)!=NULL) printf("%d\n",curr->data);
+	drop_lclist(liste);
+}
+
+void test_sockets(){
 	int p;
 	p=fork();
 	if (p) father_process();
@@ -96,6 +129,11 @@ int main (){
 		fork();
 		child_process();
 	}
+}
+
+int main (){
+/*	test_lists();*/
+	test_sockets();
 	return 0;
 }
 

@@ -35,12 +35,14 @@
 #include <arpa/inet.h>
 #include <sys/un.h>
 #include <sys/time.h>
+#include <stropts.h>
+#include <poll.h>
 
 #include "utils.h"
 #include "structures.h"
 #include "wrappers.h"
 #include "lpackets.h"
-/*#include "lclist.h"*/
+#include "lclists.h"
 
 /* ========= Defines ==========*/
 
@@ -54,12 +56,12 @@ volatile int lpacket_snd_bytes; /** Number of sended bytes */
 /* ======== Prototype =========*/
 
 /* Low level communication */
-lsocket* make_lsocket	(char*);								/* [Public]: Create new socket */ 					/* TODO: Improve */
+lsocket* make_lsocket	(char*);								/* [Public]: Create new socket */ 				/* TODO: Improve */
 void 	 open_lsocket	(lsocket*,int,int);						/* [Privte] */
 void	 bind_lsocket	(lsocket*);								/* [Public]: Bind the socket for answers */
 void 	 close_lsocket	(lsocket*,int);							/* [Public]: Terminate the connection */
-int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/* [Public]: Send a message through the socket */	/* TODO: Split messages */
-lsocket* lsocket_receive(lsocket*,char*,int);					/* [Privte] */									 	/* TODO: Split messages */
+int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/* [Privte] */									/* TODO: Split messages */
+lsocket* lsocket_receive(lsocket*,char*,int);					/* [Privte] */								 	/* TODO: Split messages */
 /* List */
 /* Basements and chinese -> list*/
 

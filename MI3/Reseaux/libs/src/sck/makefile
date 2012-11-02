@@ -23,7 +23,7 @@ all: $(EXEC)
 init:
 	mkdir -p $(DIRS)
 
-$(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o
+$(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o $(OBJ)/lclists.o
 	$(AR) $@ $^
 	mv $@ $(DEST)/
 	ln -sf $(PLACE)/$(INC)/$(MAIN).h $(DEST)/$(MAIN).h

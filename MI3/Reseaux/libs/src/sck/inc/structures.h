@@ -19,6 +19,8 @@
  */
 
 
+#include "liblsockets.h"
+
 #ifndef __LIBLSOCKETS_STRUCTURES_H__
 #define __LIBLSOCKETS_STRUCTURES_H__
 
@@ -75,6 +77,15 @@ struct pk_struct {
 	char*message;		/**< The body of the message, can be empty */
 }; typedef struct pk_struct lpacket;
 
+/** 
+ * @brief A chanined list structure
+ */
+
+typedef struct int_chained_list {
+	int data;
+	struct int_chained_list*next;
+} lclist;
+
 /**
  * @brief A basement made of sockets
  *
@@ -86,18 +97,9 @@ typedef struct sk_podr {
 	int			max_size;		/**< Maximum size of the basement */ 
 	int			type;			/**< 0 Reading fd, 1 Writing fd */
 	lsocket**	sockets;		/**< Basement itself */
-/*	lclist*		del_list;*/		/**< List of elements to delete */
+	struct pollfd*fd_list;		/**< List of poll file_descriptors */
+	lclist*		del_list;		/**< List of elements to delete */
 } lpodrum;
-
-
-/** 
- * @brief A chanined list structure
- */
-
-struct int_chained_list {
-	int val;
-	struct int_chained_list*next;
-} lclist;
 
 #endif /* __STRUCTURES_H__ */
 

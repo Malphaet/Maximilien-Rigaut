@@ -64,25 +64,44 @@ lpacket*message_receive(lsocket*recver_socket,lsocket*sender_socket){
 /** Create new listening set (a basement: podrum in croatian) 
  * @param size Size of the future socket list
  */
-lpodrum* make_lpodrum (int size,int type){
+lpodrum* make_lpodrum (int size){
 	lsocket**sock_list=malloc(sizeof(lsocket*)*size);
 	lpodrum*podr=malloc(sizeof(lpodrum));
+	struct pollfd*list=malloc(sizeof(struct pollfd)*size);
+	
 	if (sock_list==NULL) ERROR("Socket list malloc");
+	if (list==NULL) ERROR("Fd list malloc");
 	if (podr==NULL) ERROR("Podrum list malloc");
 	
 	podr->cur_size=0;
 	podr->max_size=size;
-	podr->type=type;
 	podr->sockets=sock_list;
-/*	podr->*/
+	podr->fd_list=list;
+	podr->del_list=make_lclist();
 	
 	return podr;
 }
 
-/** Add a num socket to the basement */
-void add_lsocket(lpodrum*podr,lsocket*sock){
+/** Add a num socket to the basement 
+ * @param podr The podrum to add the socket to
+ * @param sock The socket to add
+ * @param type The type of event expected, see poll manual for more information
+ * Most common types of events:
+ * \li POLLIN Data other than high-priority data may be read without blocking.
+ * \li POLLPRI High-priority data may be read without blocking.
+ * \li POLLOUT Normal data may be written without blocking.
+ * \li POLLERR An error has occurred on the device or stream.
+ * Receving only :
+ * \li POLLNVAL Invalid request: fd not open (output only).
+ * \li POLLHUP The device has been disconnected. This event and POLLOUT are mutually-exclusive;
+ *
+ */
+void add_lsocket(lpodrum*podr,lsocket*sock,int type){
 	if (podr->cur_size==podr->max_size) OUT("Podrum max size reached (basement overflow)");
-	podr->sockets[podr->cur_size++]=sock;
+	podr->sockets[podr->cur_size]=sock;
+	podr->fd_list[podr->cur_size].fd=sock->file;
+	podr->fd_list[podr->cur_size].events=type;
+	podr->cur_size++;
 }
 
 /** Get the socket number (nb) */
@@ -94,8 +113,8 @@ lsocket* get_lsocket(lpodrum*podr,int nb){
 /** Delete the socket (nb) from the basement */
 int del_lsocket(lpodrum*podr,int nb){
 	if (podr->cur_size-1<nb) return -1;
-	printf("Heavy stuff not being done...\n");
-	return -1;
+	add_lclist(podr->del_list,nb);
+	return nb;
 }
 
 /** Purge the podrum before using it 
@@ -103,9 +122,22 @@ int del_lsocket(lpodrum*podr,int nb){
  * Note that it is NOT supposed to be user-trigerred
  */
 
-void purge_lpodrum(lpodrum*podrum){
-	podrum++;
-	return;
+void purge_lpodrum(lpodrum*podr){
+	int todel,torep;
+	while ((todel=pop_lclist(podr->del_list))!=LPOP_ERROR){
+		torep=--podr->cur_size;
+		if (todel==torep) torep--;
+
+		printf("Killing %s\n",podr->sockets[todel]->addr);
+		close_lsocket(podr->sockets[todel],1);
+
+		if (torep<0){
+			podr->sockets[todel]=NULL;
+		} else {
+			podr->fd_list[todel]=podr->fd_list[torep];
+			podr->sockets[todel]=podr->sockets[torep];
+		}
+	}
 }
 
 /** Return the list from all the socket ready to communicate 
@@ -115,33 +147,22 @@ void purge_lpodrum(lpodrum*podrum){
 int*listen_lpodrum(lpodrum*podr,int time){
 	int i,j=0;
 	int nbs,*ret;
-	fd_set set,*r_ser=NULL,*w_set=NULL,*e_set=NULL;
-	struct timeval timeout;
-	if (time>0) {timeout.tv_sec=time;timeout.tv_usec=0;}
-	
-	/* Initialize the file descriptor set. */
-	FD_ZERO (&set);
 	
 	/* Purge lpodrum */
 	purge_lpodrum(podr);
-	
-	/* Set the fdset */
-	for (i=0;i<(podr->cur_size);i+=1) FD_SET((get_lsocket(podr,i))->file,&set);
+		
+/*	printf("%d listeners beeing listened to\n",podr->cur_size);*/
+/*	for (i=0;i<podr->cur_size;i+=1) printf("%d ",podr->fd_list[i].fd);*/
+/*	printf("\n");*/
 	
 	/* Listen for awaiting requests */
-	switch(podr->type){
-		case 0: r_ser=&set; break;
-		case 1: w_set=&set;	break;
-		case 2: e_set=&set;	break;
-		default: OUT("Unhandled mode");
-	}
-	nbs=select(podr->cur_size*sizeof(set),r_ser,w_set,e_set,time>0?&timeout:NULL);
-	if (nbs<0) ERROR("Podrum select");
+	nbs=poll(podr->fd_list,podr->cur_size,time);
+	if (nbs<0) ERROR("Podrum poll");
 	
 	/* Create the return list */
 	ret=malloc(sizeof(int)*(nbs+1));
-	if (ret==NULL) ERROR("Return indexv malloc");
-	for (i=0;i<podr->cur_size/* && j<=nbs*/;i+=1) if (FD_ISSET(get_lsocket(podr,i)->file, &set)) ret[j++]=i;
+	if (ret==NULL) ERROR("Socket-indexes malloc");
+	for (i=0;i<podr->cur_size;i+=1) if (podr->fd_list[i].revents!=0) ret[j++]=i;
 	ret[j]=-1;
 	
 	return ret;
