@@ -57,6 +57,7 @@
 
 #define SIZE_BUFFER 1024			/**< Size of the socket carried message */
 #define SIZE_ADDR 108				/**< Size of the socket address */
+#define SIZE_PENDING 10
 
 /* Global variables */
 volatile int lpacket_rcv_bytes;	/**< Number of received bytes */
@@ -69,6 +70,7 @@ lsocket* make_lsocket	(char*);								/**< [Public]: Create new socket */ 				/*
 lsocket* make_from_socket(struct sockaddr*,int,int);			/**< [Privte] */
 void 	 open_lsocket	(lsocket*,int,int);						/**< [Public]: Open the socket for communications */
 void 	 connect_lsocket(lsocket*,lsocket*);					/**< [Public]: Connect the socket to another */
+lsocket* listen_lsocket	(lsocket*);								/**< [Public]: Listen to new incomming transmitions */
 void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */			/* TODO: Edit */
 void 	 close_lsocket	(lsocket*,int);							/**< [Public]: Terminate the connection */
 int 	 lsocket_send	(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages + edit */

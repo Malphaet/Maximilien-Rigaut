@@ -32,8 +32,7 @@
 /** @{ */
 
 /** Big sending function
- * @param recver_socket The socket to send through
- * @param sender_socket The sender's socket
+ * @param sender_socket The receiver's socket if not connected, sender's if connected (lsockets allow to connect even UDP sockets)
  * @param type_message The type of the message (msg_type definitions are pretty clear)
  * @param msg The message itself
  */
@@ -45,7 +44,7 @@ int message_send(lsocket*sender_socket,msg_type type_message,char*msg){
 }
 
 /** Send a message through a socket specifiying a different destination for one connection.
- * @param recver_socket The socket to send through
+ * @param dest The socket to send through
  * @param sender_socket The sender's socket
  * @param type_message The type of the message (msg_type definitions are pretty clear)
  * @param msg The message itself

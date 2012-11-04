@@ -31,7 +31,7 @@ $(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o $(OBJ)/lclists.o
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h $(INC)/structures.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-test: $(SRC)/test.c $(DEST)/$(EXEC)
+test: $(SRC)/test.c $(DEST)/$(EXEC) $(SRC)/test_inet.c $(SRC)/test_unix.c
 	$(CC) $(CFLAGS) -o $(OBJ)/test.o -c $<
 	$(CC) $(LDFLAGS) $(OBJ)/test.o -o $(BIN)/$@ -llsockets
 

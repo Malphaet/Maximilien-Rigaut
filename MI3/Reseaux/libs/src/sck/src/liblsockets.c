@@ -57,13 +57,13 @@ lsocket* make_lsocket(char*name){
  */
 void open_lsocket(lsocket*sck,int type,int mode){
 	struct sockaddr_un*sock_un; struct sockaddr_in*sock_in; 
-	char*tmp; int address=0;
-	struct hostent *result;
+	char*tmp;
+/*	struct hostent *result;*/
 	if ((sck->file=socket(type,mode,0))<0) ERROR("Socket opening was impossible");
 	
 	switch (type){
 		case AF_UNIX:
-			sock_un=malloc(sizeof(struct sockaddr_un*));
+			sock_un=malloc(sizeof(struct sockaddr_un));
 			if (sock_un==NULL) ERROR("Socket malloc");
 			
 			sock_un->sun_family=type;
@@ -73,27 +73,26 @@ void open_lsocket(lsocket*sck,int type,int mode){
 			sck->mode=mode; sck->type=type;
 			break;
 		case AF_INET:
-			sock_in=malloc(sizeof(struct sockaddr_in*));
+			sock_in=calloc(1,sizeof(struct sockaddr_in));
+			memset((char*)sock_in,0,sizeof(struct sockaddr_in));
 			if (sock_in==NULL) ERROR("Socket malloc");
 			
-			
-			/* Worse than horrible any suggestion is welcome */
-/*			sock_in->sin_family=type; */
-/*			tmp=strtok(sck->addr,"."); 	address=(address|atoi(tmp))<<8; printf("%s\n",tmp);*/
-/*			tmp=strtok(NULL,"."); 		address=(address|atoi(tmp))<<8; printf("%s\n",tmp);*/
-/*			tmp=strtok(NULL,"."); 		address=(address|atoi(tmp))<<8; printf("%s\n",tmp);*/
-/*			tmp=strtok(NULL,":"); 		address=(address|atoi(tmp)); printf("%s\n",tmp);*/
-/*			tmp=strtok(NULL,"");*/
-			
-			sock_in->sin_addr.s_addr = htonl(address);
+			tmp=strtok(sck->addr,":");
+			if (!strcmp(tmp," ")) sock_in->sin_addr.s_addr = htonl(INADDR_ANY);
+			else sock_in->sin_addr.s_addr=inet_addr(tmp);
+/*			else {*/
+/*				WHERE;*/
+/*				result = gethostbyname(tmp);*/
+/*    			if (result == NULL) OUT("Host cannot be found");*/
+/*    			memcpy((void *)&sock_in->sin_addr.s_addr,(void *)result->h_addr_list[0], result->h_length);*/
+/*    		}*/
+    		
+			tmp=strtok(NULL,"");
 			sock_in->sin_port=htons(atoi(tmp));
+			sock_in->sin_family=AF_INET;
+			printf("[%s:%d] %d\n",inet_ntoa(sock_in->sin_addr),ntohs(sock_in->sin_port),sck->file);
 			
-/*			if (result!=NULL) printf("%s %d\n",result->h_addr_list[0],result->h_length);	*/
-/*			else OUT("Given adress incorrect");*/
-/*			sa.sin_addr.s_addr = htonl();*/
-/*			sock_in->port=htons();*/
-			
-/*			sck->socket=(struct sockaddr*)sock_in;*/
+			sck->socket=(struct sockaddr*)sock_in;
 			sck->mode=mode; sck->type=type;
 			break;
 		default:
@@ -138,7 +137,7 @@ void bind_lsocket(lsocket*send_sck){
 			if (bind(send_sck->file,(struct sockaddr*)send_sck->socket,sizeof(*send_sck->socket))<0) ERROR("Binding socket failed");
 			break;
 		case AF_INET:
-			OUT("Unhandled mode");
+			if (bind(send_sck->file,(struct sockaddr*)send_sck->socket,sizeof(struct sockaddr_in))<0) ERROR("Binding socket failed");
 			break;
 		default:
 			OUT("Unhandled mode");
@@ -151,17 +150,55 @@ void bind_lsocket(lsocket*send_sck){
  * @param recv_sck the socket witch will be connected to
  */
 void connect_lsocket(lsocket*sck,lsocket*recv_sck){
+/*	struct sockaddr_in serv_addr;*/
 	switch(sck->mode){
 		case (SOCK_DGRAM):
 			sck->sendto=recv_sck;
 			break;
 		case (SOCK_STREAM):
-			OUT("Unhandled mode");
+/*			bzero((char *) &serv_addr, sizeof(serv_addr));*/
+/*			serv_addr.sin_family		= AF_INET;*/
+/*			serv_addr.sin_addr.s_addr	= inet_addr("127.0.0.1");*/
+/*			serv_addr.sin_port			= htons(8888);*/
+/*			printf("%d %d\n",sock_in->sin_family,AF_INET);*/
+			if (connect(sck->file,(struct sockaddr*)sck->socket,sizeof(struct sockaddr_in))<0) ERROR("Socket connection error");
 			break;
 		default:
 			OUT("Unhandled mode");
 	}
 }
+
+/** Listen to new incomming transmitions on socket
+ * On SOCK_DGRAM it's a lame receiving server
+ * On SOCK_STREAM it behave as the standard listening function
+ */
+lsocket* listen_lsocket	(lsocket*sock){
+	lsocket*new=NULL; lpacket*pck;
+	unsigned int size;
+	struct sockaddr_in*new_addr=NULL;
+	int new_fd;
+	
+	switch(sock->mode){
+		case (SOCK_DGRAM):
+			while (1){
+				pck=message_receive(sock,&new);
+				if (pck->type==msg_sync) break;
+			}
+			break;
+		case (SOCK_STREAM):
+			WHERE;
+			listen(sock->file,SIZE_PENDING);
+			size = sizeof(new_addr);
+			WHERE;
+			if ((new_fd=accept(sock->file,(struct sockaddr *)new_addr,&size))<0) ERROR("Accept error");
+			printf("%x\n",(new_addr->sin_addr.s_addr));
+			break;
+		default:
+			OUT("Unhandled Mode");
+			break;
+	}
+	return new;
+}								
 
 /** Close a socket connection
  * @param sck The socket to close
