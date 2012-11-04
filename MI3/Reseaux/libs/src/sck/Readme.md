@@ -1,5 +1,12 @@
-A little socket library {#mainpage}
+A little socket library  {#mainpage}
 ====================
+
+## Installation
+
+> + `make init`
+> + `make`
+> + `make doc`
+> + `make test`
 
 ## Introduction
 

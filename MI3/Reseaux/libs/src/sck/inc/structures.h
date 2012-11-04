@@ -65,7 +65,8 @@ typedef struct sk_addr{
 	int file;					/**< The file descriptor to use */
 	int type;					/**< The type of connection (AF_UNIX)*/
 	int mode;					/**< The mode of connection (SOCK_DGRAM) */
-	struct sockaddr* socket;	/** The linked socket */
+	struct sockaddr* socket;	/**< The linked socket */
+	struct sk_addr* sendto;		/**< The socket to send to */
 } lsocket;
 
 

@@ -37,18 +37,40 @@
  * @param type_message The type of the message (msg_type definitions are pretty clear)
  * @param msg The message itself
  */
-int message_send(lsocket*recver_socket,msg_type type_message,char*msg,lsocket*sender_socket){
+int message_send(lsocket*sender_socket,msg_type type_message,char*msg){
 	lpacket*pck=lpacket_forge(type_message,msg);
-	lpacket_send(recver_socket,pck,sender_socket);
+	lpacket_send(sender_socket,pck);
 	lpacket_drop(pck);
 	return lpacket_snd_bytes;
+}
+
+/** Send a message through a socket specifiying a different destination for one connection.
+ * @param recver_socket The socket to send through
+ * @param sender_socket The sender's socket
+ * @param type_message The type of the message (msg_type definitions are pretty clear)
+ * @param msg The message itself
+ * Note that this function only makes sense on SOCK_DGRAM mode.
+ */
+int message_send_to(lsocket*sender_socket,msg_type type_message,char*msg,lsocket*dest){
+	lsocket*old_d;
+	switch (sender_socket->mode){
+		case SOCK_DGRAM:
+			old_d=sender_socket->sendto;
+			connect_lsocket(sender_socket,dest);
+			message_send(sender_socket,type_message,msg);
+			connect_lsocket(sender_socket,old_d);
+			return lpacket_snd_bytes;
+		default:
+			OUT("Unhandled mode");
+			break;
+	}
 }
 
 /** Big receiving function 
  * @param recver_socket The socket used for receiving the message
  * @param sender_socket The socket with will contain the sender's socket (if binded)
  */
-lpacket*message_receive(lsocket*recver_socket,lsocket*sender_socket){
+lpacket*message_receive(lsocket*recver_socket,lsocket**sender_socket){
 	char*message=malloc(sizeof(char)*SIZE_BUFFER);
 	lsocket*recv; lpacket*pck;
 	if (message==NULL) ERROR("lPacket malloc");
@@ -56,7 +78,7 @@ lpacket*message_receive(lsocket*recver_socket,lsocket*sender_socket){
 	recv=lsocket_receive(recver_socket,message,SIZE_BUFFER);
 	pck=lpacket_request(message);
 	
-	if (sender_socket!=NULL) *sender_socket=*recv;
+	if (sender_socket!=NULL) *sender_socket=recv;
 	
 	return pck;
 }
@@ -64,7 +86,7 @@ lpacket*message_receive(lsocket*recver_socket,lsocket*sender_socket){
 /** Create new listening set (a basement: podrum in croatian) 
  * @param size Size of the future socket list
  */
-lpodrum* make_lpodrum (int size){
+lpodrum* make_lpodrum(int size){
 	lsocket**sock_list=malloc(sizeof(lsocket*)*size);
 	lpodrum*podr=malloc(sizeof(lpodrum));
 	struct pollfd*list=malloc(sizeof(struct pollfd)*size);
@@ -132,7 +154,7 @@ void purge_lpodrum(lpodrum*podr){
 		torep=--podr->cur_size;
 		if (todel==torep) torep--;
 
-		printf("Killing %s\n",podr->sockets[todel]->addr);
+		if (verbose) printf("Killing %s\n",podr->sockets[todel]->addr);
 		close_lsocket(podr->sockets[todel],1);
 
 		if (torep<0){

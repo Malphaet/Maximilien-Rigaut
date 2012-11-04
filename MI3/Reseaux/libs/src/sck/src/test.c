@@ -43,8 +43,8 @@ void child_process(){
 	
 	/* Handshake */
 	printf("[%d] Awake, sending message\n",getpid());
-	message_send(serv,msg_sync,"syn",chld);
-	pck=message_receive(chld,nserv);
+	message_send_to(chld,msg_sync,"syn",serv);
+	pck=message_receive(chld,&nserv);
 	printf("[%d] Server answered <%i> %s\n",getpid(),pck->type,pck->message);
 	close_lsocket(serv,0);
 	
@@ -52,10 +52,10 @@ void child_process(){
 	sleep(2);
 	
 	/* Send results */
-	message_send(nserv,msg_text,"Here I am",chld);
+	message_send_to(chld,msg_text,"Here I am",serv);
 	
 	/* Quit */
-	message_send(nserv,msg_kill,"Ciao",NULL);
+	message_send(nserv,msg_kill,"Ciao");
 	printf("[%d] Exiting\n",getpid());
 	
 	close_lsocket(nserv,0);
@@ -80,14 +80,13 @@ void father_process(){
 	while (1){
 		actives=listen_lpodrum(podr,-1);
 		for(i=0;actives[i]>=0;i++) {
-			/* Create a new socket to hold the caller's socket */
-			sndr=malloc(sizeof(lsocket));
-			if (sndr==NULL) ERROR("Receiving malloc");
-			
 			/* Wait for the communication */
 			printf("[Server] Waiting %s:%d\n",get_lsocket(podr,actives[i])->addr,get_lsocket(podr,actives[i])->file);
-			pck=message_receive(get_lsocket(podr,actives[i]),sndr);
-			printf("[Server] (%s:%d) sended <%i> %s\n", sndr->addr ,(int)sndr->file,pck->type,pck->message);
+			pck=message_receive(get_lsocket(podr,actives[i]),&sndr);
+			printf("[Server] (%s:%d) sended <%i> %s\n",
+				sndr?sndr->addr:get_lsocket(podr,actives[i])->addr,
+				sndr?(int)sndr->file:get_lsocket(podr,actives[i])->file,
+				pck->type,pck->message);
 			
 			/* 0 is the server address: new connections comes from here*/
 			if (i==0 && pck->type==msg_sync) {
@@ -99,12 +98,12 @@ void father_process(){
 				add_lsocket(podr,clnt,POLLIN);
 				
 				/* Send an answer with the new connection */
-				message_send(sndr,msg_recv,"ack",clnt);
+				message_send_to(clnt,msg_recv,"ack",sndr);
+				close_lsocket(sndr,0);
 			} else if (pck->type==msg_kill){
 				/* If he wants to die, well kill it */
 				del_lsocket(podr,actives[i]);
 			}
-			close_lsocket(sndr,0);
 		}
 		free(actives);
 	}
@@ -129,6 +128,12 @@ void test_lists(){
 	drop_lclist(liste);
 }
 
+void test_network_sockets(){
+	lsocket*serv=make_lsocket("127.0.0.1:2222");
+	open_lsocket(serv,AF_INET,SOCK_STREAM);
+/*	close_lsocket(serv);*/
+}
+
 void test_sockets(){
 	int p;
 	p=fork();
@@ -142,7 +147,8 @@ void test_sockets(){
 
 int main (){
 /*	test_lists();*/
-	test_sockets();
+/*	test_sockets();*/
+	test_network_sockets();
 	return 0;
 }
 

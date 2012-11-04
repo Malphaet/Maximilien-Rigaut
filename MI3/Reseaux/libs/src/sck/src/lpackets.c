@@ -85,12 +85,11 @@ char *lpacket_message(lpacket*pck){
  *
  * Note that you will NOT receive the number of readed packets.
  * You can access that information through ::lpacket_snd_bytes.
- * @param recv_sck Witch socket will receive the packet
- * @param send_sck Witch socket is the sender
+ * @param sck Witch socket will receive the packet (or the sender socket if connected)
  * @param pck The packet to send
  */
-void lpacket_send(lsocket*recv_sck,lpacket*pck,lsocket*send_sck){
-	lpacket_snd_bytes=lsocket_send(recv_sck,lpacket_message(pck),strlen(pck->message)+5,send_sck);
+void lpacket_send(lsocket*sck,lpacket*pck){
+	lpacket_snd_bytes=lsocket_send(sck,lpacket_message(pck),strlen(pck->message)+5);
 }
 
 /** Receive a packet through the given socket

@@ -29,8 +29,9 @@
  *
  * All the big wrapping functions user-kinda-friendly 
  */
-int 	 message_send			(lsocket*,msg_type,char*,lsocket*);	/**< [Public]: Send a message through the socket */
-lpacket* message_receive		(lsocket*,lsocket*);				/**< [Public]: Return the received socket, save the sending socket */
+int 	 message_send			(lsocket*,msg_type,char*);			/**< [Public]: Send a message through the socket */
+int 	 message_send_to		(lsocket*,msg_type,char*,lsocket*);	/**< [Public]: Send a message through the socket */
+lpacket* message_receive		(lsocket*,lsocket**);				/**< [Public]: Return the received socket, save the sending socket */
 
 lpodrum* make_lpodrum			(int);								/**< [Public]: Create new listening basement (podrum in croatian) */
 void	 add_lsocket			(lpodrum*,lsocket*,int);			/**< [Public]: Add a num socket to the basement */

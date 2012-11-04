@@ -31,15 +31,19 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 #include <string.h>
 #include <fcntl.h>
+
+#include <netdb.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
-#include <sys/time.h>
+
 #include <stropts.h>
 #include <poll.h>
 
@@ -64,10 +68,11 @@ volatile int lpacket_snd_bytes;	/**< Number of sended bytes */
 lsocket* make_lsocket	(char*);								/**< [Public]: Create new socket */ 				/* TODO: Improve & Check*/
 lsocket* make_from_socket(struct sockaddr*,int,int);			/**< [Privte] */
 void 	 open_lsocket	(lsocket*,int,int);						/**< [Public]: Open the socket for communications */
-void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */
+void 	 connect_lsocket(lsocket*,lsocket*);					/**< [Public]: Connect the socket to another */
+void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */			/* TODO: Edit */
 void 	 close_lsocket	(lsocket*,int);							/**< [Public]: Terminate the connection */
-int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/**< [Privte] */									/* TODO: Split messages */
-lsocket* lsocket_receive(lsocket*,char*,int);					/**< [Privte] */								 	/* TODO: Split messages */
+int 	 lsocket_send	(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages + edit */
+lsocket* lsocket_receive(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages + edit */
 
 /* High level communication: Deprecated, use Wrappers instead */
 int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/**< [Public]: Deprecated - Send message */

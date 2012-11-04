@@ -39,7 +39,7 @@ doc: .PHONY
 	doxygen Doxyfile
 
 edit:
-	gedit 2> /dev/null $(SRC)/* $(INC)/* makefile &
+	gedit 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
 	
 clean: 
 	rm -f $(OBJ)/*.o
