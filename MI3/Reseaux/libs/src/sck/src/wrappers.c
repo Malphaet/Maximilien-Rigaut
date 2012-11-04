@@ -19,9 +19,9 @@
  */
 
 #include "wrappers.h"
+/** @file wrappers.c Wrappers (code) */
 
 /* ========= Defines ==========*/
-
 
 /* ========= Functions ========*/
 
@@ -104,13 +104,17 @@ void add_lsocket(lpodrum*podr,lsocket*sock,int type){
 	podr->cur_size++;
 }
 
-/** Get the socket number (nb) */
+/** Get the socket number (nb) out of the listening basement */
 lsocket* get_lsocket(lpodrum*podr,int nb){
 	if (podr->cur_size-1<nb) OUT("Index out of range");
 	return podr->sockets[nb];
 }
 
-/** Delete the socket (nb) from the basement */
+/** Delete the socket (nb) from the basement
+ *
+ * Note that the deletion is not immediate. 
+ * It will take place when the listener is called again.
+ */
 int del_lsocket(lpodrum*podr,int nb){
 	if (podr->cur_size-1<nb) return -1;
 	add_lclist(podr->del_list,nb);
@@ -142,7 +146,7 @@ void purge_lpodrum(lpodrum*podr){
 
 /** Return the list from all the socket ready to communicate 
  * @param podr The lpodrum for the listening
- * @param timeout Timeout before forced return (-1 for disabling)
+ * @param time Timeout before forced return (-1 for disabling)
  */
 int*listen_lpodrum(lpodrum*podr,int time){
 	int i,j=0;
@@ -150,10 +154,6 @@ int*listen_lpodrum(lpodrum*podr,int time){
 	
 	/* Purge lpodrum */
 	purge_lpodrum(podr);
-		
-/*	printf("%d listeners beeing listened to\n",podr->cur_size);*/
-/*	for (i=0;i<podr->cur_size;i+=1) printf("%d ",podr->fd_list[i].fd);*/
-/*	printf("\n");*/
 	
 	/* Listen for awaiting requests */
 	nbs=poll(podr->fd_list,podr->cur_size,time);

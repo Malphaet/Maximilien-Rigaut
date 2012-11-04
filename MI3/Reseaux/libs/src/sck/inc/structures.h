@@ -18,6 +18,10 @@
  * along with liblsockets. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file structures.h Struture definitions
+ *
+ * All structures are defined and documented here
+ */
 
 #include "liblsockets.h"
 
@@ -26,9 +30,8 @@
 
 /* ========= Typedef ==========*/
 
-/** @enum Message type
- * @brief The type of message sent through the socket
- * 
+/** The type of message sent through the socket
+ *
  * Keep in mind that, as an enum, this will be integers during runtime.
  * Beside that, don't be afraid if you see strange int in your packets.
  * 
@@ -40,45 +43,45 @@
  * \li The tag [wrn] means the packet is reporting a warning
  * \li The tag [err] means the packet is reporting an error
  */
-enum msg_enum{
+typedef enum msg_enum{
 	msg_sync,	/**< [nfo]:[program] Program seeking first connection*/
 	msg_recv,	/**< [nfo]:[program] Message received */
 	msg_keep,	/**< [nfo]:[core] [TBI] Keep-alive */
+	msg_kill,	/**< [nfo]:[program] The connection is to be shutdown, process now */
 	msg_text,	/**< [msg]:[program] String sent */
 	msg_cont,	/**< [msg]:[program] Message is not finished ! */
 	msg_fnsh,	/**< [msg]:[program] Message is finished */
 	msg_warnings, 	/**< Not a message: Upper this value are warnings */
 	msg_wait,	/**< [wrn]:[core] [NYI] Server overloaded, wait */
 	msg_errors, 	/**< Not a message: Upper this value are errors */
-	msg_kill,	/**< [err]:[program] The connection is to be shutdown, process now */
 	msg_err,	/**< [err]:[core] [NYI] (Unknown) Error in received socket */
 	msg_die,	/**< [err]:[core] [NYI] Server died, will not process requests anymore */
 	msg_wtf		/**< [err]:[program] Request isn't the the one expected, I don't know what to do ! Abort ! Abort !*/
-}; typedef enum msg_enum msg_type;
+} msg_type;
 
-/**
- * @brief Small wraping socket
- */
-struct sk_addr{
+/**  Small wraping socket */
+typedef struct sk_addr{
 	char* addr;					/**< Path to the socket */
 	int file;					/**< The file descriptor to use */
 	int type;					/**< The type of connection (AF_UNIX)*/
 	int mode;					/**< The mode of connection (SOCK_DGRAM) */
 	struct sockaddr* socket;	/** The linked socket */
-}; typedef struct sk_addr lsocket;
+} lsocket;
 
-/**
- * @brief A raw packet, for abstraction purpose
+
+/** A raw packet, for abstraction purpose
  *
- * Note that a socket MUST be newline free, as it is used to end packets (see packet_forge() for details)
+ * Note that a message MUST be newline free, as it is used to end packets 
+ * @see lpacket_forge() for more detailed information about socket creation.
  */
-struct pk_struct {
+typedef struct pk_struct {
 	msg_type type;		/**< The request being done, important for having normalised communications */
 	char*message;		/**< The body of the message, can be empty */
-}; typedef struct pk_struct lpacket;
+} lpacket;
 
-/** 
- * @brief A chanined list structure
+/** A chained list structure
+ *
+ * Made for handling sockets pending removal
  */
 
 typedef struct int_chained_list {
@@ -86,11 +89,9 @@ typedef struct int_chained_list {
 	struct int_chained_list*next;
 } lclist;
 
-/**
- * @brief A basement made of sockets
+/** A basement made of sockets
  *
  * The name podrum is croatian for basement.
- *
  */
 typedef struct sk_podr {
 	int 		cur_size;		/**< Current size of the basement */ 

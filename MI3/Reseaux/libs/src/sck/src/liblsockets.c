@@ -20,13 +20,14 @@
  
 #include "liblsockets.h"
 
+/** @file liblsockets.c Socket Library (code) */
 
 /* ========= Defines ==========*/
 
-int verbose; /*< Verbosity of the program */
+int verbose; /**< Verbosity of the program */
 
 /* ========= Functions ========*/
-/** \defgroup liblsockets
+/** \defgroup liblsockets Little Socket Library
  * A very small lib, made mainly to avoid direct socket handling
  * 
  */
@@ -49,8 +50,9 @@ lsocket* make_lsocket(char*name){
 }
 
 /** Open the connection of the given socket 
+ * @param sck The socket to open
  * @param type Type of the connection AF_UNIX or other
- * @param more Mode of the connection SOCK_DGRAM or other
+ * @param mode Mode of the connection SOCK_DGRAM or other
  */
 void open_lsocket(lsocket*sck,int type,int mode){
 	struct sockaddr_un*sock_un;
@@ -73,9 +75,10 @@ void open_lsocket(lsocket*sck,int type,int mode){
 	}
 }
 
-/** Create a connection from the given socket and informations 
+/** Create a connection from the given socket and informations
+ * @param sock The socket received durring incoming transmission
  * @param type Type of the connection AF_UNIX or other
- * @param more Mode of the connection SOCK_DGRAM or other
+ * @param mode Mode of the connection SOCK_DGRAM or other
  */
  
 lsocket*make_from_socket(struct sockaddr*sock,int type,int mode){
@@ -84,7 +87,6 @@ lsocket*make_from_socket(struct sockaddr*sock,int type,int mode){
 	switch (type){
 		case AF_UNIX:
 			ret_sck=make_lsocket(((struct sockaddr_un*)sock)->sun_path);
-/*			printf("%s\n",ret_sck->addr);*/
 			break;
 		case AF_INET:
 			OUT("Unhandled mode");
@@ -108,7 +110,8 @@ void bind_lsocket(lsocket*send_sck){
 }
 
 /** Close a socket connection
- * @param Shutdown shall I shutdown or just free the memory ?
+ * @param sck The socket to close
+ * @param shutdown Shall I shutdown or just free the memory ?
  */
 void close_lsocket(lsocket*sck,int shutdown){
 	switch (sck->type){
@@ -155,15 +158,34 @@ lsocket* lsocket_receive(lsocket*sck, char*message,int bytes){
 		case SOCK_DGRAM:
 			lpacket_rcv_bytes=recvfrom(sck->file,message,bytes,0,sock,&bsize);
 			if (lpacket_rcv_bytes<0) {
-				printf("Receiving packet from %s\n",sck->addr);
+				printf("Error receiving packet from %s\n",sck->addr);
 				ERROR("Reciving packet");
 			}
 			if (sock!=NULL) recv_sck=make_from_socket((struct sockaddr*)sock,sck->type,sck->mode);
-
 			return recv_sck;
 		default:
 			lpacket_rcv_bytes=read(sck->file,message,bytes);
 			return NULL;
 	}
 }
+
+/** Sending a message, with less information to provide
+ * @deprecated Only for debug purpose, a lot of informations can't be sent that way */
+int lsocket_message_send(lsocket*sck,msg_type type_message,char *message){
+	lpacket*pck=lpacket_forge(type_message,message);
+	lpacket_send(sck,pck,NULL);
+	lpacket_drop(pck);
+	return lpacket_snd_bytes;
+}
+
+/**  Receive a message with less information to provide,
+ * note that it is advised to use a packet instead.
+ * @deprecated Only for debug purpose, a lot of information is lost in the process.
+ */
+char *lsocket_message_receive(lsocket*sck){
+	char*message=malloc(sizeof(char)*SIZE_BUFFER);
+	lsocket_receive(sck,message,SIZE_BUFFER);
+	return message;
+}
+
 /**@}*/

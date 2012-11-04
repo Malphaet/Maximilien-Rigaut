@@ -20,18 +20,20 @@
 
 #include "liblsockets.h"
 
+/** @file lclists.h Chained List Library (header) */
+
 #ifndef __LLISTS_H__
 #define __LLISTS_H__
 
 /* ======== Prototype =========*/
-#define DATATYPE int
-#define LPOP_ERROR -1			/**< Extremely important for automation */
+#define DATATYPE int			/**< Data handled by the clists */
+#define LPOP_ERROR -1			/**< What pop_lclist() should return. Extremely important for automation. */
 
-lclist*	 make_lclist			();									/* [Public]: Make a new chained list */
-void	 drop_lclist			(lclist*);							/* [Public]: Drop the list */
-void	 add_lclist				(lclist*,DATATYPE);					/* [Public]: Add an element to the list */
-DATATYPE pop_lclist				(lclist*);							/* [Public]: Delete the first element of the list */
-int		 len_lclist				(lclist*);							/* [Public]: Lenght of the list */
+lclist*	 make_lclist			();									/**< [Public]: Make a new chained list */
+void	 drop_lclist			(lclist*);							/**< [Public]: Drop the list */
+void	 add_lclist				(lclist*,DATATYPE);					/**< [Public]: Add an element to the list */
+DATATYPE pop_lclist				(lclist*);							/**< [Public]: Delete the first element of the list */
+int		 len_lclist				(lclist*);							/**< [Public]: Lenght of the list */
 
 #endif /* __LLISTS_H__ */
 

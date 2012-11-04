@@ -21,6 +21,11 @@
 #ifndef __LIBLSOCKETS_H__
 #define __LIBLSOCKETS_H__
 
+/** @file liblsockets.h Socket Library (header)
+ *
+ * Little socket library, handle the basic task of creating, opening, binding, sending and receiving sockets 
+ */
+
 /* ========= Includes =========*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,29 +51,26 @@
 
 /* ========= Defines ==========*/
 
-#define SIZE_BUFFER 1024
-#define SIZE_ADDR 108
+#define SIZE_BUFFER 1024			/**< Size of the socket carried message */
+#define SIZE_ADDR 108				/**< Size of the socket address */
 
 /* Global variables */
-volatile int lpacket_rcv_bytes; /** Number of received bytes */
-volatile int lpacket_snd_bytes; /** Number of sended bytes */
+volatile int lpacket_rcv_bytes;	/**< Number of received bytes */
+volatile int lpacket_snd_bytes;	/**< Number of sended bytes */
 
 /* ======== Prototype =========*/
 
 /* Low level communication */
-lsocket* make_lsocket	(char*);								/* [Public]: Create new socket */ 				/* TODO: Improve */
-void 	 open_lsocket	(lsocket*,int,int);						/* [Privte] */
-void	 bind_lsocket	(lsocket*);								/* [Public]: Bind the socket for answers */
-void 	 close_lsocket	(lsocket*,int);							/* [Public]: Terminate the connection */
-int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/* [Privte] */									/* TODO: Split messages */
-lsocket* lsocket_receive(lsocket*,char*,int);					/* [Privte] */								 	/* TODO: Split messages */
-/* List */
-/* Basements and chinese -> list*/
+lsocket* make_lsocket	(char*);								/**< [Public]: Create new socket */ 				/* TODO: Improve & Check*/
+lsocket* make_from_socket(struct sockaddr*,int,int);			/**< [Privte] */
+void 	 open_lsocket	(lsocket*,int,int);						/**< [Public]: Open the socket for communications */
+void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */
+void 	 close_lsocket	(lsocket*,int);							/**< [Public]: Terminate the connection */
+int 	 lsocket_send	(lsocket*,char*,int,lsocket*);			/**< [Privte] */									/* TODO: Split messages */
+lsocket* lsocket_receive(lsocket*,char*,int);					/**< [Privte] */								 	/* TODO: Split messages */
 
-/* High level communication */
-int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/* [Public]: DPR - Send message */
-char*	 lsocket_message_receive	(lsocket*);					/* [Public]: DPR - Return a raw message */
+/* High level communication: Deprecated, use Wrappers instead */
+int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/**< [Public]: Deprecated - Send message */
+char*	 lsocket_message_receive	(lsocket*);					/**< [Public]: Deprecated - Return a raw message */
 
 #endif /* __liblsockets_H__ */
-
-

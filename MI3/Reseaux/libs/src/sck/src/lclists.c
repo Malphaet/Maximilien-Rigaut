@@ -20,6 +20,13 @@
 
 #include "lclists.h"
 
+/** @file lclists.c Chained List Library (code) */
+
+/** \defgroup Clists Chained lists
+ * Barely part of the project, they are needed to handle the sockets pending deletion
+ */
+/** @{ */
+
 /** Make a new chained list */
 lclist* make_lclist(){
 	lclist*l=malloc(sizeof(lclist));
@@ -61,3 +68,4 @@ int len_lclist(lclist*l){
 	while ((curr=curr->next)!=NULL) ln++;
 	return ln;
 }
+/** @}*/

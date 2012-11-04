@@ -25,16 +25,19 @@
 
 /* ======== Prototype =========*/
 
-/* Wrappers */
-int 	 message_send			(lsocket*,msg_type,char*,lsocket*);	/* [Public]: Send a message through the socket */
-lpacket* message_receive		(lsocket*,lsocket*);				/* [Public]: Return the received socket, save the sending socket */
+/** @file wrappers.h Wrappers (headers)
+ *
+ * All the big wrapping functions user-kinda-friendly 
+ */
+int 	 message_send			(lsocket*,msg_type,char*,lsocket*);	/**< [Public]: Send a message through the socket */
+lpacket* message_receive		(lsocket*,lsocket*);				/**< [Public]: Return the received socket, save the sending socket */
 
-lpodrum* make_lpodrum			(int);								/* [Public]: Create new listening basement (podrum in croatian) */
-void	 add_lsocket			(lpodrum*,lsocket*,int);			/* [Public]: Add a num socket to the basement */
-lsocket* get_lsocket			(lpodrum*,int);						/* [Public]: Get the socket number */
-int		 del_lsocket			(lpodrum*,int);						/* [Public]: Delete the socket (int) from the basement */
-int* 	 listen_lpodrum			(lpodrum*,int timeout);				/* [Public]: Return the list from all the socket ready to communicate */
-void	 purge_lpodrum			(lpodrum*);							/* [Prvate]: Purge the lpodrum before usage */
+lpodrum* make_lpodrum			(int);								/**< [Public]: Create new listening basement (podrum in croatian) */
+void	 add_lsocket			(lpodrum*,lsocket*,int);			/**< [Public]: Add a num socket to the basement */
+lsocket* get_lsocket			(lpodrum*,int);						/**< [Public]: Get the socket number */
+int		 del_lsocket			(lpodrum*,int);						/**< [Public]: Delete the socket (int) from the basement */
+int* 	 listen_lpodrum			(lpodrum*,int timeout);				/**< [Public]: Return the list from all the socket ready to communicate */
+void	 purge_lpodrum			(lpodrum*);							/**< [Prvate]: Purge the lpodrum before usage */
 
 #endif /* __WRAPPERS_H__ */
 

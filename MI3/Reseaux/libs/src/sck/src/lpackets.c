@@ -20,16 +20,17 @@
 
 #include "lpackets.h"
 
+/**@file lpackets.c Packet Library (code) */
+
 /* ========= Defines ==========*/
 
 /* ========= Functions ========*/
-/** \defgroup Packetlib 
+/** \defgroup Packetlib Little Packet Library
  * Packetlib is a small lib build ontop of liblsockets.
  * 
  * It is used extensively to avoid any interference with the implementation of the sockets.
- * The main functions you should use for communication are the wrappers message_send() message_receive().
  *
- * However, the following will allow you to handle basic communication:
+ * The following will allow you to handle basic communication:
  * \li lpacket_forge()
  * \li lpacket_send()
  * \li lpacket_drop()
@@ -39,23 +40,6 @@
  * \li lpacket_receive()
  * @{
  */
-
-/** Sending a message, with less information to provide */
-int lsocket_message_send(lsocket*sck,msg_type type_message,char *message){
-	lpacket*pck=lpacket_forge(type_message,message);
-	lpacket_send(sck,pck,NULL);
-	lpacket_drop(pck);
-	return lpacket_snd_bytes;
-}
-
-/** [Deprecated] Receive a message with less information to provide,
- * note that it is advised to use a packet instead.
- */
-char *lsocket_message_receive(lsocket*sck){
-	char*message=malloc(sizeof(char)*SIZE_BUFFER);
-	lsocket_receive(sck,message,SIZE_BUFFER);
-	return message;
-}
 
 /** Forge a packet with the given information.
  *
@@ -87,7 +71,8 @@ lpacket*lpacket_request(char*message){
 	return lpacket_forge(type,pck_message);
 }
 
-/** Create a message from given packet. */
+/** DPR - Create a message from given packet. 
+ * @deprecated Use the communications wrappers instead*/
 char *lpacket_message(lpacket*pck){
 	int size=strlen(pck->message)+5;
 	char*message=malloc(sizeof(char)*size);
@@ -99,9 +84,10 @@ char *lpacket_message(lpacket*pck){
 /** Send a packet through the given socket.
  *
  * Note that you will NOT receive the number of readed packets.
- * You can access that information through ::packet_snd_bytes.
+ * You can access that information through ::lpacket_snd_bytes.
  * @param recv_sck Witch socket will receive the packet
  * @param send_sck Witch socket is the sender
+ * @param pck The packet to send
  */
 void lpacket_send(lsocket*recv_sck,lpacket*pck,lsocket*send_sck){
 	lpacket_snd_bytes=lsocket_send(recv_sck,lpacket_message(pck),strlen(pck->message)+5,send_sck);
@@ -118,6 +104,6 @@ lpacket*lpacket_receive(lsocket*sck){
 	lsocket_receive(sck,message,SIZE_BUFFER);
 	return lpacket_request(message);
 }
-/** }@ */
+/** @} */
 
 

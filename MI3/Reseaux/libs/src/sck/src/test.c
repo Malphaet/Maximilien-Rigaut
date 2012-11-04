@@ -20,6 +20,11 @@
 
 #include "liblsockets.h"
 
+/** @file test.c Tests
+ *
+ * A little test program, uncomment the part you wanna test on the main functions, and compile it with make test
+ */
+
 void child_process(){
 	char name[101];
 	lsocket*chld,*nserv=malloc(sizeof(lsocket)),*serv=make_lsocket("tmp/serv");
@@ -49,6 +54,7 @@ void child_process(){
 	/* Send results */
 	message_send(nserv,msg_text,"Here I am",chld);
 	
+	/* Quit */
 	message_send(nserv,msg_kill,"Ciao",NULL);
 	printf("[%d] Exiting\n",getpid());
 	
@@ -74,10 +80,12 @@ void father_process(){
 	while (1){
 		actives=listen_lpodrum(podr,-1);
 		for(i=0;actives[i]>=0;i++) {
+			/* Create a new socket to hold the caller's socket */
 			sndr=malloc(sizeof(lsocket));
 			if (sndr==NULL) ERROR("Receiving malloc");
 			
-			printf("[Server] Waiting at %s:%d (%d)\n",get_lsocket(podr,actives[i])->addr,get_lsocket(podr,actives[i])->file,actives[i]);
+			/* Wait for the communication */
+			printf("[Server] Waiting %s:%d\n",get_lsocket(podr,actives[i])->addr,get_lsocket(podr,actives[i])->file);
 			pck=message_receive(get_lsocket(podr,actives[i]),sndr);
 			printf("[Server] (%s:%d) sended <%i> %s\n", sndr->addr ,(int)sndr->file,pck->type,pck->message);
 			
@@ -85,14 +93,15 @@ void father_process(){
 			if (i==0 && pck->type==msg_sync) {
 				/* Create particular socket for him (note that it is generally not usefull)*/
 				sprintf(name,"tmp/nw_clnt_%d",nb_clients++);
-				
 				clnt=make_lsocket(name);
 				open_lsocket(clnt,AF_UNIX,SOCK_DGRAM);
 				bind_lsocket(clnt);
 				add_lsocket(podr,clnt,POLLIN);
 				
+				/* Send an answer with the new connection */
 				message_send(sndr,msg_recv,"ack",clnt);
 			} else if (pck->type==msg_kill){
+				/* If he wants to die, well kill it */
 				del_lsocket(podr,actives[i]);
 			}
 			close_lsocket(sndr,0);

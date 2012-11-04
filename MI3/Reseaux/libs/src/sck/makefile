@@ -43,6 +43,7 @@ edit:
 	
 clean: 
 	rm -f $(OBJ)/*.o
+	rm -f $(TMP)/*
 	
 cleaner: clean
 	rm -f $(BIN)/*
