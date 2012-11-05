@@ -56,9 +56,9 @@ lsocket* make_lsocket(char*name){
  * @param mode Mode of the connection SOCK_DGRAM or other
  */
 void open_lsocket(lsocket*sck,int type,int mode){
-	struct sockaddr_un*sock_un; struct sockaddr_in*sock_in; 
+	struct sockaddr_un*sock_un; struct sockaddr_in *sock_in; 
 	char*tmp;
-/*	struct hostent *result;*/
+	struct hostent *server;
 	if ((sck->file=socket(type,mode,0))<0) ERROR("Socket opening was impossible");
 	
 	switch (type){
@@ -74,26 +74,24 @@ void open_lsocket(lsocket*sck,int type,int mode){
 			break;
 		case AF_INET:
 			sock_in=calloc(1,sizeof(struct sockaddr_in));
-			memset((char*)sock_in,0,sizeof(struct sockaddr_in));
 			if (sock_in==NULL) ERROR("Socket malloc");
 			
 			tmp=strtok(sck->addr,":");
 			if (!strcmp(tmp," ")) sock_in->sin_addr.s_addr = htonl(INADDR_ANY);
-			else sock_in->sin_addr.s_addr=inet_addr(tmp);
-/*			else {*/
-/*				WHERE;*/
-/*				result = gethostbyname(tmp);*/
-/*    			if (result == NULL) OUT("Host cannot be found");*/
-/*    			memcpy((void *)&sock_in->sin_addr.s_addr,(void *)result->h_addr_list[0], result->h_length);*/
-/*    		}*/
+			else{
+				server=gethostbyname(tmp);
+				if (server == NULL) OUT("Host cannot be found");
+    			memcpy((char *)&(sock_in->sin_addr.s_addr),(char *)server->h_addr_list[0], server->h_length);
+			}
+/*			else sock_in->sin_addr.s_addr=inet_addr(tmp); */
     		
 			tmp=strtok(NULL,"");
 			sock_in->sin_port=htons(atoi(tmp));
 			sock_in->sin_family=AF_INET;
-			printf("[%s:%d] %d\n",inet_ntoa(sock_in->sin_addr),ntohs(sock_in->sin_port),sck->file);
 			
 			sck->socket=(struct sockaddr*)sock_in;
 			sck->mode=mode; sck->type=type;
+			sck->sendto=sck;
 			break;
 		default:
 			OUT("Unhandled mode");
@@ -117,7 +115,6 @@ lsocket*make_from_socket(struct sockaddr*sock,int type,int mode){
 			break;
 		case AF_INET:
 			OUT("Unhandled mode");
-/*			ret_sck=make_lsocket(((struct sockaddr_in*)sock)->sin_addr);*/
 			break;
 		default:
 			OUT("Unhandled mode");
@@ -147,20 +144,14 @@ void bind_lsocket(lsocket*send_sck){
 
 /** Connect the sending socket to another socket
  * @param sck The socket to be connected
- * @param recv_sck the socket witch will be connected to
+ * @param recv_sck the socket witch will be connected to, UDP only, the parameter will be ignored on tcp
  */
 void connect_lsocket(lsocket*sck,lsocket*recv_sck){
-/*	struct sockaddr_in serv_addr;*/
 	switch(sck->mode){
 		case (SOCK_DGRAM):
 			sck->sendto=recv_sck;
 			break;
 		case (SOCK_STREAM):
-/*			bzero((char *) &serv_addr, sizeof(serv_addr));*/
-/*			serv_addr.sin_family		= AF_INET;*/
-/*			serv_addr.sin_addr.s_addr	= inet_addr("127.0.0.1");*/
-/*			serv_addr.sin_port			= htons(8888);*/
-/*			printf("%d %d\n",sock_in->sin_family,AF_INET);*/
 			if (connect(sck->file,(struct sockaddr*)sck->socket,sizeof(struct sockaddr_in))<0) ERROR("Socket connection error");
 			break;
 		default:
@@ -172,11 +163,10 @@ void connect_lsocket(lsocket*sck,lsocket*recv_sck){
  * On SOCK_DGRAM it's a lame receiving server
  * On SOCK_STREAM it behave as the standard listening function
  */
-lsocket* listen_lsocket	(lsocket*sock){
+lsocket* listen_lsocket(lsocket*sock){
 	lsocket*new=NULL; lpacket*pck;
-	unsigned int size;
+	unsigned int size; char*name;
 	struct sockaddr_in*new_addr=NULL;
-	int new_fd;
 	
 	switch(sock->mode){
 		case (SOCK_DGRAM):
@@ -186,12 +176,20 @@ lsocket* listen_lsocket	(lsocket*sock){
 			}
 			break;
 		case (SOCK_STREAM):
-			WHERE;
+			new=malloc(sizeof(struct sockaddr_in));
+			new_addr=malloc(sizeof(struct sockaddr));
+			name=malloc(sizeof(char)*SIZE_ADDR);
+			size=sizeof(struct sockaddr_in);
+			if (new==NULL) ERROR("Returned socket malloc");
+			if (new_addr==NULL) ERROR("Listening socket malloc");
+			
 			listen(sock->file,SIZE_PENDING);
-			size = sizeof(new_addr);
-			WHERE;
-			if ((new_fd=accept(sock->file,(struct sockaddr *)new_addr,&size))<0) ERROR("Accept error");
-			printf("%x\n",(new_addr->sin_addr.s_addr));
+			if ((new->file=accept(sock->file,(struct sockaddr*)new_addr,&size))<0) ERROR("Accept error");
+			if (new_addr==NULL) OUT("Error receiving socket");
+			sprintf(name,"%s:%d",inet_ntoa(new_addr->sin_addr),ntohs(new_addr->sin_port));
+						
+			new->type=sock->type; new->mode=sock->mode;
+			new->addr=name; new->sendto=new;
 			break;
 		default:
 			OUT("Unhandled Mode");
@@ -202,15 +200,15 @@ lsocket* listen_lsocket	(lsocket*sock){
 
 /** Close a socket connection
  * @param sck The socket to close
- * @param shutdown Shall I shutdown or just free the memory ?
+ * @param shutd How to shutdown, on AF_UNIX it is freeing the memory (0) or total shutdown (1) on AF_INET it is from simple shutdown (0) to total one (2);
  */
-void close_lsocket(lsocket*sck,int shutdown){
+void close_lsocket(lsocket*sck,int shutd){
 	switch (sck->type){
 		case AF_UNIX:
-			if (shutdown) unlink(sck->addr);
+			if (shutd) unlink(sck->addr);
 			break;
 		case AF_INET:
-			OUT("Unhandled mode");
+			shutdown(sck->file,shutd);
 			break;
 		default:
 			OUT("Unhandled mode");
@@ -225,26 +223,24 @@ void close_lsocket(lsocket*sck,int shutdown){
 /** Send string to the server 
  * @param socket if connect_lsocket() wasn't used it's considered to be the receiver
  * If it was, it's considered to be the sender's socket and lsocket->sendto is considered to be the destination.
+ * Nb: On connected sockets, the sender is also the receiver, and sendo link to the socket.
  * @param message The message itself
  * @param bytes Length of the message (in bytes)
  */
 int lsocket_send(lsocket*socket,char*message,int bytes){
-	int write_to;
+	int write_to=socket->file;
 	lsocket*recver_socket;
-	if (socket->sendto!=NULL) {
-		recver_socket=socket->sendto;
-		write_to=socket->file;
-	} else {
-		recver_socket=socket;
-		write_to=socket->file;
-	}
+	if (socket->sendto!=NULL) recver_socket=socket->sendto;
+	else recver_socket=socket;
 	
-	switch (recver_socket->mode){
-		case SOCK_DGRAM:
+	switch (recver_socket->type){
+		case SOCK_DGRAM:		
 			return sendto(write_to,message,bytes,0,
 				(struct sockaddr*)recver_socket->socket,
 				sizeof(((struct sockaddr_un*)recver_socket->socket)->sun_family)
 				+strlen(((struct sockaddr_un*)recver_socket->socket)->sun_path));
+		case SOCK_STREAM:
+			return send(socket->file,message,bytes,0);
 		default:
 			return write(write_to,message,bytes);
 	}
@@ -254,6 +250,7 @@ int lsocket_send(lsocket*socket,char*message,int bytes){
 lsocket* lsocket_receive(lsocket*sck, char*message,int bytes){
 	unsigned int bsize=sizeof(struct sockaddr_un);
 	lsocket*recv_sck=NULL;
+	
 	struct sockaddr*sock=calloc(1,sizeof(struct sockaddr));
 	
 	switch (sck->mode){
@@ -265,6 +262,13 @@ lsocket* lsocket_receive(lsocket*sck, char*message,int bytes){
 			}
 			if (sock!=NULL) recv_sck=make_from_socket((struct sockaddr*)sock,sck->type,sck->mode);
 			return recv_sck;
+		case SOCK_STREAM:
+			lpacket_rcv_bytes=recv(sck->file,message,bytes,0);
+			if (lpacket_rcv_bytes<0) {
+				printf("Error receiving packet from %s\n",sck->addr);
+				ERROR("Reciving packet");
+			}
+			return sck->sendto;
 		default:
 			lpacket_rcv_bytes=read(sck->file,message,bytes);
 			return NULL;

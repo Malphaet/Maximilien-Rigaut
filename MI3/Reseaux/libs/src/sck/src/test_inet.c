@@ -23,15 +23,22 @@ void inet_chld_process(){
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
 	sleep(1);
 	connect_lsocket(serv,NULL);
+	message_send(serv,msg_text,"MOOOOO");
+	close_lsocket(serv,2);
 	return;
 }
 
 void inet_fath_process(){
-	lsocket*serv=make_lsocket(" :8888");
+	int optval=1;
+	lpacket*pck;
+	lsocket*clnt,*serv=make_lsocket(" :8888");
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
+	setsockopt(serv->file,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int));
 	bind_lsocket(serv);
-	listen_lsocket(serv);
-				
+	clnt=listen_lsocket(serv);
+	pck=message_receive(clnt,NULL);
+	printf("[%s] %d %s\n",clnt->addr,pck->type,pck->message);
+	close_lsocket(serv,2);
 	return;
 }
 

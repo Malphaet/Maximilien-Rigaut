@@ -15,6 +15,7 @@ The main goal was to provide a litte degree of abstraction,
 hence allowing to handle @ref lpacket instead of raw text, @ref lsocket instead of structures.
 
 Some other tools like the @ref lpodrum are meant to provide an automated version of the poll() function.
+Providing a complete tool to handle all the incoming connections.
 
 ## Modules
 
@@ -48,10 +49,25 @@ The following function allow you to handle the task of waiting for incomming/out
 + @ref listen_lpodrum 	Return the list from all the socket ready to communicate
 
 ## Todo
+
+### Important
++ make functions thread_safe
+
+### Cosmetic
+
+### Test:
++ listen_lsocket: Done
++ close_lsocket: Done
++ lsocket_send: Done
++ lsocket_receive: Done
+
++ lsocket_message_send: Done
++ lsocket_message_receive: Done
+
+### Done
 + SOCK_INET implementation
 + make_from_lsocket corrections
 + listen_lsocket() listen for new sockets
-
 
 [Modules]: 	./modules.html 				"List of all modules"
 [Wrappers]: ./group___wrappers.html 	"Comunication managers"

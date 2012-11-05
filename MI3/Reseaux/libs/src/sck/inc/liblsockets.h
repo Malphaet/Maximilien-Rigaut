@@ -66,15 +66,15 @@ volatile int lpacket_snd_bytes;	/**< Number of sended bytes */
 /* ======== Prototype =========*/
 
 /* Low level communication */
-lsocket* make_lsocket	(char*);								/**< [Public]: Create new socket */ 				/* TODO: Improve & Check*/
+lsocket* make_lsocket	(char*);								/**< [Public]: Create new socket */ 				/* TODO: Improve */
 lsocket* make_from_socket(struct sockaddr*,int,int);			/**< [Privte] */
 void 	 open_lsocket	(lsocket*,int,int);						/**< [Public]: Open the socket for communications */
 void 	 connect_lsocket(lsocket*,lsocket*);					/**< [Public]: Connect the socket to another */
 lsocket* listen_lsocket	(lsocket*);								/**< [Public]: Listen to new incomming transmitions */
-void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */			/* TODO: Edit */
+void	 bind_lsocket	(lsocket*);								/**< [Public]: Bind the socket for answers */
 void 	 close_lsocket	(lsocket*,int);							/**< [Public]: Terminate the connection */
-int 	 lsocket_send	(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages + edit */
-lsocket* lsocket_receive(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages + edit */
+int 	 lsocket_send	(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages */
+lsocket* lsocket_receive(lsocket*,char*,int);					/**< [Privte] */							/* TODO: Split messages */
 
 /* High level communication: Deprecated, use Wrappers instead */
 int 	 lsocket_message_send		(lsocket*,msg_type,char*);	/**< [Public]: Deprecated - Send message */
