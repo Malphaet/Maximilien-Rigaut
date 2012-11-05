@@ -1,0 +1,15 @@
+# Binaries ignores
+bin/
+lib/
+corrector
+
+# Std ignore
+*.so
+*.o
+*.ar
+*.a
+*.zip
+*.tar
+
+# Uselessness ignore
+*.pdf
