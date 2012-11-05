@@ -160,6 +160,7 @@ void connect_lsocket(lsocket*sck,lsocket*recv_sck){
 }
 
 /** Listen to new incomming transmitions on socket
+ * 
  * On SOCK_DGRAM it's a lame receiving server
  * On SOCK_STREAM it behave as the standard listening function
  */
@@ -170,10 +171,9 @@ lsocket* listen_lsocket(lsocket*sock){
 	
 	switch(sock->mode){
 		case (SOCK_DGRAM):
-			while (1){
+			do{
 				pck=message_receive(sock,&new);
-				if (pck->type==msg_sync) break;
-			}
+			} while (pck->type!=msg_sync)
 			break;
 		case (SOCK_STREAM):
 			new=malloc(sizeof(struct sockaddr_in));
@@ -233,8 +233,8 @@ int lsocket_send(lsocket*socket,char*message,int bytes){
 	if (socket->sendto!=NULL) recver_socket=socket->sendto;
 	else recver_socket=socket;
 	
-	switch (recver_socket->type){
-		case SOCK_DGRAM:		
+	switch (recver_socket->mode){
+		case SOCK_DGRAM:
 			return sendto(write_to,message,bytes,0,
 				(struct sockaddr*)recver_socket->socket,
 				sizeof(((struct sockaddr_un*)recver_socket->socket)->sun_family)

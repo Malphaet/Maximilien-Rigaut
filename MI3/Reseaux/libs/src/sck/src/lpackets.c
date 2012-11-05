@@ -87,7 +87,6 @@ char *lpacket_message(lpacket*pck){
  * You can access that information through ::lpacket_snd_bytes.
  * @param sck Witch socket will receive the packet (or the sender socket if connected)
  * @param pck The packet to send
- * @deprecated Use lsocket_send() directly
  */
 void lpacket_send(lsocket*sck,lpacket*pck){
 	lpacket_snd_bytes=lsocket_send(sck,lpacket_message(pck),strlen(pck->message)+5);

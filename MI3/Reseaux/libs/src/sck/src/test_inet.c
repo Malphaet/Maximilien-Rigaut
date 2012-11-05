@@ -28,16 +28,38 @@ void inet_chld_process(){
 	return;
 }
 
+void inet_new_clnt_process(lsocket*sck){
+	int p;
+	lpacket*pck;
+	if (sck==NULL) return;
+	if ((p=fork())<0) ERROR("New listener");
+	if (p) return;
+	
+	do {
+		pck=message_receive(sck,NULL);
+		printf("[%s] %d %s\n",sck->addr,pck->type,pck->message);
+		message_send(sck,msg_sync,"ack");
+	} while (pck->type!=msg_kill);
+	exit(EXIT_SUCCESS);
+}
+
 void inet_fath_process(){
 	int optval=1;
-	lpacket*pck;
 	lsocket*clnt,*serv=make_lsocket(" :8888");
+	
+	/* Initialisation */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
 	setsockopt(serv->file,SOL_SOCKET,SO_REUSEADDR,&optval,sizeof(int));
 	bind_lsocket(serv);
-	clnt=listen_lsocket(serv);
-	pck=message_receive(clnt,NULL);
-	printf("[%s] %d %s\n",clnt->addr,pck->type,pck->message);
+	
+	/* Main loop */
+	while(1){
+		/* Wait for the communication */
+		clnt=listen_lsocket(serv);
+		printf("[Server] Waiting %s:%d\n",clnt->addr,clnt->file);
+		inet_new_clnt_process(clnt);
+	}
+	
 	close_lsocket(serv,2);
 	return;
 }
@@ -47,6 +69,8 @@ void test_network_sockets(){
 	if ((p=fork())<0) ERROR("Fork !");
 	if (p) inet_fath_process();
 	else{
+		fork();
+		fork();
 		inet_chld_process();
 	}
 }

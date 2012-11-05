@@ -72,6 +72,7 @@ void father_process(){
 	add_lsocket(podr,serv,POLLIN);
 	while (1){
 		actives=listen_lpodrum(podr,-1);
+		WHERE;
 		for(i=0;actives[i]>=0;i++) {
 			/* Wait for the communication */
 			printf("[Server] Waiting %s:%d\n",get_lsocket(podr,actives[i])->addr,get_lsocket(podr,actives[i])->file);

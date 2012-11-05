@@ -52,7 +52,7 @@ The following function allow you to handle the task of waiting for incomming/out
 
 ### Important
 + make functions thread_safe
-
++ Do the test on all other combination TCP unix, UDP inet.
 ### Cosmetic
 
 ### Test:

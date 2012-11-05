@@ -59,6 +59,9 @@ int message_send_to(lsocket*sender_socket,msg_type type_message,char*msg,lsocket
 			message_send(sender_socket,type_message,msg);
 			connect_lsocket(sender_socket,old_d);
 			return lpacket_snd_bytes;
+		case SOCK_STREAM:
+			message_send(sender_socket,type_message,msg);
+			return lpacket_snd_bytes;
 		default:
 			OUT("Unhandled mode");
 			break;
