@@ -27,9 +27,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include "utf8.h"
 
 /* Prototype */
-int 	levenshtein				(char*,char*);		/* Moooo */
+int 	levenshtein				(char*,char*);		/* The levenshtein functions */
 
 
 #endif /* __LEVENSHTEIN__H__ */

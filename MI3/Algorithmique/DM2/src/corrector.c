@@ -20,24 +20,24 @@
 
 #include "corrector.h"
 
+
 int main (int argc, char *argv[]){
 	FILE*f;
 	int nb=6;
 	int res;
-	int8 str[100],*bests;
+	char str[100],bests[100];
+	if (argc<3) OUT("Usage: corrector <word> <dico>");
 	
-	if (argc<3) OUT("Usage: levenshtein <word> <dico>");
-	printf("%d\n",levenshtein("a","²"));
 	f=fopen(argv[2],"r");
 	while(0<fscanf(f,"%s\n",str)){
 		res=levenshtein(argv[1],str);
 		if (res<=nb){
 			nb=res;
 			printf("%d %d %s\n",nb,res,str);
-			bests=str;
+			strcpy(bests,str);
 		}
 	}
-	printf("Best match %s %d",bests,nb);
+	printf("Best match %s %d\n",bests,nb);
 	fclose(f);
 	return 0;
 }

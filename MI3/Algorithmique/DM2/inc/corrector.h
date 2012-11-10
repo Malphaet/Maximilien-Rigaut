@@ -23,7 +23,7 @@
 
 /* Includes */
 
-#include "levenshtein.h"
+#include "wordtools.h"
 
 
 #endif /* __CORRECTOR_H__ */

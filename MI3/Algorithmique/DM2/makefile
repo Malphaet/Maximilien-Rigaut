@@ -8,11 +8,12 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -W -Wall -ansi -pedantic -I$(INC)
-LDFLAGS =
+CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) 
+LDFLAGS = 
+
 
 EXEC=corrector
-EXEC_O=levenshtein 
+EXEC_O=wordtools utf8
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
@@ -22,11 +23,11 @@ all: $(EXEC)
 init:
 	mkdir -p $(DIRS)
 
-$(EXEC): $(OBJ)/$(EXEC).o $(OBJ)/$(EXEC_O:%=%.o)
+$(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
 	$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@ 
 
 test: $(SRC)/test.c
 
@@ -39,11 +40,9 @@ edit:
 clean: 
 	rm -f $(OBJ)/*.o
 	rm -f $(TMP)/*
+	rm -f $(LIB)/*.a
 	
 cleaner: clean
-	rm -f $(BIN)/*
 	rm -f $(BIN)/$(EXEC)
-	rm -f $(BIN)/$(MAIN).h
-	rm -f $(BIN)/test
 
 .PHONY:
