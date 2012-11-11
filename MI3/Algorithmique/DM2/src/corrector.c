@@ -21,13 +21,6 @@
 #include "corrector.h"
 
 /* Defines */
-						
-#define exec_tests 	printf("Writing test results at %s\n",T_PATH);\
-					printf("Testing hash function\n");\
-					test_jhash();\
-					printf("Testing hash dict building function\n");\
-					test_hashtable();\
-
 
 #ifdef build_tests
 	#include "tests.c"
@@ -57,13 +50,15 @@ char*best_match(char*word,char*path){
 
 int main (int argc, char *argv[]){
 	if (argc<2) OUT("Usage: corrector <dico>");
-	
+
+	printf("%d\n",str_eq("AAA","AA"));	
 	#ifdef build_tests
-	exec_tests
+/*	exec_tests*/
 	#endif
 	
 /*	binary_print(argv[argc-1]);*/
-	build_hashdict(argv[1]);
+/*	build_hashdict(argv[1]);*/
+/*	build_3tupledict(argv[1]);*/
 /*	best_match(argv[1],argv[2]);*/
 	return 0;
 }

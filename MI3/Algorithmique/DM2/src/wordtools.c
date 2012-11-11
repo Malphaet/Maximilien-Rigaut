@@ -51,12 +51,19 @@ int levenshtein(char*w1,char*w2){
 /** Hash the given word according to the java string hash function
  * This function returns a HASH_SIZE bytes checksum
  *
- * Take note that the XORing give a decrease of 17% in efficency, for an increase of 25% in entropy (experimental measures)
- * The test is 
+ * ##Experimental measures:$
+ * ### Scattering
+ * + The XORing give a ±70% scattering variation.
+ * + The modulus gives a ±150% scattering variation.
+ * The goal being a 0% scattering variation (that is to say, a perfectly uniform hash function).
+ * ### Speed
+ * The XORing runs 17% faster in average than the modulus function.
+ * ### Collisions
+ * Hashing a word dictionnary the XOR function 
  */
 unsigned int jhash(char*word){
 	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
-	for (i=0;i<l;i++) hash=(hash<<HASH_POWR)-hash+(unsigned int)word[i];
+	for (i=0;i<l;i++) hash=((hash<<HASH_POWR)-hash+(unsigned int)word[i])%HASH_DSIZ;
 	
 	/* Strip the checksum (Here some XORing for entropy purposes) */
 	mask=mask>>(sizeof(int)*8-HASH_SIZE);
@@ -80,41 +87,91 @@ lclist**build_hashdict(char*path){
 	if (!hashd) ERROR("Malloc hash table");
 	
 	while(0<fscanf(f,"%s\n",str)){
-		hashdict_addword(hashd,str);
+		/* Calculate hash */
+		hashdict_addword(hashd,jhash(str),str);
 	}
 	fclose(f);
 		
 	return hashd;
 }
 
-/** Custom wordsplitting function 
- * Adds all the 3-tuples of the $word$ to the dictionnary 
+/** Add a word to a dictionnary
  */
-void hashdict_addword(lclist**hashd,char*str){
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str){
 	char *sve_str;
-	unsigned int hash,max=strlen(str);
-	lclist*node;
-	
-	/* Calculate hash */
-	hash=jhash(str);
+	unsigned int max=strlen(str);
+	lclist*node,*new_node;
 	
 	/* Either the hash generate collision */
-	if (hashd[hash]) {
-		node=hashd[hash];
+	node=hashd[hash];
+	if (node) {
 		/* If the hash is already present, skip it */
-		while ((node=node->next)!=NULL) {if (strcmp(node->data,str)==0) continue;}
+		while ((node=node->next)!=NULL) {if (str_eq(node->data,str)) continue;}
 	/* Either it doesn't */
-	} else hashd[hash]=make_lclist();
+	} else node=make_lclist();
 	
 	/* Add the string to the list */
-	sve_str=malloc(sizeof(char)*(max+1));
-	if (!sve_str) ERROR("Malloc index string");
+	sve_str=malloc(sizeof(char)*(max+1)); 	if (!sve_str) ERROR("Malloc index string");
+	new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
+
+	/* Create new node */
 	strcpy(sve_str,str);
-	add_lclist(hashd[hash],sve_str);
+	new_node->data=sve_str;
+	new_node->next=NULL;
+	node->next=new_node;
 }
 
+/** Check if the string is in the hashed values */
+int hashdict_in(lclist**hashd,char*str){
+	lclist*node;
+	unsigned int hash=jhash(str);
+	if (hashd[hash]) return 0;
+	
+	while((node=node->next)!=NULL) if (str_eq(node->data,str)) return 1;
+	return 0;
+}
+
+/** Build the 3-tuple dictionnary*/
+lclist**build_3tupledict(char*path){
+	FILE*f;
+	lclist**tupled;
+	char str[200],tuple[4]={0,0,0,0},*news;
+	unsigned int i,j,max,hash;
+	char w=' ';
+	/* Three chars of 8 bits can store up to 16777215 variables */
+	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
+	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
+	if (!tupled) ERROR("Malloc tuple table");
+	
+	strcpy(str,path);
+	while(0<fscanf(f,"%s\n",str)){
+		if (*str!=w) {
+			w=*str;
+/*			printf("%c\n",w);*/
+		}
+		max=strlen(str);
+		news=calloc(max+3,sizeof(char));
+		strcpy(news+1,str);
+		news[0]='$';news[max+1]='$';
+		
+		for (i=0;i<max;i+=1){
+			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
+			hash=jhash(tuple);
+			hashdict_addword(tupled,hash,str);
+		}
+		free(news);
+	}
+	fclose(f);
+		
+	return tupled;
+}
 
 int str_eq(char*w1,char*w2){
-	while(w1++==w2++) if (!w1|!w2) return 0;
-	return 1;
+
+	while(*w1==*w2){
+		printf("%s %s \n",w1,w2);
+		w1++;w2++;
+		if (!*w1|!*w2) return (*w1&*w2);
+	} 
+	return !(*w1&*w2);
 }
