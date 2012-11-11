@@ -52,10 +52,11 @@ int levenshtein(char*w1,char*w2){
  * This function returns a HASH_SIZE bytes checksum
  *
  * Take note that the XORing give a decrease of 17% in efficency, for an increase of 25% in entropy (experimental measures)
+ * The test is 
  */
 unsigned int jhash(char*word){
 	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
-	for (i=0;i<l;i++) hash=(hash<<HASH_POWR)-hash+(unsigned int)word[i]%HASH_MODL;
+	for (i=0;i<l;i++) hash=(hash<<HASH_POWR)-hash+(unsigned int)word[i];
 	
 	/* Strip the checksum (Here some XORing for entropy purposes) */
 	mask=mask>>(sizeof(int)*8-HASH_SIZE);
@@ -74,16 +75,15 @@ lclist**build_hashdict(char*path){
 	lclist**hashd;
 	char str[200];
 
-	if ((f=fopen(path,"r"))){
-		hashd=calloc(HASH_DSIZ,sizeof(lclist*));
-		if (!hashd) ERROR("Malloc hash table");
-		
-		while(0<fscanf(f,"%s\n",str)){
-			hashdict_addword(hashd,str);
-		}
-		fclose(f);
-	} else return NULL;
+	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
+	hashd=calloc(HASH_DSIZ,sizeof(lclist*));
+	if (!hashd) ERROR("Malloc hash table");
 	
+	while(0<fscanf(f,"%s\n",str)){
+		hashdict_addword(hashd,str);
+	}
+	fclose(f);
+		
 	return hashd;
 }
 

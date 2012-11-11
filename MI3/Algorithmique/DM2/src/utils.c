@@ -43,10 +43,10 @@ void binary_print(char*val){
 
 /** Convert the char to binary format */
 char* atobin(char*str){
-	char*res=malloc(((strlen(str))*8+1)*sizeof(char));
+	char*res=malloc(((strlen(str)*sizeof(char))*8+1)*sizeof(char));
 	char*tmp=res;
 	do{
-		strcpy(tmp,itobin(*str,sizeof(char)));
+		strcpy(tmp,itobin(*str,sizeof(char)*8));
 		tmp+=8;
 		*tmp++=' ';
 	}while (*++str);
@@ -56,13 +56,12 @@ char* atobin(char*str){
 
 /** Convert the integer to binary format 
  * @param nb The number to convert
- * @param size The real number of bytes of the number (sizeof) 
+ * @param size The real number of bytes of the number (sizeof)*8
  */
 char* itobin(int nb,unsigned int size){
-	char*res=calloc(size*8+1,sizeof(char));
+	char*res=calloc(size+1,sizeof(char));
 	unsigned int i;
 	if (!res) ERROR("Malloc");
-	size*=8;
 	for (i=0;i<size;i+=1){
 		res[i]=(nb&1)+'0';
 		nb>>=1;

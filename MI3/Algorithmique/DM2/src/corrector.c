@@ -21,10 +21,13 @@
 #include "corrector.h"
 
 /* Defines */
-#define exec_tests 	printf("Testing hash function\n");\
+						
+#define exec_tests 	printf("Writing test results at %s\n",T_PATH);\
+					printf("Testing hash function\n");\
 					test_jhash();\
 					printf("Testing hash dict building function\n");\
-					test_hashtable();
+					test_hashtable();\
+
 
 #ifdef build_tests
 	#include "tests.c"

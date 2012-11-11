@@ -37,7 +37,6 @@
 #define HASH_SIZE 20 		/**< Size of the checksum (in bits) */
 #define HASH_DSIZ 1048577	/**< Dictionnary size (2**HASH_SIZE-1) */
 #define HASH_POWR 5			/**< Power of two to elevate the checksum */
-#define HASH_MODL 11		/**< Modulus to applicate to the chars */
 
 /*==== Prototype ====*/
 int 			levenshtein				(char*,char*);			/* The levenshtein functions */
