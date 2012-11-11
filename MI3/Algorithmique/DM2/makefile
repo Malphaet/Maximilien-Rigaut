@@ -8,12 +8,12 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) 
+CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) -D build_tests
 LDFLAGS = 
 
 
 EXEC=corrector
-EXEC_O=wordtools utf8
+EXEC_O=wordtools utf8 utils clist
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
@@ -26,7 +26,7 @@ init:
 $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
 	$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 
-$(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h
+$(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(CC) -c $(CFLAGS) $< -o $@ 
 
 test: $(SRC)/test.c

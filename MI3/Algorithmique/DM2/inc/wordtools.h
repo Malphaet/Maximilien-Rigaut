@@ -21,17 +21,28 @@
 #ifndef __LEVENSHTEIN__H__
 #define __LEVENSHTEIN__H__
 
-/* Includes */
+/*==== Includes ====*/
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "utils.h"
 #include "utf8.h"
+#include "clist.h"
 
-/* Prototype */
-int 	levenshtein				(char*,char*);		/* The levenshtein functions */
+/*==== Defines ====*/
+#define min3(a,b,c) min(min((a),(b)),(c))
+/* Hash */
+#define HASH_SIZE 20 		/**< Size of the checksum (in bits) */
+#define HASH_DSIZ 1048577	/**< Dictionnary size (2**HASH_SIZE-1) */
+#define HASH_POWR 5			/**< Power of two to elevate the checksum */
+#define HASH_MODL 11		/**< Modulus to applicate to the chars */
 
-
+/*==== Prototype ====*/
+int 			levenshtein				(char*,char*);			/* The levenshtein functions */
+unsigned int 	jhash					(char*);				/* Hash function */
+lclist**		build_hashdict			(char*);				/* Build the hash dictionnary */
+void 			hashdict_addword		(lclist**,char*);
 #endif /* __LEVENSHTEIN__H__ */
 

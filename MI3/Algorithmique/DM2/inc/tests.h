@@ -1,5 +1,5 @@
 /*
- * corrector.h
+ * tests.h
  * This file is part of Algorithms 2012
  *
  * Copyright (C) 2012 - Maximilien Rigaut
@@ -17,17 +17,5 @@
  * You should have received a copy of the GNU General Public License
  * along with Algorithms 2012. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#ifndef __CORRECTOR_H__
-#define __CORRECTOR_H__
-
-/* Includes */
-
-#include "wordtools.h"
-
-char*			best_match				(char*,char*);			/* The best match for the word in the dictionnary */
-
-#endif /* __CORRECTOR_H__ */
-
 
 

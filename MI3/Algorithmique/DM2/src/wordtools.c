@@ -21,7 +21,6 @@
 #include "wordtools.h"
 
 #define GT(t,i,j) t[(i)+(j)*(l)]
-#define Min(a,b,c) min(min((a),(b)),(c))
 /** The levenshtein function
  * Made to understand unicode characters
  */
@@ -39,24 +38,83 @@ int levenshtein(char*w1,char*w2){
 		w1_val=u8_nextchar(w1,&w_i);w_j=0;
 		for (j=1;j<l2;j+=1){
 			cost=w1_val==u8_nextchar(w2,&w_j)?0:1;
-			GT(table,i,j)=Min(GT(table,i,j-1)+1,GT(table,i-1,j)+1,(GT(table,i-1,j-1)+cost));
+			GT(table,i,j)=min3(GT(table,i,j-1)+1,GT(table,i-1,j)+1,(GT(table,i-1,j-1)+cost));
 		}
 	}
-/*	for (i=0;i<l;i+=1) {*/
-/*		for (j=0;j<l2;j+=1) printf("%d ",GT(table,i,j));*/
-/*		printf("\n");*/
-/*	}*/
 	
 	cost=GT(table,i-1,j-1);
 	free(table);
 	return cost;
 }
-
 #undef GT
-#undef Min
 
+/** Hash the given word according to the java string hash function
+ * This function returns a HASH_SIZE bytes checksum
+ *
+ * Take note that the XORing give a decrease of 17% in efficency, for an increase of 25% in entropy (experimental measures)
+ */
 unsigned int jhash(char*word){
-	unsigned int i,hash=0,l=strlen(word);
-	for (i=0;i<l;i++) hash=(hash<<5)-hash+(unsigned int)word[i];
-	return hash;
+	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
+	for (i=0;i<l;i++) hash=(hash<<HASH_POWR)-hash+(unsigned int)word[i]%HASH_MODL;
+	
+	/* Strip the checksum (Here some XORing for entropy purposes) */
+	mask=mask>>(sizeof(int)*8-HASH_SIZE);
+	do{
+		finalhash=(finalhash^hash)&mask;
+		hash=hash<<HASH_SIZE;
+	} while(hash);
+
+	return finalhash;
+}
+
+/** Build the hash dictionnary of the file at the given path 
+ */
+lclist**build_hashdict(char*path){
+	FILE*f;
+	lclist**hashd;
+	char str[200];
+
+	if ((f=fopen(path,"r"))){
+		hashd=calloc(HASH_DSIZ,sizeof(lclist*));
+		if (!hashd) ERROR("Malloc hash table");
+		
+		while(0<fscanf(f,"%s\n",str)){
+			hashdict_addword(hashd,str);
+		}
+		fclose(f);
+	} else return NULL;
+	
+	return hashd;
+}
+
+/** Custom wordsplitting function 
+ * Adds all the 3-tuples of the $word$ to the dictionnary 
+ */
+void hashdict_addword(lclist**hashd,char*str){
+	char *sve_str;
+	unsigned int hash,max=strlen(str);
+	lclist*node;
+	
+	/* Calculate hash */
+	hash=jhash(str);
+	
+	/* Either the hash generate collision */
+	if (hashd[hash]) {
+		node=hashd[hash];
+		/* If the hash is already present, skip it */
+		while ((node=node->next)!=NULL) {if (strcmp(node->data,str)==0) continue;}
+	/* Either it doesn't */
+	} else hashd[hash]=make_lclist();
+	
+	/* Add the string to the list */
+	sve_str=malloc(sizeof(char)*(max+1));
+	if (!sve_str) ERROR("Malloc index string");
+	strcpy(sve_str,str);
+	add_lclist(hashd[hash],sve_str);
+}
+
+
+int str_eq(char*w1,char*w2){
+	while(w1++==w2++) if (!w1|!w2) return 0;
+	return 1;
 }

@@ -20,24 +20,47 @@
 
 #include "corrector.h"
 
+/* Defines */
+#define exec_tests 	printf("Testing hash function\n");\
+					test_jhash();\
+					printf("Testing hash dict building function\n");\
+					test_hashtable();
 
-int main (int argc, char *argv[]){
+#ifdef build_tests
+	#include "tests.c"
+#endif
+
+
+/* Various correction functions */
+
+/** Print the best match amongst a dictionnary */
+char*best_match(char*word,char*path){
 	FILE*f;
-	int nb=6;
-	int res;
-	char str[100],bests[100];
-	if (argc<3) OUT("Usage: corrector <word> <dico>");
-	
-	f=fopen(argv[2],"r");
+	int nb=6,res;
+	char str[100],*bests=malloc(sizeof(char)*100);
+	if (!bests) ERROR("Malloc");
+	f=fopen(path,"r");
 	while(0<fscanf(f,"%s\n",str)){
-		res=levenshtein(argv[1],str);
+		res=levenshtein(word,str);
 		if (res<=nb){
 			nb=res;
 			printf("%d %d %s\n",nb,res,str);
 			strcpy(bests,str);
 		}
 	}
-	printf("Best match %s %d\n",bests,nb);
 	fclose(f);
+	return bests;
+}
+
+int main (int argc, char *argv[]){
+	if (argc<2) OUT("Usage: corrector <dico>");
+	
+	#ifdef build_tests
+	exec_tests
+	#endif
+	
+/*	binary_print(argv[argc-1]);*/
+	build_hashdict(argv[1]);
+/*	best_match(argv[1],argv[2]);*/
 	return 0;
 }

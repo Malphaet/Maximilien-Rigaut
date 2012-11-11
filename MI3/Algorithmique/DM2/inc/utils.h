@@ -22,7 +22,9 @@
  
 #ifndef __UTILS_H__
 #define __UTILS_H__
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 /** @file utils.h Utilities
  *
  * All utilities are defined and documented here
@@ -49,11 +51,23 @@ int verbose; /*< Verbosity of the program */
 
 /* Functions */
 
-
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
 #define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
 #define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
 #define FPRINT(msg)	{fprintf(stdout,msg);fflush(stdout);}
 #define min(a,b)	((a)<(b)?(a):(b))
+
+#define TIMER_INIT struct timeval tvBegin, tvEnd
+#define TIMER_STRT gettimeofday(&tvBegin, NULL)
+#define TIMER_STOP gettimeofday(&tvEnd, NULL)
+#define TIMER_USEC ((tvEnd.tv_usec+1000000*tvEnd.tv_sec)-(tvBegin.tv_usec+1000000*tvBegin.tv_sec))
+
+int 			Salem 					(FILE*);
+/* Debug purpose */
+void			binary_print			(char*);
+char*			itobin					(int,unsigned int);
+char* 			atobin					(char*);
+int				str_eq					(char*,char*);
+
 #endif /* __UTILS_H__ */
 
