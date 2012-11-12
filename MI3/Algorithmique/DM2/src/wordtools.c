@@ -61,7 +61,7 @@ int levenshtein(char*w1,char*w2){
  * ### Collisions
  * Hashing a word dictionnary the XOR function 
  */
-unsigned int jhash(char*word){
+unsigned int jhash(const char*word){
 	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
 	for (i=0;i<l;i++) hash=((hash<<HASH_POWR)-hash+(unsigned int)word[i])%HASH_DSIZ;
 	
@@ -88,7 +88,7 @@ lclist**build_hashdict(char*path){
 	
 	while(0<fscanf(f,"%s\n",str)){
 		/* Calculate hash */
-		hashdict_addword(hashd,jhash(str),str);
+		hashdict_addword(hashd,jhash(str),str,0);
 	}
 	fclose(f);
 		
@@ -96,29 +96,41 @@ lclist**build_hashdict(char*path){
 }
 
 /** Add a word to a dictionnary
+ * @param hashd
+ * @param hash
+ * @param str
+ * @param careless
+ * This function works in a very particular fashion, 
+ * in the way that is doesn't calculate the hash and solve the collision,
+ * but relie on the calling function to provide the tools for it
  */
-void hashdict_addword(lclist**hashd,unsigned int hash,char*str){
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 	char *sve_str;
 	unsigned int max=strlen(str);
-	lclist*node,*new_node;
+	lclist*node,*new_node,*old_node;
 	
 	/* Either the hash generate collision */
-	node=hashd[hash];
+	old_node=node=hashd[hash];
 	if (node) {
 		/* If the hash is already present, skip it */
-		while ((node=node->next)!=NULL) {if (str_eq(node->data,str)) continue;}
+		if (!careless) while ((node=node->next)!=NULL) {old_node=node; if (strcmp(node->data,str)==0) return;}
 	/* Either it doesn't */
-	} else node=make_lclist();
+	} else hashd[hash]=old_node=make_lclist();
+	
+	/* Create new node */
+	sve_str=malloc(sizeof(char)*(max+1));
+	if (!sve_str) ERROR("Malloc index string");
 	
 	/* Add the string to the list */
-	sve_str=malloc(sizeof(char)*(max+1)); 	if (!sve_str) ERROR("Malloc index string");
-	new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
-
-	/* Create new node */
 	strcpy(sve_str,str);
-	new_node->data=sve_str;
-	new_node->next=NULL;
-	node->next=new_node;
+	if (careless) add_lclist(old_node,sve_str);
+	else{
+		new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
+		new_node->data=sve_str;
+		new_node->next=NULL;
+		old_node->next=new_node;
+	}
+
 }
 
 /** Check if the string is in the hashed values */
@@ -127,7 +139,7 @@ int hashdict_in(lclist**hashd,char*str){
 	unsigned int hash=jhash(str);
 	if (hashd[hash]) return 0;
 	
-	while((node=node->next)!=NULL) if (str_eq(node->data,str)) return 1;
+	while((node=node->next)!=NULL) if (strcmp(node->data,str)) return 1;
 	return 0;
 }
 
@@ -147,7 +159,7 @@ lclist**build_3tupledict(char*path){
 	while(0<fscanf(f,"%s\n",str)){
 		if (*str!=w) {
 			w=*str;
-/*			printf("%c\n",w);*/
+			printf("%c\n",w);
 		}
 		max=strlen(str);
 		news=calloc(max+3,sizeof(char));
@@ -157,7 +169,7 @@ lclist**build_3tupledict(char*path){
 		for (i=0;i<max;i+=1){
 			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
 			hash=jhash(tuple);
-			hashdict_addword(tupled,hash,str);
+			hashdict_addword(tupled,hash,str,1);
 		}
 		free(news);
 	}
@@ -166,12 +178,6 @@ lclist**build_3tupledict(char*path){
 	return tupled;
 }
 
-int str_eq(char*w1,char*w2){
-
-	while(*w1==*w2){
-		printf("%s %s \n",w1,w2);
-		w1++;w2++;
-		if (!*w1|!*w2) return (*w1&*w2);
-	} 
-	return !(*w1&*w2);
+int strheq(const char*w1,const char*w2){
+	return jhash(w1)!=jhash(w2);
 }

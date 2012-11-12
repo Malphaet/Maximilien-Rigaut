@@ -67,7 +67,6 @@ int 			Salem 					(FILE*);
 void			binary_print			(char*);
 char*			itobin					(int,unsigned int);
 char* 			atobin					(char*);
-int				str_eq					(char*,char*);
 
 #endif /* __UTILS_H__ */
 

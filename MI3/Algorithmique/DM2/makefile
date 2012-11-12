@@ -8,7 +8,7 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) -D build_tests
+CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) -D build_tests -g	
 LDFLAGS = 
 
 
@@ -22,7 +22,7 @@ all: $(EXEC)
 
 init:
 	mkdir -p $(DIRS)
-
+	
 $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
 	$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 

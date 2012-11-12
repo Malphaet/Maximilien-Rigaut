@@ -65,11 +65,11 @@ void test_jhash(){
 
 void test_hashtable(){
 	lclist**dict,*node;
-	int i,j;
+	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
 	T_OPEN;
-	int*hashs_col=calloc(10,sizeof(int));
-	int nb=0,col,max_col=0;
+	unsigned int*hashs_col=calloc(424242,sizeof(int));
+	
 	double fisher[]={	0.6670355074,
 						0.270090681373,
 						0.054681478988,
@@ -81,12 +81,12 @@ void test_hashtable(){
 					};
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");
 	TIMER_STRT;
-	dict=build_hashdict("./ressources/dico.txt");	
-/*	dict=build_3tupledict("./ressources/dico.txt");	*/
+/*	dict=build_hashdict("./ressources/dico.txt");	*/
+	dict=build_3tupledict("./ressources/dico.txt");	
 	TIMER_STOP;
 	
 	for (i=0;i<HASH_DSIZ;i+=1) if(dict[i]){
-/*		fprintf(test,"%05x %s",i,itobin(i,HASH_SIZE));*/
+		fprintf(test,"%05x %s",i,itobin(i,HASH_SIZE));
 		node=dict[i];
 		col=0;
 		while((node=node->next)!=NULL) {
@@ -94,12 +94,16 @@ void test_hashtable(){
 			col++;
 			nb++;
 		}
-		for (j=0;j<col;j+=1) hashs_col[j]++;
+		for (j=0;j<col;j+=1){
+			if (j>424244) printf("%d\n",j);
+			hashs_col[j]++;
+		}
+			
+
 		max_col=col>max_col?col:max_col;
 		fprintf(test,"\n");
 	}
 	T_CLOSE;
-	
 	
 	printf("Time elapsed: %li ms, alpha: %f, word digested: %d, worst collision: %d\n",TIMER_USEC/1000,(float)nb/HASH_DSIZ,nb,max_col-1);
 	printf("Hash repartition :\nk Number    Fisher\n");
