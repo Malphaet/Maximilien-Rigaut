@@ -149,7 +149,7 @@ lclist**build_3tupledict(char*path){
 	lclist**tupled;
 	char str[200],tuple[4]={0,0,0,0},*news;
 	unsigned int i,j,max,hash;
-	char w=' ';
+	
 	/* Three chars of 8 bits can store up to 16777215 variables */
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
 	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
@@ -157,10 +157,6 @@ lclist**build_3tupledict(char*path){
 	
 	strcpy(str,path);
 	while(0<fscanf(f,"%s\n",str)){
-		if (*str!=w) {
-			w=*str;
-			printf("%c\n",w);
-		}
 		max=strlen(str);
 		news=calloc(max+3,sizeof(char));
 		strcpy(news+1,str);

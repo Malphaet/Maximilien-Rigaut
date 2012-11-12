@@ -28,7 +28,9 @@
 					printf("> Testing hash function\n");\
 					test_jhash();\
 					printf("> Testing hash dict building function\n");\
-					test_hashtable();
+					test_hashtable();\
+					printf("> Testing 3-tuple reduction function\n");\
+					test_3tuples();
 
 void test_jhash(){
 	TIMER_INIT;
@@ -68,7 +70,7 @@ void test_hashtable(){
 	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
 	T_OPEN;
-	unsigned int*hashs_col=calloc(70560,sizeof(int));
+	unsigned int*hashs_col=calloc(10,sizeof(int));
 	
 	double fisher[]={	0.6670355074,
 						0.270090681373,
@@ -83,8 +85,7 @@ void test_hashtable(){
 					};
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");
 	TIMER_STRT;
-/*	dict=build_hashdict("./ressources/dico.txt");	*/
-	dict=build_3tupledict("./ressources/dico.txt");	
+	dict=build_hashdict("./ressources/dico.txt");	
 	TIMER_STOP;
 	
 	for (i=0;i<HASH_DSIZ;i+=1) if(dict[i]){
@@ -111,5 +112,37 @@ void test_hashtable(){
 	}
 
 }
+
+void test_3tuples(){
+	lclist**dict,*node;
+	unsigned int i,j,nb=0,col,max_col=0;
+	TIMER_INIT;
+	T_OPEN;
+	unsigned int*hashs_col=calloc(70560,sizeof(int));
+	
+	printf("Digesting dictionnary: ./ressources/dico.txt\n");
+	TIMER_STRT;
+	dict=build_3tupledict("./ressources/dico.txt");	
+	TIMER_STOP;
+	
+	for (i=0;i<HASH_DSIZ;i+=1) if(dict[i]){
+		fprintf(test,"%05x %s",i,itobin(i,HASH_SIZE));
+		node=dict[i];
+		col=0;
+		while((node=node->next)!=NULL) {
+			fprintf(test," %s",node->data);
+			col++;
+			nb++;
+		}
+		for (j=0;j<col;j+=1) hashs_col[j]++;
+
+		max_col=col>max_col?col:max_col;
+		fprintf(test,"\n");
+	}
+	T_CLOSE;
+	
+	printf("Time elapsed: %li ms, alpha: %f, word digested: %d, worst collision: %d\n",TIMER_USEC/1000,(float)nb/HASH_DSIZ,nb,max_col-1);
+}
+
 #undef nb_test
 #undef val_test
