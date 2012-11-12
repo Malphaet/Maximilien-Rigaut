@@ -8,7 +8,7 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) -D build_tests -g	
+CFLAGS = -W -Wall -ansi -pedantic -std=c99 -I$(INC) -D build_tests -O3
 LDFLAGS = 
 
 

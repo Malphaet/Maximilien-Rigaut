@@ -25,7 +25,7 @@
  * Made to understand unicode characters
  */
 int levenshtein(char*w1,char*w2){
-	int cost,i,j,w_i=0,w_j=0;
+	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
 	int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
 	int*table=calloc(1,sizeof(int)*(l)*(l2));
@@ -137,7 +137,7 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 int hashdict_in(lclist**hashd,char*str){
 	lclist*node;
 	unsigned int hash=jhash(str);
-	if (hashd[hash]) return 0;
+	if (!(node=hashd[hash])) return 0;
 	
 	while((node=node->next)!=NULL) if (strcmp(node->data,str)) return 1;
 	return 0;

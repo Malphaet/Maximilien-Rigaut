@@ -68,7 +68,7 @@ void test_hashtable(){
 	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
 	T_OPEN;
-	unsigned int*hashs_col=calloc(424242,sizeof(int));
+	unsigned int*hashs_col=calloc(70560,sizeof(int));
 	
 	double fisher[]={	0.6670355074,
 						0.270090681373,
@@ -77,7 +77,9 @@ void test_hashtable(){
 						0.000747102693219,
 						6.05021691434e-05,
 						4.08300905203e-06,
-						2.36179908754e-07
+						2.36179908754e-07,
+						1.19540099017e-08,
+						5.37813561922e-10
 					};
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");
 	TIMER_STRT;
@@ -94,10 +96,7 @@ void test_hashtable(){
 			col++;
 			nb++;
 		}
-		for (j=0;j<col;j+=1){
-			if (j>424244) printf("%d\n",j);
-			hashs_col[j]++;
-		}
+		for (j=0;j<col;j+=1) hashs_col[j]++;
 			
 
 		max_col=col>max_col?col:max_col;

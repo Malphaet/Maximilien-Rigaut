@@ -1,6 +1,8 @@
 # Binaries ignores
 bin/
 lib/
+tmp/
+doc/
 corrector
 
 # Std ignore
