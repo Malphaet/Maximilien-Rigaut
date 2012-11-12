@@ -51,7 +51,7 @@ int levenshtein(char*w1,char*w2){
 /** Hash the given word according to the java string hash function
  * This function returns a HASH_SIZE bytes checksum
  *
- * ##Experimental measures:$
+ * ##Experimental measures
  * ### Scattering
  * + The XORing give a ±70% scattering variation.
  * + The modulus gives a ±150% scattering variation.
@@ -95,11 +95,42 @@ lclist**build_hashdict(char*path){
 	return hashd;
 }
 
+/** Build the 3-tuple dictionnary*/
+lclist**build_3tupledict(char*path){
+	FILE*f;
+	lclist**tupled;
+	char str[200],tuple[4]={0,0,0,0},*news;
+	unsigned int i,j,max,hash;
+	
+	/* Three chars of 8 bits can store up to 16777215 variables */
+	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
+	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
+	if (!tupled) ERROR("Malloc tuple table");
+	
+	strcpy(str,path);
+	while(0<fscanf(f,"%s\n",str)){
+		max=strlen(str);
+		news=calloc(max+3,sizeof(char));
+		strcpy(news+1,str);
+		news[0]='$';news[max+1]='$';
+		
+		for (i=0;i<max;i+=1){
+			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
+			hash=jhash(tuple);
+			hashdict_addword(tupled,hash,str,1);
+		}
+		free(news);
+	}
+	fclose(f);
+		
+	return tupled;
+}
+
 /** Add a word to a dictionnary
- * @param hashd
- * @param hash
- * @param str
- * @param careless
+ * @param hashd The hash dictionnary (a chained list)
+ * @param hash The hash of the given object
+ * @param str The object hashed, to store if unique
+ * @param careless Check if collisions are genuine
  * This function works in a very particular fashion, 
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it
@@ -141,37 +172,6 @@ int hashdict_in(lclist**hashd,char*str){
 	
 	while((node=node->next)!=NULL) if (strcmp(node->data,str)) return 1;
 	return 0;
-}
-
-/** Build the 3-tuple dictionnary*/
-lclist**build_3tupledict(char*path){
-	FILE*f;
-	lclist**tupled;
-	char str[200],tuple[4]={0,0,0,0},*news;
-	unsigned int i,j,max,hash;
-	
-	/* Three chars of 8 bits can store up to 16777215 variables */
-	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
-	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
-	if (!tupled) ERROR("Malloc tuple table");
-	
-	strcpy(str,path);
-	while(0<fscanf(f,"%s\n",str)){
-		max=strlen(str);
-		news=calloc(max+3,sizeof(char));
-		strcpy(news+1,str);
-		news[0]='$';news[max+1]='$';
-		
-		for (i=0;i<max;i+=1){
-			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-			hash=jhash(tuple);
-			hashdict_addword(tupled,hash,str,1);
-		}
-		free(news);
-	}
-	fclose(f);
-		
-	return tupled;
 }
 
 int strheq(const char*w1,const char*w2){

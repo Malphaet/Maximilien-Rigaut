@@ -43,12 +43,10 @@ Here is a quick description of the implemented modules, covering their main func
 ## Usage
 
 ## Todo
-+ Implement a test and performance test script
 
 ### Important
-+ Document
-+ Test a utf8 library
-+ Implement a clever trigram "library"
++ Document functions
++ Clean and sort code
 
 ### Cosmetic
 
