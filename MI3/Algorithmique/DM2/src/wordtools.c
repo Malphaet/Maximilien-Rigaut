@@ -33,7 +33,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	suggests=calloc(max,sizeof(lclist*));
 	bests=calloc(11,sizeof(char*));
 	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));
-	qualified=calloc(11,sizeof(lclist*));
+	qualified=calloc(101,sizeof(lclist*));
 	
 	if (!news) ERROR("Malloc new word");
 	if (!suggests) ERROR("Malloc suggestion list");
@@ -45,8 +45,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	node=hashd[jhash(word)];
 	if (node) while ((node=node->next)!=NULL) if (strcmp(word,node->data)==0){
 		bests[0]=node->data;
-		printf("Sending %s\n",node->data);
-		return bests;
+		goto finish;
 	}
 	
 	/* Analyse the tuples */
@@ -74,13 +73,12 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 				max2=strlen(node->data);
 				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
 					max2=u8_strlen(node->data); max=u8_strlen(word);
-					val=100-(100*levenshtein(node->data,word))/(1+(max>max2?max:max2));
-					
+					val=(100*levenshtein(node->data,word))/(1+(max>max2?max:max2));
 					/* Add them to results */
-					val=10-val/10; /*< Terrible precision loss */
+/*					val=10-val/10; *//*< Terrible precision loss */
 					if (!qualified[val]) qualified[val]=make_lclist();
 					add_lclist(qualified[val],node->data);
-					if (val==10) if (nbf++==10) break;
+					if (val==100) if (nbf++==10) break;
 /*					if (val>100) printf("%s sounds weird (%d)\n",node->data,val);*/
 				}
 			}
@@ -89,18 +87,19 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	
 	j=0;
 	
-	for (i=0;i<10;i+=1){
+	for (i=0;i<100;i++){
 		node=qualified[i];
 		if (node){ 
 			while((node=node->next)!=NULL) if (j<10) bests[j++]=node->data;
 			drop_lclist(qualified[i]);
 		}
-		
 	}
 	
-	free(news);
-	free(suggests);
-	return bests;
+	/* Clean and exit */
+	finish:
+		free(news);
+		free(suggests);
+		return bests;
 }
 
 

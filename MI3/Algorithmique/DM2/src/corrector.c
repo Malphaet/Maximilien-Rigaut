@@ -19,7 +19,6 @@
  */
 
 #include "corrector.h"
-
 /* Defines */
 
 #ifdef build_tests
@@ -73,16 +72,18 @@ void correct_all(char*path){
 			} else break;
 		}
 		
-/*		if (st==2) {*/
-/*			printf("Analysing %s...(%s) leads to no match\n",str,goal);*/
-/*			for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);*/
-/*			printf("\n");*/
-/*		}*/
+		if (st==2) {
+			printf("Analysing %s...(%s) leads to no match\n",str,goal);
+			for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);
+			printf("\n");
+		}
 		stats[st]++;
 	}
 	TIMER_STOP;
+	st=stats[0]+stats[1]+stats[2];
 	printf("Analysis complete, lasted %ldms.\n%d words were first guess, %d were amongs the guesses and %d weren't found.\n",
 	TIMER_USEC/1000,stats[0],stats[1],stats[2]);
+	printf("   M    F    N\n%3d%% %3d%% %3d%%\n",stats[0]*100/st,stats[1]*100/st,stats[2]*100/st);
 }
 
 int main (int argc, char *argv[]){
@@ -91,7 +92,6 @@ int main (int argc, char *argv[]){
 	#ifdef build_tests
 /*	exec_tests*/
 	#endif
-	
 	correct_all(argv[1]);
 	
 	return 0;

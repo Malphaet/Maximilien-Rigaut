@@ -48,6 +48,7 @@ Here is a quick description of the implemented modules, covering their main func
 + Clean and sort code
 + Remove all fscanf
 + add utf8 support to word recognition
++ Threadify it a little
 
 ### Cosmetic
 + Add groups
