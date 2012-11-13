@@ -104,7 +104,7 @@ emental>emmenthal
 emploit>emploi
 ennivré>enivré
 éthymologie>étymologie
-évidamment>évidemment 
+évidamment>évidemment
 ex aequo>ex æquo
 example>exemple
 exangue>exsangue
@@ -181,7 +181,6 @@ omnubilé>obnubilé
 orcheste>orchestre
 ornitorinque>ornithorynque
 oyé>oyez
-parceque>parce que
 parmis>parmi
 partisant>partisan
 pécunier>pécuniaire
@@ -207,7 +206,6 @@ précipitament>précipitamment
 précisemment>précisément
 précisémment>précisément
 prémice>prémisse
-prémice>prémisse ou prémices
 proffessionnel>professionnel
 propriétée>propriété
 puis ensuite>puis

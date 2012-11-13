@@ -47,6 +47,7 @@ Here is a quick description of the implemented modules, covering their main func
 + Document functions
 + Clean and sort code
 + Remove all fscanf
++ add utf8 support to word recognition
 
 ### Cosmetic
 + Add groups

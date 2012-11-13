@@ -22,10 +22,10 @@
 
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news;
-	unsigned int i,j,max,hash,*nbmatching,val,max2;
+	unsigned int i,j,max,hash,*nbmatching,val,max2,nbf=0;
 	lclist**suggests;		/* Value that each tuple suggests */
 	lclist*node;
-/*	lclist*qualified=make_lclist();*/
+	lclist**qualified;
 	char**bests;
 	
 	max=strlen(word);
@@ -33,11 +33,13 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	suggests=calloc(max,sizeof(lclist*));
 	bests=calloc(11,sizeof(char*));
 	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));
+	qualified=calloc(11,sizeof(lclist*));
 	
 	if (!news) ERROR("Malloc new word");
 	if (!suggests) ERROR("Malloc suggestion list");
 	if (!bests) ERROR("Malloc result list");
 	if (!nbmatching) ERROR("Malloc number of matching tuples");
+	if (!qualified) ERROR("Malloc qualified words");
 	
 	/* Check into the dictionnary for existence */
 	node=hashd[jhash(word)];
@@ -71,19 +73,32 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 			while ((node=node->next)!=NULL) {
 				max2=strlen(node->data);
 				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
+					max2=u8_strlen(node->data); max=u8_strlen(word);
 					val=100-(100*levenshtein(node->data,word))/(1+(max>max2?max:max2));
-					if ((100*levenshtein(node->data,word))/(1+(max>max2?max:max2))>100) 
-						printf("WTF %s %s %d %d\n",node->data,word,levenshtein(word,node->data),1+(max>max2?max:max2));
-					if (val<101) bests[10-(val/10)]=node->data;
-					else printf("%s sounds weird (%d)\n",node->data,val);
+					
+					/* Add them to results */
+					val=10-val/10; /*< Terrible precision loss */
+					if (!qualified[val]) qualified[val]=make_lclist();
+					add_lclist(qualified[val],node->data);
+					if (val==10) if (nbf++==10) break;
+/*					if (val>100) printf("%s sounds weird (%d)\n",node->data,val);*/
 				}
 			}
 		}
 	}
 	
+	j=0;
+	
+	for (i=0;i<10;i+=1){
+		node=qualified[i];
+		if (node){ 
+			while((node=node->next)!=NULL) if (j<10) bests[j++]=node->data;
+			drop_lclist(qualified[i]);
+		}
+		
+	}
 	
 	free(news);
-/*	drop_lclist(qualified);*/
 	free(suggests);
 	return bests;
 }

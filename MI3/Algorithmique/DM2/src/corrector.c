@@ -69,13 +69,15 @@ void correct_all(char*path){
 		st=2;
 		for (i=0;i<10;i+=1) {
 			if (founds[i]!=NULL) {
-/*				printf("%s ",founds[i]);*/
 				if (strcmp(goal,founds[i])==0){ st=(i!=0); break;}
-/*				else {printf("%s doesnt match\n",founds[i]);}*/
-			} /*else break;*/
-/*			printf("\n");*/
+			} else break;
 		}
-/*		printf("\n");*/
+		
+/*		if (st==2) {*/
+/*			printf("Analysing %s...(%s) leads to no match\n",str,goal);*/
+/*			for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);*/
+/*			printf("\n");*/
+/*		}*/
 		stats[st]++;
 	}
 	TIMER_STOP;
@@ -85,8 +87,7 @@ void correct_all(char*path){
 
 int main (int argc, char *argv[]){
 	if (argc<2) OUT("Usage: corrector <dico>");
-
-	printf("%d\n",levenshtein("aigü","ignés"));	
+	
 	#ifdef build_tests
 /*	exec_tests*/
 	#endif
