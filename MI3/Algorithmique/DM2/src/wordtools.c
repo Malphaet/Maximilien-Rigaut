@@ -20,11 +20,80 @@
 
 #include "wordtools.h"
 
+char**ten_bests(char*word,lclist**tuples,lclist**hashd){
+	char tuple[4]={0,0,0,0},*news;
+	unsigned int i,j,max,hash,*nbmatching,val,max2;
+	lclist**suggests;		/* Value that each tuple suggests */
+	lclist*node;
+/*	lclist*qualified=make_lclist();*/
+	char**bests;
+	
+	max=strlen(word);
+	news=calloc(max+3,sizeof(char));
+	suggests=calloc(max,sizeof(lclist*));
+	bests=calloc(11,sizeof(char*));
+	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));
+	
+	if (!news) ERROR("Malloc new word");
+	if (!suggests) ERROR("Malloc suggestion list");
+	if (!bests) ERROR("Malloc result list");
+	if (!nbmatching) ERROR("Malloc number of matching tuples");
+	
+	/* Check into the dictionnary for existence */
+	node=hashd[jhash(word)];
+	if (node) while ((node=node->next)!=NULL) if (strcmp(word,node->data)==0){
+		bests[0]=node->data;
+		printf("Sending %s\n",node->data);
+		return bests;
+	}
+	
+	/* Analyse the tuples */
+	strcpy(news+1,word);
+	news[0]='$';news[max+1]='$';
+	
+	for (i=0;i<max;i+=1){
+		for (j=0;j<3;j+=1) tuple[j]=news[i+j];
+		hash=jhash(tuple);
+		suggests[i]=tuples[hash];
+	}
+	
+	/* Calculate number of matching tuples */
+	for (i=0;i<max;i+=1){
+		node=suggests[i];
+		if (node) while((node=node->next)!=NULL) nbmatching[jhash(node->data)]++;
+	}
+	
+	/* Extract best suggestions */
+	for (i=0;i<HASH_DSIZ;i+=1){
+		if (nbmatching[i]) {
+			/* Collisions may occur, however levenshtein will take care of that */
+			node=hashd[i];
+			while ((node=node->next)!=NULL) {
+				max2=strlen(node->data);
+				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
+					val=100-(100*levenshtein(node->data,word))/(1+(max>max2?max:max2));
+					if ((100*levenshtein(node->data,word))/(1+(max>max2?max:max2))>100) 
+						printf("WTF %s %s %d %d\n",node->data,word,levenshtein(word,node->data),1+(max>max2?max:max2));
+					if (val<101) bests[10-(val/10)]=node->data;
+					else printf("%s sounds weird (%d)\n",node->data,val);
+				}
+			}
+		}
+	}
+	
+	
+	free(news);
+/*	drop_lclist(qualified);*/
+	free(suggests);
+	return bests;
+}
+
+
 #define GT(t,i,j) t[(i)+(j)*(l)]
 /** The levenshtein function
  * Made to understand unicode characters
  */
-int levenshtein(char*w1,char*w2){
+unsigned int levenshtein(char*w1,char*w2){
 	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
 	int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
@@ -75,7 +144,7 @@ unsigned int jhash(const char*word){
 	return finalhash;
 }
 
-/** Build the hash dictionnary of the file at the given path 
+/** Build the hash dictionnary of the file at the given path
  */
 lclist**build_hashdict(char*path){
 	FILE*f;
@@ -86,7 +155,7 @@ lclist**build_hashdict(char*path){
 	hashd=calloc(HASH_DSIZ,sizeof(lclist*));
 	if (!hashd) ERROR("Malloc hash table");
 	
-	while(0<fscanf(f,"%s\n",str)){
+	while(0<fscanf(f,"%[^\n]\n",str)){
 		/* Calculate hash */
 		hashdict_addword(hashd,jhash(str),str,0);
 	}
@@ -108,7 +177,7 @@ lclist**build_3tupledict(char*path){
 	if (!tupled) ERROR("Malloc tuple table");
 	
 	strcpy(str,path);
-	while(0<fscanf(f,"%s\n",str)){
+	while(0<fscanf(f,"%[^\n]\n",str)){
 		max=strlen(str);
 		news=calloc(max+3,sizeof(char));
 		strcpy(news+1,str);

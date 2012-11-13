@@ -36,7 +36,7 @@ char*best_match(char*word,char*path){
 	char str[100],*bests=malloc(sizeof(char)*100);
 	if (!bests) ERROR("Malloc");
 	f=fopen(path,"r");
-	while(0<fscanf(f,"%s\n",str)){
+	while(0<fscanf(f,"%[^\n]\n",str)){
 		res=levenshtein(word,str);
 		if (res<=nb){
 			nb=res;
@@ -48,17 +48,50 @@ char*best_match(char*word,char*path){
 	return bests;
 }
 
+void correct_all(char*path){
+	FILE*f;
+	int stats[3]={0,0,0},st,i;
+	char str[100],goal[100],**founds;
+	lclist**hashd=build_hashdict("ressources/dico.txt");
+	lclist**tuples=build_3tupledict("ressources/dico.txt");
+	TIMER_INIT;
+	
+	printf("Starting analysis...\n");
+	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file");
+	
+	TIMER_STRT;
+	while ((fscanf(f,"%[^>]>%[^\n]\n",str,goal))>0){
+		/* Find best match */
+/*		printf("Analysing %s...(%s)\n",str,goal);*/
+		founds=ten_bests(str,tuples,hashd);
+		
+		/* Show the score */
+		st=2;
+		for (i=0;i<10;i+=1) {
+			if (founds[i]!=NULL) {
+/*				printf("%s ",founds[i]);*/
+				if (strcmp(goal,founds[i])==0){ st=(i!=0); break;}
+/*				else {printf("%s doesnt match\n",founds[i]);}*/
+			} /*else break;*/
+/*			printf("\n");*/
+		}
+/*		printf("\n");*/
+		stats[st]++;
+	}
+	TIMER_STOP;
+	printf("Analysis complete, lasted %ldms.\n%d words were first guess, %d were amongs the guesses and %d weren't found.\n",
+	TIMER_USEC/1000,stats[0],stats[1],stats[2]);
+}
+
 int main (int argc, char *argv[]){
 	if (argc<2) OUT("Usage: corrector <dico>");
 
-/*	printf("%d\n",str_eq("AAA","AA"));	*/
+	printf("%d\n",levenshtein("aigü","ignés"));	
 	#ifdef build_tests
-	exec_tests
+/*	exec_tests*/
 	#endif
 	
-/*	binary_print(argv[argc-1]);*/
-	build_hashdict(argv[1]);
-/*	build_3tupledict(argv[1]);*/
-/*	best_match(argv[1],argv[2]);*/
+	correct_all(argv[1]);
+	
 	return 0;
 }

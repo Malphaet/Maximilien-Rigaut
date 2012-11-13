@@ -26,7 +26,8 @@
 #include "wordtools.h"
 
 char*			best_match				(char*,char*);			/* The best match for the word in the dictionnary */
-
+void			correct_all				(char*);				/* Correct all words, compare */
+int				correct					(char*,char*,lclist**,lclist**);			/* Correct a string */
 #endif /* __CORRECTOR_H__ */
 
 

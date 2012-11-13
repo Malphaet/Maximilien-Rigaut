@@ -32,8 +32,7 @@ Here is a quick description of the implemented modules, covering their main func
 1. Detect posible options
 
 ### Hash Tables
-+ Load/Create a hash table
-+ Save it if created
++ Create a hash table
 + Do the hash comparaison
 
 ### Jacquard Distance
@@ -47,7 +46,9 @@ Here is a quick description of the implemented modules, covering their main func
 ### Important
 + Document functions
 + Clean and sort code
++ Remove all fscanf
 
 ### Cosmetic
++ Add groups
 
 ### Done
