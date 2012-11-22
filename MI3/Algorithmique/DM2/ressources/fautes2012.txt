@@ -105,7 +105,7 @@ emploit>emploi
 ennivré>enivré
 éthymologie>étymologie
 évidamment>évidemment
-ex aequo>ex æquo
+ex aequo>exæquo
 example>exemple
 exangue>exsangue
 exaustif>exhaustif
@@ -265,3 +265,4 @@ volontier>volontiers
 voluptes>volutes
 vraissemblable>vraisemblable
 waggon>wagon
+

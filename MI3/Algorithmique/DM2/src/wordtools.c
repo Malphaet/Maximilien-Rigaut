@@ -73,9 +73,8 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 				max2=strlen(node->data);
 				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
 					max2=u8_strlen(node->data); max=u8_strlen(word);
-					val=(100*levenshtein(node->data,word))/(1+(max>max2?max:max2));
+					val=(100*(levenshtein(node->data,word)))/(1+(max>max2?max:max2));
 					/* Add them to results */
-/*					val=10-val/10; *//*< Terrible precision loss */
 					if (!qualified[val]) qualified[val]=make_lclist();
 					add_lclist(qualified[val],node->data);
 					if (val==100) if (nbf++==10) break;
@@ -142,7 +141,7 @@ unsigned int levenshtein(char*w1,char*w2){
  * ### Speed
  * The XORing runs 17% faster in average than the modulus function.
  * ### Collisions
- * Hashing a word dictionnary the XOR function 
+ * Hashing a word dictionnary the XOR function produce +2% to -120% less collisions than modulus.
  */
 unsigned int jhash(const char*word){
 	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
@@ -178,11 +177,12 @@ lclist**build_hashdict(char*path){
 	return hashd;
 }
 
-/** Build the 3-tuple dictionnary*/
+/** Build the 3-tuple dictionnary */
 lclist**build_3tupledict(char*path){
 	FILE*f;
 	lclist**tupled;
-	char str[200],tuple[4]={0,0,0,0},*news;
+	char str[200],tuple[4]={0,0,0,0};
+	char*news;
 	unsigned int i,j,max,hash;
 	
 	/* Three chars of 8 bits can store up to 16777215 variables */
@@ -216,7 +216,7 @@ lclist**build_3tupledict(char*path){
  * @param careless Check if collisions are genuine
  * This function works in a very particular fashion, 
  * in the way that is doesn't calculate the hash and solve the collision,
- * but relie on the calling function to provide the tools for it
+ * but relie on the calling function to provide the tools for it.
  */
 void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 	char *sve_str;

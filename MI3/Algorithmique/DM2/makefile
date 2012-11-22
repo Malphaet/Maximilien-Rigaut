@@ -8,7 +8,7 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -Wextra -Wall -ansi -pedantic -std=c99 -Wshadow -O3 -I$(INC) -D build_tests
+CFLAGS = -Wextra -Wall -ansi -pedantic -std=c99 -Wshadow -O3 -g -I$(INC) -D build_tests
 LDFLAGS = 
 
 

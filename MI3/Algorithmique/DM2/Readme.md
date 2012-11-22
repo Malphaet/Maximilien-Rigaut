@@ -47,7 +47,8 @@ Here is a quick description of the implemented modules, covering their main func
 + Document functions
 + Clean and sort code
 + Remove all fscanf
-+ add utf8 support to word recognition
++ Add utf8 support to word recognition
++ + Better build_3tupledict, maybe a subfunction
 + Threadify it a little
 
 ### Cosmetic
