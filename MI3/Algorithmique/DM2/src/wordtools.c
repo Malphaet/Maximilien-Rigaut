@@ -223,8 +223,8 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 	unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
 	
-	/* Either the hash generate collision */
 	old_node=node=hashd[hash];
+	/* Either the hash generate collision */
 	if (node) {
 		/* If the hash is already present, skip it */
 		if (!careless) while ((node=node->next)!=NULL) {old_node=node; if (strcmp(node->data,str)==0) return;}

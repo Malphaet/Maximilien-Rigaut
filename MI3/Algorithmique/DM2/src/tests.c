@@ -55,8 +55,8 @@ void test_jhash(){
 					"Raven Guard",
 					"Alpha Legion"};
 	int size=18;
-	TIMER_STRT;
 	T_OPEN;
+	TIMER_STRT;
 	
 	for (i=0;i<nb_test;i+=1) jhash(val_test);
 	TIMER_STOP;
@@ -69,9 +69,7 @@ void test_hashtable(){
 	lclist**dict,*node;
 	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
-	T_OPEN;
 	unsigned int*hashs_col=calloc(10,sizeof(int));
-	
 	double fisher[]={	0.6670355074,
 						0.270090681373,
 						0.054681478988,
@@ -83,6 +81,8 @@ void test_hashtable(){
 						1.19540099017e-08,
 						5.37813561922e-10
 					};
+	T_OPEN;
+	
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");
 	TIMER_STRT;
 	dict=build_hashdict("./ressources/dico.txt");	
@@ -117,8 +117,8 @@ void test_3tuples(){
 	lclist**dict,*node;
 	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
-	T_OPEN;
 	unsigned int*hashs_col=calloc(70560,sizeof(int));
+	T_OPEN;
 	
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");
 	TIMER_STRT;

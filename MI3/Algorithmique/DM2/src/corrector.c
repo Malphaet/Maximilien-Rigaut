@@ -60,7 +60,7 @@ void correct_all(char*path){
 	
 	TIMER_STRT;
 	while ((fscanf(f,"%[^>]>%[^\n]\n",str,goal))>0){
-		/* Find best match */
+		/* Find bests matches */
 /*		printf("Analysing %s...(%s)\n",str,goal);*/
 		founds=ten_bests(str,tuples,hashd);
 		
@@ -73,7 +73,7 @@ void correct_all(char*path){
 		}
 		
 		if (st==2) {
-			printf("Analysing %s...(%s) leads to no match\n",str,goal);
+			printf("Analysing %s...(%s) led to no match\n",str,goal);
 			for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);
 			printf("\n");
 		}
@@ -90,7 +90,7 @@ int main (int argc, char *argv[]){
 	if (argc<2) OUT("Usage: corrector <dico>");
 	
 	#ifdef build_tests
-/*	exec_tests*/
+		exec_tests
 	#endif
 	correct_all(argv[1]);
 	

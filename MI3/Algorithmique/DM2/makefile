@@ -1,4 +1,6 @@
 CC = gcc
+EDITOR = geany
+QUIET = @
 
 BIN = bin
 OBJ = obj
@@ -8,7 +10,9 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-CFLAGS = -Wextra -Wall -ansi -pedantic -std=c99 -Wshadow -O3 -g -I$(INC) -D build_tests
+NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -std=c99 -Wshadow -O3 -I$(INC) 
+DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations -std=c99 -Wshadow -I$(INC) -g -D build_tests
+CFLAGS = $(DFLAGS)
 LDFLAGS = 
 
 
@@ -24,10 +28,12 @@ init:
 	mkdir -p $(DIRS)
 	
 $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
-	$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
+	$(QUIET)echo "Linking" $^ "to" $@
+	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
-	$(CC) -c $(CFLAGS) $< -o $@ 
+	$(QUIET)echo "Making" $@
+	$(QUIET)$(CC) -c $(CFLAGS) $< -o $@ 
 
 test: $(SRC)/test.c
 
@@ -35,14 +41,15 @@ doc: .PHONY
 	doxygen Doxyfile
 
 edit:
-	gedit 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
+	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
 	
-clean: 
-	rm -f $(OBJ)/*.o
-	rm -f $(TMP)/*
-	rm -f $(LIB)/*.a
+clean:
+	$(QUIET)echo "Cleaning objects and temporary files"
+	$(QUIET)rm -f $(OBJ)/*.o
+	$(QUIET)rm -f $(TMP)/*
 	
 cleaner: clean
-	rm -f $(BIN)/$(EXEC)
+	$(QUIET)echo "Deleting build target"
+	$(QUIET)rm -f $(BIN)/$(EXEC)
 
 .PHONY:
