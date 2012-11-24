@@ -1,4 +1,4 @@
-A little socket library  {#mainpage}
+Orthographic Corrector  {#mainpage}
 ====================
 
 ## Installation
@@ -6,7 +6,7 @@ A little socket library  {#mainpage}
 > + `make init`
 > + `make`
 > + `make doc`
-> + `make test`
+> + `./bin/corrector ressources/dico.txt ressources/fautes2012.txt`
 
 ## Introduction
 

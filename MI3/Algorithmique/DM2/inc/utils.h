@@ -30,40 +30,31 @@
  * All utilities are defined and documented here
  */
 
-/** @def WHERE 
- * Print the current position on the program 
- */
-
-/** @def ERROR(msg) 
- * Print the current error, with the error message @a msg and exits
- */
-
-/** @def OUT(msg) 
- * Exits the program with the message @a msg
- */
-
-/** @def FPRINT(msg) 
- * Print @a msg in stdout and flush 
- */
 
 /* ========= Defines ==========*/
-int verbose; /*< Verbosity of the program */
+int verbose; /**< Verbosity of the program */
 
-/* Functions */
-
+/** Print the current position on the program */
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
+/** Print the current error, with the error message @a msg and exits */
 #define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
+/** Exits the program with the message @a msg */
 #define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+/** Print @a msg in stdout and flush */
 #define FPRINT(msg)	{fprintf(stdout,msg);fflush(stdout);}
+/** Return the max beetween the two parameters */
 #define min(a,b)	((a)<(b)?(a):(b))
 
+/** Initialise the timer */
 #define TIMER_INIT struct timeval tvBegin, tvEnd
+/** Start the timer */
 #define TIMER_STRT gettimeofday(&tvBegin, NULL)
+/** Stop the timer */
 #define TIMER_STOP gettimeofday(&tvEnd, NULL)
+/** Get the time interval */
 #define TIMER_USEC ((tvEnd.tv_usec+1000000*tvEnd.tv_sec)-(tvBegin.tv_usec+1000000*tvBegin.tv_sec))
 
-int 			Salem 					(FILE*);
-/* Debug purpose */
+/* Prototype */
 void			binary_print			(char*);
 char*			itobin					(int,unsigned int);
 char* 			atobin					(char*);

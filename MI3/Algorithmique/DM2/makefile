@@ -11,7 +11,8 @@ TMP = tmp
 RSC = ressources
 
 NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -std=c99 -Wshadow -O3 -I$(INC) 
-DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations -std=c99 -Wshadow -I$(INC) -g -D build_tests
+DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
+		 -std=c99 -Wshadow -I$(INC) -g -D build_tests
 CFLAGS = $(DFLAGS)
 LDFLAGS = 
 
@@ -28,28 +29,29 @@ init:
 	mkdir -p $(DIRS)
 	
 $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
-	$(QUIET)echo "Linking" $^ "to" $@
+	$(QUIET)echo "LINK" $^ "=>" $@
 	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
-	$(QUIET)echo "Making" $@
-	$(QUIET)$(CC) -c $(CFLAGS) $< -o $@ 
-
-test: $(SRC)/test.c
+	$(QUIET)echo "MAKE" $^ "=>" $@
+	$(QUIET)$(CC) -c $(CFLAGS) $< -o $@
 
 doc: .PHONY
-	doxygen Doxyfile
+	$(QUIET)doxygen Doxyfile
+	$(QUIET)echo "MAKE DOCS"
+
 
 edit:
 	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
 	
 clean:
-	$(QUIET)echo "Cleaning objects and temporary files"
+	$(QUIET)echo "RMVE" $(OBJ)/*.o $(TMP)/* $(DOC)/*
 	$(QUIET)rm -f $(OBJ)/*.o
 	$(QUIET)rm -f $(TMP)/*
+	$(QUIET)rm -rf $(DOC)/*
 	
 cleaner: clean
-	$(QUIET)echo "Deleting build target"
+	$(QUIET)echo "RMVE" $(BIN)/$(EXEC)
 	$(QUIET)rm -f $(BIN)/$(EXEC)
 
 .PHONY:

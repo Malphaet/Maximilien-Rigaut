@@ -1,15 +1,15 @@
 /*
-  Basic UTF-8 manipulation routines
-  by Jeff Bezanson
-  placed in the public domain Fall 2005
-
-  This code is designed to provide the utilities you need to manipulate
-  UTF-8 as an internal string encoding. These functions do not perform the
-  error checking normally needed when handling UTF-8 data, so if you happen
-  to be from the Unicode Consortium you will want to flay me alive.
-  I do this because error checking can be performed at the boundaries (I/O),
-  with these routines reserved for higher performance on data known to be
-  valid.
+ * Basic UTF-8 manipulation routines
+ * by Jeff Bezanson
+ * placed in the public domain Fall 2005
+ *
+ * This code is designed to provide the utilities you need to manipulate
+ * UTF-8 as an internal string encoding. These functions do not perform the
+ * error checking normally needed when handling UTF-8 data, so if you happen
+ * to be from the Unicode Consortium you will want to flay me alive.
+ * I do this because error checking can be performed at the boundaries (I/O),
+ * with these routines reserved for higher performance on data known to be
+ * valid.
 */
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,21 +38,20 @@ static const char trailingBytesForUTF8[256] = {
     2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5
 };
 
-/* returns length of next utf-8 sequence */
+/** returns length of next utf-8 sequence */
 int u8_seqlen(char *s)
 {
     return trailingBytesForUTF8[(unsigned int)(unsigned char)s[0]] + 1;
 }
 
-/* conversions without error checking
-   only works for valid UTF-8, i.e. no 5- or 6-byte sequences
-   srcsz = source size in bytes, or -1 if 0-terminated
-   sz = dest size in # of wide characters
-
-   returns # characters converted
-   dest will always be L'\0'-terminated, even if there isn't enough room
-   for all the characters.
-   if sz = srcsz+1 (i.e. 4*srcsz+4 bytes), there will always be enough space.
+/** Conversions without error checking
+ * Only works for valid UTF-8, i.e. no 5- or 6-byte sequences
+ * @param dest Sestination, will always be L'\0'-terminated, even if there isn't enough room for all the characters.
+ * @param srcsz Source size in bytes, or -1 if 0-terminated
+ * @param sz Dest size in # of wide characters
+ * @param src Source
+ * @return # characters converted
+ * if sz = srcsz+1 (i.e. 4*srcsz+4 bytes), there will always be enough space.
 */
 int u8_toucs(u_int32_t *dest, int sz, char *src, int srcsz)
 {
@@ -87,18 +86,21 @@ int u8_toucs(u_int32_t *dest, int sz, char *src, int srcsz)
     return i;
 }
 
-/* srcsz = number of source characters, or -1 if 0-terminated
-   sz = size of dest buffer in bytes
-
-   returns # characters converted
-   dest will only be '\0'-terminated if there is enough space. this is
-   for consistency; imagine there are 2 bytes of space left, but the next
-   character requires 3 bytes. in this case we could NUL-terminate, but in
-   general we can't when there's insufficient space. therefore this function
-   only NUL-terminates if all the characters fit, and there's space for
-   the NUL as well.
-   the destination string will never be bigger than the source string.
-*/
+/** From char string to utf8 string
+ * @param src Source char string
+ * @param dest Destination u_int32_t string
+ * @param srcsz number of source characters, or -1 if 0-terminated
+ * @param sz size of dest buffer in bytes
+ * 
+ * @return # characters converted
+ * For consistency purpose, the destination will only be '\0'-terminated if there is enough space.
+ * imagine there are 2 bytes of space left, but the next
+ * character requires 3 bytes. in this case we could NUL-terminate, but in
+ * general we can't when there's insufficient space. therefore this function
+ * only NUL-terminates if all the characters fit, and there's space for
+ * the NUL as well.
+ * The destination string will never be bigger than the source string.
+ */
 int u8_toutf8(char *dest, int sz, u_int32_t *src, int srcsz)
 {
     u_int32_t ch;
@@ -167,7 +169,7 @@ int u8_wc_toutf8(char *dest, u_int32_t ch)
     return 0;
 }
 
-/* charnum => byte offset */
+/** charnum => byte offset */
 int u8_offset(char *str, int charnum)
 {
     int offs=0;
@@ -180,7 +182,7 @@ int u8_offset(char *str, int charnum)
     return offs;
 }
 
-/* byte offset => charnum */
+/** byte offset => charnum */
 int u8_charnum(char *s, int offset)
 {
     int charnum = 0, offs=0;
@@ -193,7 +195,7 @@ int u8_charnum(char *s, int offset)
     return charnum;
 }
 
-/* number of characters */
+/** number of characters */
 int u8_strlen(char *s)
 {
     int count = 0;
@@ -205,7 +207,7 @@ int u8_strlen(char *s)
     return count;
 }
 
-/* reads the next utf-8 sequence out of a string, updating an index */
+/** reads the next utf-8 sequence out of a string, updating an index */
 u_int32_t u8_nextchar(char *s, int *i)
 {
     u_int32_t ch = 0;
@@ -245,7 +247,7 @@ int hex_digit(char c)
             (c >= 'a' && c <= 'f'));
 }
 
-/* assumes that src points to the character after a backslash
+/** assumes that src points to the character after a backslash
    returns number of input characters processed */
 int u8_read_escape_sequence(char *str, u_int32_t *dest)
 {
@@ -301,9 +303,10 @@ int u8_read_escape_sequence(char *str, u_int32_t *dest)
     return i;
 }
 
-/* convert a string with literal \uxxxx or \Uxxxxxxxx characters to UTF-8
-   example: u8_unescape(mybuf, 256, "hello\\u220e")
-   note the double backslash is needed if called on a C string literal */
+/** Convert a string with literal \\uxxxx or \\Uxxxxxxxx characters to UTF-8
+ * Example: u8_unescape(mybuf, 256, "hello\\u220e")
+ * Note the double backslash is needed if called on a C string literal 
+ */
 int u8_unescape(char *buf, int sz, char *src)
 {
     int c=0, amt;

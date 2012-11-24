@@ -20,28 +20,18 @@
 
 #include "utils.h"
 
-/** Line counter by Salem */
-int Salem (FILE*fd){
-	int nlines=0, partial=0;
-	char buff[1024] = "";
-
-	while (fgets(buff,1024,fd)!=NULL){
-		if (strchr(buff,'\n')){
-			nlines++;
-			partial = 0;
-		} else partial = 1;
-	}
-	return nlines += partial;
-}
-
-
-/* Debug tools */
+/**@defgroup tools Debug tools 
+ * @{
+ */
 /** Print the given char in binary */
 void binary_print(char*val){
 	printf("%s\n",atobin(val));
 }
 
-/** Convert the char to binary format */
+/** Convert the char to binary format 
+ * @param str The string to convert to binary
+ * @return The binary value as a string
+ */
 char* atobin(char*str){
 	char*res=malloc(((strlen(str)*sizeof(char))*8+1)*sizeof(char));
 	char*tmp=res;
@@ -56,7 +46,9 @@ char* atobin(char*str){
 
 /** Convert the integer to binary format 
  * @param nb The number to convert
- * @param size The real number of bytes of the number (sizeof)*8
+ * @param size The number of bits to print sizeof()*8
+ * 
+ * @return The binary value as a string
  */
 char* itobin(int nb,unsigned int size){
 	char*res=calloc(size+1,sizeof(char));
@@ -68,3 +60,4 @@ char* itobin(int nb,unsigned int size){
 	}
 	return res;
 }
+/** @} */

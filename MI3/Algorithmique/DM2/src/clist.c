@@ -20,7 +20,14 @@
 
 #include "clist.h"
 
-/** Make a new chained list */
+/** @file clist.c Chained lists structures */
+/** @defgroup lclist Small chained lists functions
+ * @{
+*/
+
+/** Make a new chained list 
+ * @return Return an empty clist
+ */
 lclist* make_lclist(){
 	lclist*l=malloc(sizeof(lclist));
 	l->data=LPOP_ERROR;
@@ -29,14 +36,19 @@ lclist* make_lclist(){
 	return l;
 }
 
-/** Drop the list */
+/** Drop the list 
+ * @param l The clist to drop
+ */
 void drop_lclist(lclist*l){
 	lclist*next,*curr;
 	for (curr=l;(next=curr->next)!=NULL;curr=next) free(curr);
 	free(curr);
 }
 
-/** Add an element to the list */
+/** Add an element to the list 
+ * @param l The clist to add to
+ * @param data The data to add
+ */
 void add_lclist(lclist*l,DATATYPE data){
 	lclist*new=malloc(sizeof(lclist));
 	new->data=data;
@@ -44,7 +56,10 @@ void add_lclist(lclist*l,DATATYPE data){
 	l->next=new;
 }
 
-/** Delete the first element of the list */
+/** Delete the first element of the list
+ * @param l The list to pop the last element$
+ * @return The value popped (You should free it properly if needed)
+ */
 DATATYPE pop_lclist(lclist*l){
 	DATATYPE ret; lclist*new;
 	if (l->next==NULL) return LPOP_ERROR;
@@ -55,9 +70,13 @@ DATATYPE pop_lclist(lclist*l){
 	return ret;
 }
 
-/** Lenght of the list */
+/** Lenght of the list 
+ * @param l The list to mesure
+ * @return The size of the list
+ */
 int len_lclist(lclist*l){
 	int ln=0; lclist*curr=l;
 	while ((curr=curr->next)!=NULL) ln++;
 	return ln;
 }
+/** @} */
