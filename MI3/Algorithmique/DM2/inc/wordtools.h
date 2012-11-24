@@ -40,18 +40,18 @@
 /* Hash */
 #define HASH_S_SIZE 16 		/**< Size of the checksum (in bits) */
 #define HASH_M_SIZE 20 		/**< Size of the checksum (in bits) */
-#define HASH_L_SIZE 24 		/**< Size of the checksum (in bits) */
+#define HASH_L_SIZE 28 		/**< Size of the checksum (in bits) */
 #define HASH_SIZE	 HASH_M_SIZE/**< Dictionnary standard size */
 
 #define HASH_S_DSIZ 65536		/**< Dictionnary size (2**HASH_SIZE) */
 #define HASH_M_DSIZ 1048576	/**< Dictionnary size (2**HASH_SIZE) */
-#define HASH_L_DSIZ 16777216	/**< Dictionnary size (2**HASH_SIZE) */
+#define HASH_L_DSIZ 268435456	/**< Dictionnary size (2**HASH_SIZE) */
 #define HASH_DSIZ	 HASH_M_DSIZ/**< Dictionnary standard size */
 
 #define jhash(x)	 jhash_char((x),HASH_SIZE)	/**< Link to the hash function, for flexibility purpose */
 #define jhash_S(x)  jhash_char((x),HASH_S_SIZE) /**< Small sized hash */
 #define jhash_M(x)  jhash_char((x),HASH_M_SIZE) /**< Medium sized hash */
-#define jhash_L(x)  jhash_char((x),HASH_L_SIZE) /**< Large sized hash */
+#define jhash_L(x)  jhash_char((x),HASH_M_SIZE) /**< Large sized hash */
 
 #define HASH_POWR 5			/**< Power of two to elevate the checksum */
 

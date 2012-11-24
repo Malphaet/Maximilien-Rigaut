@@ -125,7 +125,7 @@ void test_3tuples(){
 	dict=build_3tupledict("./ressources/dico.txt");	
 	TIMER_STOP;
 	
-	for (i=0;i<HASH_DSIZ;i+=1) if(dict[i]){
+	for (i=0;i<HASH_L_DSIZ;i+=1) if(dict[i]){
 		fprintf(test,"%05x %s",i,itobin(i,HASH_SIZE));
 		node=dict[i];
 		col=0;
@@ -142,6 +142,10 @@ void test_3tuples(){
 	T_CLOSE;
 	
 	printf("Time elapsed: %li ms, alpha: %f, word digested: %d, worst collision: %d\n",TIMER_USEC/1000,(float)nb/HASH_DSIZ,nb,max_col-1);
+	printf("Hash repartition :\nk Number\n");
+	for (i=0;i<20;i+=1){
+		if (hashs_col[i]) printf("%d %6d\n",i,hashs_col[i]);
+	}
 }
 
 #undef nb_test

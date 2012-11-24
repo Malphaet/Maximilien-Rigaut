@@ -110,10 +110,10 @@ lclist**build_3tupledict(char*path){
 	
 	/* Three chars of 8 bits can store up to 16777215 variables */
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
-	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
+	tupled=calloc(HASH_L_DSIZ,sizeof(lclist*));
 	if (!tupled) ERROR("Malloc tuple table");
 	
-	strcpy(str,path);
+	//strcpy(str,path);
 	while(0<fscanf(f,"%[^\n]\n",str)){
 		max=strlen(str);
 		news=calloc(max+3,sizeof(char));
@@ -122,7 +122,7 @@ lclist**build_3tupledict(char*path){
 		
 		for (i=0;i<max;i+=1){
 			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-			hash=jhash(tuple);
+			hash=jhash_L(tuple);
 			hashdict_addword(tupled,hash,str,1);
 		}
 		free(news);
@@ -136,12 +136,12 @@ lclist**build_3tupledict(char*path){
  * @param hashd The hash dictionnary (a chained list)
  * @param hash The hash of the given object
  * @param str The object hashed, to store if unique
- * @param careless Check if collisions are genuine
+ * @param subhash Check if collisions are genuine
  * This function works in a very particular fashion, 
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it.
  */
-void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
 	char *sve_str;
 	unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
@@ -150,7 +150,12 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 	/* Either the hash generate collision */
 	if (node) {
 		/* If the hash is already present, skip it */
-		if (!careless) while ((node=node->next)!=NULL) {old_node=node; if (strcmp(node->data,str)==0) return;}
+		if (!subhash) while ((node=node->next)!=NULL) {old_node=node; if (strcmp(node->data,str)==0) return;}
+		else {
+			/* The function received a subhash, calculate the full one */
+			hash=jhash(str);
+			
+		}
 	/* Either it doesn't */
 	} else hashd[hash]=old_node=make_lclist();
 	
@@ -160,7 +165,7 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int careless){
 	
 	/* Add the string to the list */
 	strcpy(sve_str,str);
-	if (careless) add_lclist(old_node,sve_str);
+	if (subhash) add_lclist(old_node,sve_str);
 	else{
 		new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
 		new_node->data=sve_str;
