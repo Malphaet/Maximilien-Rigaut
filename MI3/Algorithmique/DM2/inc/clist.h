@@ -25,7 +25,7 @@
 #include "utils.h"
 #include <stdlib.h>
 /* ======== Defines ========= */
-#define DATATYPE char*				/**< The type of data handled by the lists */
+#define DATATYPE void*				/**< The type of data handled by the lists */
 #define LPOP_ERROR NULL			/**< Extremely important for automation */
 
 /* ======== Structures ========= */

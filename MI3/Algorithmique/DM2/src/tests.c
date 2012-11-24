@@ -93,7 +93,7 @@ void test_hashtable(){
 		node=dict[i];
 		col=0;
 		while((node=node->next)!=NULL) {
-			fprintf(test," %s",node->data);
+			fprintf(test," %s",(char*)node->data);
 			col++;
 			nb++;
 		}
@@ -130,7 +130,7 @@ void test_3tuples(){
 		node=dict[i];
 		col=0;
 		while((node=node->next)!=NULL) {
-			fprintf(test," %s",node->data);
+			fprintf(test," %s",(char*)node->data);
 			col++;
 			nb++;
 		}

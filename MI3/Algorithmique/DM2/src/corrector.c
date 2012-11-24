@@ -208,7 +208,7 @@ int main (int argc, char *argv[]){
 	#ifdef build_tests
 		exec_tests
 	#endif
-	//correct_all(argv[1],argv[2]);
+	correct_all(argv[1],argv[2]);
 	
 	return 0;
 }
