@@ -18,7 +18,7 @@
  * along with Algorithms 2012. If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @file clist.h Chained lists */
+/** @file clist.h Chained lists header */
 
 #ifndef __LLISTS_H__
 #define __LLISTS_H__
@@ -38,10 +38,10 @@ typedef struct lchained_list {
 
 /* ======== Prototype ========= */
 
-lclist*	 make_lclist			();									/**< Make a new chained list */
-void	 drop_lclist			(lclist*);							/**< Drop the list */
-void	 add_lclist				(lclist*,DATATYPE);					/**< Add an element to the list */
-DATATYPE pop_lclist				(lclist*);							/**< Delete the first element of the list */
-int		 len_lclist				(lclist*);							/**< Lenght of the list */
+lclist*	 make_lclist			();									/* Make a new chained list */
+void	 drop_lclist			(lclist*);							/* Drop the list */
+void	 add_lclist				(lclist*,DATATYPE);					/* Add an element to the list */
+DATATYPE pop_lclist				(lclist*);							/* Delete the first element of the list */
+int		 len_lclist				(lclist*);							/* Lenght of the list */
 
 #endif /* __LLISTS_H__ */

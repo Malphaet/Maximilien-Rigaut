@@ -20,8 +20,9 @@
 
 #include "clist.h"
 
-/** @file clist.c Chained lists structures */
+/** @file clist.c Chained lists source */
 /** @defgroup lclist Small chained lists functions
+ * @brief Minimalistic way of supporting chained lists
  * @{
 */
 

@@ -18,6 +18,8 @@
  * along with Algorithms 2012. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file corrector.h Word correction header */
+
 #ifndef __CORRECTOR_H__
 #define __CORRECTOR_H__
 
@@ -25,7 +27,7 @@
 
 #include "wordtools.h"
 
-
+char**			ten_bests				(char*,lclist**,lclist**); /* Return the ten best guesses for the given word */
 char*			best_match				(char*,char*);				/**< The best match for the word in the dictionnary */		
 void			correct_all				(char*,char*);				/**< Correct all words, compare */	
 int				correct					(char*,char*,lclist**,lclist**);	/**< Correct a string */

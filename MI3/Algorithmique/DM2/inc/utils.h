@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-/** @file utils.h Utilities
+/** @file utils.h Utilities header
  *
  * All utilities are defined and documented here
  */

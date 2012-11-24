@@ -10,10 +10,11 @@ DOC = doc
 TMP = tmp
 RSC = ressources
 
-NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -std=c99 -Wshadow -O3 -I$(INC) 
+NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
+		 -std=c99 -Wshadow -O3 -I$(INC) 
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -I$(INC) -g -D build_tests
-CFLAGS = $(DFLAGS)
+CFLAGS = $(NFLAGS)
 LDFLAGS = 
 
 
@@ -42,7 +43,7 @@ doc: .PHONY
 
 
 edit:
-	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
+	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md Doxyfile &
 	
 clean:
 	$(QUIET)echo "RMVE" $(OBJ)/*.o $(TMP)/* $(DOC)/*

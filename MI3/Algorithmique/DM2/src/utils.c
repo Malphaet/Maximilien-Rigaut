@@ -18,12 +18,16 @@
  * along with Algorithms 2012. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @file utils.c Utilities source */
 #include "utils.h"
 
 /**@defgroup tools Debug tools 
+ * @brief Simple debugging tools
  * @{
  */
-/** Print the given char in binary */
+/** Print the given char in binary 
+ * @param val The value to print
+ */
 void binary_print(char*val){
 	printf("%s\n",atobin(val));
 }

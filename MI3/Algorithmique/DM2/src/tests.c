@@ -61,7 +61,7 @@ void test_jhash(){
 	for (i=0;i<nb_test;i+=1) jhash(val_test);
 	TIMER_STOP;
 	res=TIMER_USEC;
-	while (size--)	fprintf(test,"%05x %s %s\n",jhash(cluster[size]),itobin(jhash(cluster[size]),HASH_SIZE),cluster[size]);
+	while (size--)	fprintf(test,"%05x %s %s\n",jhash(cluster[size]),itobin(jhash(cluster[size]),HASH_M_SIZE),cluster[size]);
 	printf("Time elapsed: %li ms. Hash speed: %li hashs per ms\n",res/1000,nb_test/(res/1000));
 }
 

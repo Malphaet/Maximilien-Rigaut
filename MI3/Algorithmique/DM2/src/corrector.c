@@ -27,8 +27,89 @@
 
 /** @file corrector.c Word corrector */
 /** @defgroup correctf Correction functions 
+ * @brief A handful correction function
  * @{
  */
+
+/** Find the ten best correction guesses for the given word
+ * @param word The word to correct
+ * @param tuples The tuples hashes 
+ * @param hashd The dictionnary hash 
+ * @return The list of the ten (or less) best guesses
+ */
+char**ten_bests(char*word,lclist**tuples,lclist**hashd){
+	char tuple[4]={0,0,0,0},*news,**bests;
+	unsigned int i,j,max,hash,*nbmatching,val,max2,nbf=0;
+	lclist**suggests;		/* Value that each tuple suggests */
+	lclist**qualified,*node;
+	
+	/* Variable initialisation */
+	max=strlen(word);
+	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word");
+	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list");
+	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list");
+	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");
+	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words");
+	
+	/* Check into the dictionnary for existence */
+	node=hashd[jhash(word)];
+	if (node) while ((node=node->next)!=NULL) if (strcmp(word,node->data)==0){
+		bests[0]=node->data; bests[1]=NULL;
+		goto finish;
+	}
+	
+	/* Analyse the tuples */
+	strcpy(news+1,word);
+	news[0]='$';news[max+1]='$';
+	
+	for (i=0;i<max;i+=1){
+		for (j=0;j<3;j+=1) tuple[j]=news[i+j];
+		hash=jhash(tuple);
+		suggests[i]=tuples[hash];
+	}
+	
+	/* Calculate number of matching tuples */
+	for (i=0;i<max;i+=1){
+		node=suggests[i];
+		if (node) while((node=node->next)!=NULL) nbmatching[jhash(node->data)]++;
+	}
+	
+	/* Extract best suggestions */
+	for (i=0;i<HASH_DSIZ;i+=1){
+		if (nbmatching[i]) {
+			/* Collisions may occur, however levenshtein will take care of that */
+			node=hashd[i];
+			while ((node=node->next)!=NULL) {
+				max2=strlen(node->data);
+				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
+					max2=u8_strlen(node->data); max=u8_strlen(word);
+					val=(100*(levenshtein(node->data,word)))/(1+(max>max2?max:max2));
+					/* Add them to results */
+					if (!qualified[val]) qualified[val]=make_lclist();
+					add_lclist(qualified[val],node->data);
+					if (val==100) if (nbf++==10) break;
+/*					if (val>100) printf("%s sounds weird (%d)\n",node->data,val);*/
+				}
+			}
+		}
+	}
+	
+	j=0;
+	for (i=0;i<100;i++){
+		node=qualified[i];
+		if (node){ 
+			while((node=node->next)!=NULL) if (j<10) bests[j++]=node->data;
+			drop_lclist(qualified[i]);
+		}
+	}
+	bests[j]=NULL;
+	
+	/* Clean and exit */
+	finish:
+		free(news);
+		free(suggests);
+		return bests;
+}
 
 /** Find the best match amongst a dictionnary
  * @param word The word to correct
