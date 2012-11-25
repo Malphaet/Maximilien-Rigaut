@@ -19,21 +19,20 @@ Here is a quick description of the implemented modules, covering their main func
 + Hashing a string
 + Linking each tri-gram to a list
 + Creating a trigram-dictionnary
-+ + Storing/Loading this dictionnary for memory efficiency purposes
-+ 
+
 ### Orthographic Corrector
 
 ## Performances of different algorithms
 
 ## Modus Operandi
-### Twist'n'jazz
+### Twisting
 1. Detect hiphenable characters (being: "a:âà" e:"éèë" i:"ïî" c:"ç" oe:"")
 1. Twist the words
 1. Detect posible options
 
 ### Hash Tables
 + Create a hash table
-+ Do the hash comparaison
++ Do hash comparaison
 
 ### Jacquard Distance
 + Calculate the Jacquard Distance
@@ -42,16 +41,9 @@ Here is a quick description of the implemented modules, covering their main func
 ## Usage
 
 ## Todo
-
-### Important
-+ Document functions
-+ Clean and sort code
-+ Remove all fscanf
++ @ref todo
++ Free a lot more ressources
++ Update and complete this page
 + Add utf8 support to word recognition
-+ + Better build_3tupledict, maybe a subfunction
++ Better @ref build_3tupledict, maybe a subfunction
 + Threadify it a little
-
-### Cosmetic
-+ Add groups
-
-### Done

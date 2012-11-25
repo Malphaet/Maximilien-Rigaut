@@ -110,7 +110,7 @@ lclist**build_3tupledict(char*path){
 	
 	/* Three chars of 8 bits can store up to 16777215 variables */
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
-	tupled=calloc(HASH_L_DSIZ,sizeof(lclist*));
+	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
 	if (!tupled) ERROR("Malloc tuple table");
 	
 	//strcpy(str,path);
@@ -122,7 +122,7 @@ lclist**build_3tupledict(char*path){
 		
 		for (i=0;i<max;i+=1){
 			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-			hash=jhash_L(tuple);
+			hash=jhash(tuple);
 			hashdict_addword(tupled,hash,str,1);
 		}
 		free(news);
@@ -149,13 +149,15 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
 	old_node=node=hashd[hash];
 	/* Either the hash generate collision */
 	if (node) {
-		/* If the hash is already present, skip it */
-		if (!subhash) while ((node=node->next)!=NULL) {old_node=node; if (strcmp(node->data,str)==0) return;}
-		else {
+		/** If the hash is already present, skip it
+		 * @todo Find a better redondency check 
+		 */
+		if (!subhash) while ((node=node->next)!=NULL) {old_node=node; if (strcmp((char*)node->data,str)==0) return;}
+		//else {
 			/* The function received a subhash, calculate the full one */
-			hash=jhash(str);
+			//hash=jhash(str);
 			
-		}
+		//}
 	/* Either it doesn't */
 	} else hashd[hash]=old_node=make_lclist();
 	
@@ -165,10 +167,10 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
 	
 	/* Add the string to the list */
 	strcpy(sve_str,str);
-	if (subhash) add_lclist(old_node,sve_str);
+	if (subhash) add_lclist(old_node,(void*)sve_str);
 	else{
 		new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
-		new_node->data=sve_str;
+		new_node->data=(void*)sve_str;
 		new_node->next=NULL;
 		old_node->next=new_node;
 	}
@@ -184,7 +186,7 @@ int hashdict_in(lclist**hashd,char*str){
 	unsigned int hash=jhash(str);
 	if (!(node=hashd[hash])) return 0;
 	
-	while((node=node->next)!=NULL) if (strcmp(node->data,str)) return 1;
+	while((node=node->next)!=NULL) if (strcmp((char*)node->data,str)) return 1;
 	return 0;
 }
 

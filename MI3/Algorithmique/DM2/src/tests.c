@@ -125,7 +125,7 @@ void test_3tuples(){
 	dict=build_3tupledict("./ressources/dico.txt");	
 	TIMER_STOP;
 	
-	for (i=0;i<HASH_L_DSIZ;i+=1) if(dict[i]){
+	for (i=0;i<HASH_DSIZ;i+=1) if(dict[i]){
 		fprintf(test,"%05x %s",i,itobin(i,HASH_SIZE));
 		node=dict[i];
 		col=0;

@@ -53,8 +53,8 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	
 	/* Check into the dictionnary for existence */
 	node=hashd[jhash(word)];
-	if (node) while ((node=node->next)!=NULL) if (strcmp(word,node->data)==0){
-		bests[0]=node->data; bests[1]=NULL;
+	if (node) while ((node=node->next)!=NULL) if (strcmp(word,(char*)node->data)==0){
+		bests[0]=(char*)node->data; bests[1]=NULL;
 		goto finish;
 	}
 	
@@ -69,26 +69,32 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	}
 	
 	/* Calculate number of matching tuples */
+	//val=0;
 	for (i=0;i<max;i+=1){
 		node=suggests[i];
-		if (node) while((node=node->next)!=NULL) nbmatching[jhash(node->data)]++;
+		if (node) while((node=node->next)!=NULL) {
+			nbmatching[jhash((char*)node->data)]++;
+			//val++;
+		}
 	}
-	
-	/* Extract best suggestions */
-	for (i=0;i<HASH_DSIZ;i+=1){
+	//printf("Found %d hashs\n",val);
+	/** Extract best suggestions 
+	 *  @todo Improve the hash counting loop 
+	 */
+	for (i=0;i<HASH_DSIZ;i+=1){ 
 		if (nbmatching[i]) {
 			/* Collisions may occur, however levenshtein will take care of that */
 			node=hashd[i];
 			while ((node=node->next)!=NULL) {
-				max2=strlen(node->data);
+				max2=strlen((char*)node->data);
 				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
-					max2=u8_strlen(node->data); max=u8_strlen(word);
-					val=(100*(levenshtein(node->data,word)))/(1+(max>max2?max:max2));
+					max2=u8_strlen((char*)node->data); max=u8_strlen(word);
+					val=(100*(levenshtein((char*)node->data,word)))/(1+(max>max2?max:max2));
 					/* Add them to results */
 					if (!qualified[val]) qualified[val]=make_lclist();
-					add_lclist(qualified[val],node->data);
+					add_lclist(qualified[val],(void*)node->data);
 					if (val==100) if (nbf++==10) break;
-/*					if (val>100) printf("%s sounds weird (%d)\n",node->data,val);*/
+					//if (val>100) printf("%s sounds weird (%d)\n",(char*)node->data,val);
 				}
 			}
 		}
@@ -98,7 +104,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	for (i=0;i<100;i++){
 		node=qualified[i];
 		if (node){ 
-			while((node=node->next)!=NULL) if (j<10) bests[j++]=node->data;
+			while((node=node->next)!=NULL) if (j<10) bests[j++]=(char*)node->data;
 			drop_lclist(qualified[i]);
 		}
 	}
