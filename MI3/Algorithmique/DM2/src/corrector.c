@@ -32,6 +32,7 @@
  */
 
 /** Find the ten best correction guesses for the given word
+ * @todo Make the function Leak free
  * @param word The word to correct
  * @param tuples The tuples hashes 
  * @param hashd The dictionnary hash 
@@ -39,7 +40,7 @@
  */
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
-	unsigned int i,j,max,hash,*nbmatching,val,max2,nbf=0,*found_hashs,founds;
+	unsigned int i,j,max,hash,*nbmatching,val,max2,*found_hashs,founds;
 	lclist**suggests;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 	
@@ -50,7 +51,8 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
 	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");//freed
 	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words"); //freed
-	found_hashs=malloc(705600*sizeof(unsigned int)); if (!found_hashs) ERROR("Malloc found hashes");
+	found_hashs=malloc(705600*sizeof(unsigned int)); if (!found_hashs) ERROR("Malloc found hashes"); //freed
+	
 	/* Check into the dictionnary for existence */
 	node=hashd[jhash(word)];
 	if (node) while ((node=node->next)!=NULL) if (strcmp(word,(char*)node->data)==0){
@@ -64,7 +66,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	
 	for (i=0;i<max;i+=1){
 		for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-		hash=jhash_L(tuple);
+		hash=jhash(tuple);
 		suggests[i]=tuples[hash];
 	}
 	
@@ -79,22 +81,24 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	}
 	
 	/** Extract best suggestions 
-	 *  @todo Improve the hash counting loop 
+	 *  @todo Make this readable
 	 */
 	for (j=0;j<founds;j+=1){ 
-		hash=found_hashs[j];
 		/* Collisions may occur, however levenshtein will take care of that */
+		hash=found_hashs[j];
 		node=hashd[hash];
 		while ((node=node->next)!=NULL) {
+			/* Avoid words with error on the first letter, cruel but efficient */
+			if (((char*)node->data)[0]!=word[0]) continue;
 			max2=strlen((char*)node->data);
-			if (((nbmatching[hash]*10)/(max+max2-nbmatching[hash]))>2){
-				max2=u8_strlen((char*)node->data); max=u8_strlen(word);
-				val=(100*(levenshtein((char*)node->data,word)))/(1+(max>max2?max:max2));
-				/* Add them to results */
+			/* Only analyse the guesses who are jacquard-close to the word to correct */
+			if (((nbmatching[hash]*10)/(max+max2-nbmatching[hash]))>1){
+				/* Calculate the ponderated levenshtein distance */
+				val=levenshtein((char*)node->data,word);
+				
+				/* Add the guess to results */
 				if (!qualified[val]) qualified[val]=make_lclist();
 				add_lclist(qualified[val],(void*)node->data);
-				if (val==100) if (nbf++==10) break;
-				//if (val>100) printf("%s sounds weird (%d)\n",(char*)node->data,val);
 			}
 		}
 		
@@ -117,29 +121,6 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		free(nbmatching);
 		free(found_hashs);
 		return bests;
-}
-
-/** Find the best match amongst a dictionnary
- * @param word The word to correct
- * @param path The dictionnay path
- * @return The best match according to the levenshtein function
- */
-char*best_match(char*word,char*path){
-	FILE*f;
-	int nb=6,res;
-	char str[100],*bests=malloc(sizeof(char)*100);
-	if (!bests) ERROR("Malloc");
-	f=fopen(path,"r");
-	while(0<fscanf(f,"%[^\n]\n",str)){
-		res=levenshtein(word,str);
-		if (res<=nb){
-			nb=res;
-			printf("%d %d %s\n",nb,res,str);
-			strcpy(bests,str);
-		}
-	}
-	fclose(f);
-	return bests;
 }
 
 /** Correct all word in the given path

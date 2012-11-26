@@ -14,7 +14,7 @@ NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-lo
 		 -std=c99 -Wshadow -O3 -I$(INC) 
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -I$(INC) -g -D build_tests
-CFLAGS = $(NFLAGS)
+CFLAGS = $(DFLAGS)
 LDFLAGS = 
 
 

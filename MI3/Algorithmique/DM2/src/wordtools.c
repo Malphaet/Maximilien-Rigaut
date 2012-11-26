@@ -21,12 +21,11 @@
 
 #define GT(t,i,j) t[(i)+(j)*(l)] /**< Acess to element t[i,j] */
 /** The levenshtein function
- * Note that this function doesn't really handle unicode characters 
- * hence finding a huge difference with all of them, this is still in progress
+ * Note that the function return the ponderated levenshtein function with 2 digits precision.
  * @param w1,w2 The words to compare
  * @return the distance, in permutation and additions/deletion between the two words aka the levenshtein distance
  */
-unsigned int levenshtein(char*w1,char*w2){ //leak free
+unsigned int levenshtein(char*w1,char*w2){
 	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
 	int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
@@ -45,8 +44,9 @@ unsigned int levenshtein(char*w1,char*w2){ //leak free
 	}
 	
 	cost=GT(table,i-1,j-1);
+	
 	free(table);
-	return cost;
+	return (100*(cost))/(1+(l>l2?l:l2));
 }
 #undef GT
 
@@ -71,7 +71,7 @@ unsigned int jhash_char(const char*word,int hash_size){
 }
 
 /** Build the hash dictionnary of the file at the given path */
-lclist**build_hashdict(char*path){ //leak free
+lclist**build_hashdict(char*path){
 	FILE*f;
 	lclist**hashd;
 	char str[200];
@@ -89,7 +89,7 @@ lclist**build_hashdict(char*path){ //leak free
 }
 
 /** Build the 3-tuple dictionnary */
-lclist**build_3tupledict(char*path){ //leak free
+lclist**build_3tupledict(char*path){
 	FILE*f;
 	lclist**tupled;
 	char str[200],tuple[4]={0,0,0,0};
@@ -100,7 +100,6 @@ lclist**build_3tupledict(char*path){ //leak free
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
 	if (!(tupled=calloc(HASH_DSIZ,sizeof(lclist*))))ERROR("Malloc tuple table");
 	
-	//strcpy(str,path);
 	while(0<fscanf(f,"%[^\n]\n",str)){
 		max=strlen(str);
 		news=calloc(max+3,sizeof(char));
@@ -128,7 +127,7 @@ lclist**build_3tupledict(char*path){ //leak free
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it.
  */
-void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){ //leak free
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
 	char *sve_str;
 	unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
@@ -136,15 +135,9 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){ //l
 	old_node=node=hashd[hash];
 	/* Either the hash generate collision */
 	if (node) {
-		/** If the hash is already present, skip it
-		 * @todo Find a better redondency check 
-		 */
+		/* If the hash is already present, skip it */
+		/** @todo Find a better redondency check */
 		if (!subhash) while ((node=node->next)!=NULL) {old_node=node; if (strcmp((char*)node->data,str)==0) return;}
-		//else {
-			/* The function received a subhash, calculate the full one */
-			//hash=jhash(str);
-			
-		//}
 	/* Either it doesn't */
 	} else hashd[hash]=old_node=make_lclist();
 	

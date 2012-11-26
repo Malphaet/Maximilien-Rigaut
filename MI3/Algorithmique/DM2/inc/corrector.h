@@ -28,7 +28,6 @@
 #include "wordtools.h"
 
 char**			ten_bests				(char*,lclist**,lclist**); /* Return the ten best guesses for the given word */
-char*			best_match				(char*,char*);				/**< The best match for the word in the dictionnary */		
 void			correct_all				(char*,char*);				/**< Correct all words, compare */	
 int				correct					(char*,char*,lclist**,lclist**);	/**< Correct a string */
 #endif /* __CORRECTOR_H__ */
