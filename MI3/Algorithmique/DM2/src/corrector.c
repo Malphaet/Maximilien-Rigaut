@@ -39,18 +39,18 @@
  */
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
-	unsigned int i,j,max,hash,*nbmatching,val,max2,nbf=0;
+	unsigned int i,j,max,hash,*nbmatching,val,max2,nbf=0,*found_hashs,founds;
 	lclist**suggests;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 	
 	/* Variable initialisation */
 	max=strlen(word);
-	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word");
-	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list");
-	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list");
-	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");
-	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words");
-	
+	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word"); //freed
+	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list"); //freed
+	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
+	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");//freed
+	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words"); //freed
+	found_hashs=malloc(705600*sizeof(unsigned int)); if (!found_hashs) ERROR("Malloc found hashes");
 	/* Check into the dictionnary for existence */
 	node=hashd[jhash(word)];
 	if (node) while ((node=node->next)!=NULL) if (strcmp(word,(char*)node->data)==0){
@@ -64,40 +64,40 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	
 	for (i=0;i<max;i+=1){
 		for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-		hash=jhash(tuple);
+		hash=jhash_L(tuple);
 		suggests[i]=tuples[hash];
 	}
 	
 	/* Calculate number of matching tuples */
-	//val=0;
+	founds=0;
 	for (i=0;i<max;i+=1){
 		node=suggests[i];
 		if (node) while((node=node->next)!=NULL) {
-			nbmatching[jhash((char*)node->data)]++;
-			//val++;
+			hash=jhash((char*)node->data);
+			if ((++nbmatching[hash])==1) found_hashs[founds++]=hash;
 		}
 	}
-	//printf("Found %d hashs\n",val);
+	
 	/** Extract best suggestions 
 	 *  @todo Improve the hash counting loop 
 	 */
-	for (i=0;i<HASH_DSIZ;i+=1){ 
-		if (nbmatching[i]) {
-			/* Collisions may occur, however levenshtein will take care of that */
-			node=hashd[i];
-			while ((node=node->next)!=NULL) {
-				max2=strlen((char*)node->data);
-				if (((nbmatching[i]*10)/(max+max2-nbmatching[i]))>2){
-					max2=u8_strlen((char*)node->data); max=u8_strlen(word);
-					val=(100*(levenshtein((char*)node->data,word)))/(1+(max>max2?max:max2));
-					/* Add them to results */
-					if (!qualified[val]) qualified[val]=make_lclist();
-					add_lclist(qualified[val],(void*)node->data);
-					if (val==100) if (nbf++==10) break;
-					//if (val>100) printf("%s sounds weird (%d)\n",(char*)node->data,val);
-				}
+	for (j=0;j<founds;j+=1){ 
+		hash=found_hashs[j];
+		/* Collisions may occur, however levenshtein will take care of that */
+		node=hashd[hash];
+		while ((node=node->next)!=NULL) {
+			max2=strlen((char*)node->data);
+			if (((nbmatching[hash]*10)/(max+max2-nbmatching[hash]))>2){
+				max2=u8_strlen((char*)node->data); max=u8_strlen(word);
+				val=(100*(levenshtein((char*)node->data,word)))/(1+(max>max2?max:max2));
+				/* Add them to results */
+				if (!qualified[val]) qualified[val]=make_lclist();
+				add_lclist(qualified[val],(void*)node->data);
+				if (val==100) if (nbf++==10) break;
+				//if (val>100) printf("%s sounds weird (%d)\n",(char*)node->data,val);
 			}
 		}
+		
 	}
 	
 	j=0;
@@ -114,6 +114,8 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	finish:
 		free(news);
 		free(suggests);
+		free(nbmatching);
+		free(found_hashs);
 		return bests;
 }
 
@@ -149,7 +151,7 @@ char*best_match(char*word,char*path){
  */
 void correct_all(char*dict,char*errs){
 	FILE*f;
-	int stats[3]={0,0,0},st;
+	int stats[3]={0,0,0},st,i;
 	char str[100],goal[100];
 	lclist**hashd=build_hashdict(dict);
 	lclist**tuples=build_3tupledict(dict);
@@ -170,6 +172,9 @@ void correct_all(char*dict,char*errs){
 	printf("Analysis complete, lasted %ldms.\n%d words were first guess, %d were amongs the guesses and %d weren't found.\n",
 	TIMER_USEC/1000,stats[0],stats[1],stats[2]);
 	printf("   M    F    N\n%3d%% %3d%% %3d%%\n",stats[0]*100/st,stats[1]*100/st,stats[2]*100/st);
+	
+	for(i=0;i<HASH_DSIZ;i++) if (hashd[i]) drop_lclist(hashd[i]);
+	for(i=0;i<HASH_DSIZ;i++) if (tuples[i]) drop_lclist(tuples[i]);
 }
 
 /** Find bests corrections for the given string
@@ -192,9 +197,14 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 	for (i=0;i<10;i+=1) {
 		if (founds[i]!=NULL) {
 			if (strcmp(goal,founds[i])==0){st=(i!=0);break;}
+			#ifndef build_tests
+				//free(founds[i]);
+			#endif
 		} else break;
 	}
-	
+	#ifndef build_tests
+		//free(founds);
+	#endif
 	/* No matchs, display the guesses */
 	#ifdef build_tests
 	if (st==2) {
@@ -203,6 +213,7 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 		printf("\n");
 	}
 	#endif
+	
 	return st;
 }
 /** @} */
@@ -210,7 +221,7 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 /** Process correction over the given parameters */
 int main (int argc, char *argv[]){
 	if (argc<3) OUT("Usage: corrector <dictonnary> <mistake file>");
-	
+
 	#ifdef build_tests
 		exec_tests
 	#endif

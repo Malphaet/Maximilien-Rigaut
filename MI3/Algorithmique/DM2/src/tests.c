@@ -117,7 +117,7 @@ void test_3tuples(){
 	lclist**dict,*node;
 	unsigned int i,j,nb=0,col,max_col=0;
 	TIMER_INIT;
-	unsigned int*hashs_col=calloc(70560,sizeof(int));
+	unsigned int*hashs_col=calloc(80000,sizeof(int));
 	T_OPEN;
 	
 	printf("Digesting dictionnary: ./ressources/dico.txt\n");

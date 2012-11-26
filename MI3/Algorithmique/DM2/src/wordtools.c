@@ -26,7 +26,7 @@
  * @param w1,w2 The words to compare
  * @return the distance, in permutation and additions/deletion between the two words aka the levenshtein distance
  */
-unsigned int levenshtein(char*w1,char*w2){
+unsigned int levenshtein(char*w1,char*w2){ //leak free
 	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
 	int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
@@ -53,17 +53,7 @@ unsigned int levenshtein(char*w1,char*w2){
 /** Hash the given word according to the java string hash function
  * @param word The word to hash
  * @param hash_size Size of the hash (in bits)
- *
- * ##Experimental measures
- * ### Scattering
- * + The XORing give a ±70% scattering variation.
- * + The modulus gives a ±150% scattering variation.
- * The goal being a 0% scattering variation (that is to say, a perfectly uniform hash function).
- * ### Speed
- * The XORing runs 17% faster in average than the modulus function.
- * ### Collisions
- * Hashing a word dictionnary the XOR function produce +2% to -120% less collisions than modulus.
- * 
+ 
  * @return The unsigned int of the hash
  */
 unsigned int jhash_char(const char*word,int hash_size){
@@ -80,16 +70,14 @@ unsigned int jhash_char(const char*word,int hash_size){
 	return finalhash;
 }
 
-/** Build the hash dictionnary of the file at the given path
- */
-lclist**build_hashdict(char*path){
+/** Build the hash dictionnary of the file at the given path */
+lclist**build_hashdict(char*path){ //leak free
 	FILE*f;
 	lclist**hashd;
 	char str[200];
 
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
-	hashd=calloc(HASH_DSIZ,sizeof(lclist*));
-	if (!hashd) ERROR("Malloc hash table");
+	hashd=calloc(HASH_DSIZ,sizeof(lclist*)); if (!hashd) ERROR("Malloc hash table");
 	
 	while(0<fscanf(f,"%[^\n]\n",str)){
 		/* Calculate hash */
@@ -101,7 +89,7 @@ lclist**build_hashdict(char*path){
 }
 
 /** Build the 3-tuple dictionnary */
-lclist**build_3tupledict(char*path){
+lclist**build_3tupledict(char*path){ //leak free
 	FILE*f;
 	lclist**tupled;
 	char str[200],tuple[4]={0,0,0,0};
@@ -110,8 +98,7 @@ lclist**build_3tupledict(char*path){
 	
 	/* Three chars of 8 bits can store up to 16777215 variables */
 	if ((f=fopen(path,"r"))==NULL) ERROR("Opening file error");
-	tupled=calloc(HASH_DSIZ,sizeof(lclist*));
-	if (!tupled) ERROR("Malloc tuple table");
+	if (!(tupled=calloc(HASH_DSIZ,sizeof(lclist*))))ERROR("Malloc tuple table");
 	
 	//strcpy(str,path);
 	while(0<fscanf(f,"%[^\n]\n",str)){
@@ -141,7 +128,7 @@ lclist**build_3tupledict(char*path){
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it.
  */
-void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){ //leak free
 	char *sve_str;
 	unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
@@ -162,19 +149,17 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
 	} else hashd[hash]=old_node=make_lclist();
 	
 	/* Create new node */
-	sve_str=malloc(sizeof(char)*(max+1));
-	if (!sve_str) ERROR("Malloc index string");
+	sve_str=malloc(sizeof(char)*(max+1)); if (!sve_str) ERROR("Malloc index string");
 	
 	/* Add the string to the list */
 	strcpy(sve_str,str);
 	if (subhash) add_lclist(old_node,(void*)sve_str);
 	else{
-		new_node=malloc(sizeof(lclist));		if (!new_node) ERROR("Malloc new node");
+		new_node=malloc(sizeof(lclist));	if (!new_node) ERROR("Malloc new node");
 		new_node->data=(void*)sve_str;
 		new_node->next=NULL;
 		old_node->next=new_node;
 	}
-
 }
 
 /** Check if the string is in the hashed values 
