@@ -173,7 +173,7 @@ lsocket* listen_lsocket(lsocket*sock){
 		case (SOCK_DGRAM):
 			do{
 				pck=message_receive(sock,&new);
-			} while (pck->type!=msg_sync)
+			} while (pck->type!=msg_sync);
 			break;
 		case (SOCK_STREAM):
 			new=malloc(sizeof(struct sockaddr_in));
@@ -221,17 +221,17 @@ void close_lsocket(lsocket*sck,int shutd){
 }
 
 /** Send string to the server 
- * @param socket if connect_lsocket() wasn't used it's considered to be the receiver
+ * @param sck if connect_lsocket() wasn't used it's considered to be the receiver
  * If it was, it's considered to be the sender's socket and lsocket->sendto is considered to be the destination.
  * Nb: On connected sockets, the sender is also the receiver, and sendo link to the socket.
  * @param message The message itself
  * @param bytes Length of the message (in bytes)
  */
-int lsocket_send(lsocket*socket,char*message,int bytes){
-	int write_to=socket->file;
+int lsocket_send(lsocket*sck,char*message,int bytes){
+	int write_to=sck->file;
 	lsocket*recver_socket;
-	if (socket->sendto!=NULL) recver_socket=socket->sendto;
-	else recver_socket=socket;
+	if (sck->sendto!=NULL) recver_socket=sck->sendto;
+	else recver_socket=sck;
 	
 	switch (recver_socket->mode){
 		case SOCK_DGRAM:
@@ -240,7 +240,7 @@ int lsocket_send(lsocket*socket,char*message,int bytes){
 				sizeof(((struct sockaddr_un*)recver_socket->socket)->sun_family)
 				+strlen(((struct sockaddr_un*)recver_socket->socket)->sun_path));
 		case SOCK_STREAM:
-			return send(socket->file,message,bytes,0);
+			return send(sck->file,message,bytes,0);
 		default:
 			return write(write_to,message,bytes);
 	}

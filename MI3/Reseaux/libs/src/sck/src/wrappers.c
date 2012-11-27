@@ -74,13 +74,13 @@ int message_send_to(lsocket*sender_socket,msg_type type_message,char*msg,lsocket
  */
 lpacket*message_receive(lsocket*recver_socket,lsocket**sender_socket){
 	char*message=malloc(sizeof(char)*SIZE_BUFFER);
-	lsocket*recv; lpacket*pck;
+	lsocket*rcv; lpacket*pck;
 	if (message==NULL) ERROR("lPacket malloc");
 	
-	recv=lsocket_receive(recver_socket,message,SIZE_BUFFER);
+	rcv=lsocket_receive(recver_socket,message,SIZE_BUFFER);
 	pck=lpacket_request(message);
 	
-	if (sender_socket!=NULL) *sender_socket=recv;
+	if (sender_socket!=NULL) *sender_socket=rcv;
 	
 	return pck;
 }
@@ -172,7 +172,7 @@ void purge_lpodrum(lpodrum*podr){
  * @param podr The lpodrum for the listening
  * @param time Timeout before forced return (-1 for disabling)
  */
-int*listen_lpodrum(lpodrum*podr,int time){
+int*listen_lpodrum(lpodrum*podr,int timer){
 	int i,j=0;
 	int nbs,*ret;
 	
@@ -180,7 +180,7 @@ int*listen_lpodrum(lpodrum*podr,int time){
 	purge_lpodrum(podr);
 	
 	/* Listen for awaiting requests */
-	nbs=poll(podr->fd_list,podr->cur_size,time);
+	nbs=poll(podr->fd_list,podr->cur_size,timer);
 	if (nbs<0) ERROR("Podrum poll");
 	
 	/* Create the return list */

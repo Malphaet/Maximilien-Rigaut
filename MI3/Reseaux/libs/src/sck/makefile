@@ -1,5 +1,7 @@
 AR = ar rcs
 CC = gcc
+EDITOR = geany
+QUIET = @
 
 BIN = bin
 OBJ = obj
@@ -8,7 +10,8 @@ INC = inc
 DOC = doc
 TMP = tmp
 
-CFLAGS = -W -Wall -ansi -pedantic -I$(INC)
+CFLAGS = -W -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
+		 -std=c99 -Wshadow -O3 -I$(INC) 
 LDFLAGS = -L../../
 
 EXEC=liblsockets.a
@@ -24,31 +27,48 @@ init:
 	mkdir -p $(DIRS)
 
 $(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o $(OBJ)/lclists.o
-	$(AR) $@ $^
-	mv $@ $(DEST)/
-	ln -sf $(PLACE)/$(INC)/$(MAIN).h $(DEST)/$(MAIN).h
+	$(QUIET)echo ""
+	$(QUIET)echo "__"$@"__"
+	$(QUIET)echo "LINK" $^ "=>" $@
+	$(QUIET)$(AR) $@ $^
+	$(QUIET)echo "MOVE" $@ "=>" $(DEST) $(DEST)/$(MAIN).h
+	$(QUIET)mv $@ $(DEST)/
+	$(QUIET)ln -sf $(PLACE)/$(INC)/$(MAIN).h $(DEST)/$(MAIN).h
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h $(INC)/structures.h
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(QUIET)echo "MAKE" $^ "=>" $@
+	$(QUIET)$(CC) -c $(CFLAGS) $< -o $@
 
 test: $(SRC)/test.c $(DEST)/$(EXEC) $(SRC)/test_inet.c $(SRC)/test_unix.c
-	$(CC) $(CFLAGS) -o $(OBJ)/test.o -c $<
-	$(CC) $(LDFLAGS) $(OBJ)/test.o -o $(BIN)/$@ -llsockets
+	$(QUIET)echo ""
+	$(QUIET)echo "__"$@"__"
+	$(QUIET)echo "MAKE" $^ "=>" $@
+	$(QUIET)$(CC) $(CFLAGS) -o $(OBJ)/test.o -c $<
+	$(QUIET)echo "LINK" $^ "=>" $@
+	$(QUIET)$(CC) $(LDFLAGS) $(OBJ)/test.o -o $(BIN)/$@ -llsockets
 
 doc: .PHONY
-	doxygen Doxyfile
+	$(QUIET)echo ""
+	$(QUIET)echo "__"$@"__"
+	$(QUIET)doxygen Doxyfile
+	$(QUIET)echo "MAKE DOCS"
 
 edit:
-	gedit 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md &
+	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md Doxyfile &
 	
-clean: 
-	rm -f $(OBJ)/*.o
-	rm -f $(TMP)/*
+clean:
+	$(QUIET)echo "RMVE" $(OBJ)/*.o $(TMP)/* $(DOC)/*
+	$(QUIET)rm -f $(OBJ)/*.o
+	$(QUIET)rm -f $(TMP)/*
+	$(QUIET)rm -rf $(DOC)/*
 	
 cleaner: clean
-	rm -f $(BIN)/*
-	rm -f $(DEST)/$(EXEC)
-	rm -f $(DEST)/$(MAIN).h
-	rm -f $(BIN)/test
+	$(QUIET)echo ""
+	$(QUIET)echo "__"$@"__"
+	$(QUIET)echo "RMVE" $(BIN)/$(EXEC) $(DEST)/$(EXEC) $(DEST)/$(MAIN).h $(BIN)/test
+	$(QUIET)rm -f $(BIN)/*
+	$(QUIET)rm -f $(DEST)/$(EXEC)
+	$(QUIET)rm -f $(DEST)/$(MAIN).h
+	$(QUIET)rm -f $(BIN)/test
 
 .PHONY:
