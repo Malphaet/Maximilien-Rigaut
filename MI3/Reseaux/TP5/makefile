@@ -8,7 +8,7 @@ SRC = src
 INC = inc
 DOC = doc
 
-LIBS = ../libs/
+LIBS = ../libs/src/sck/inc
 INCS = $(LIBS) $(INC)
 LNKS = 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) tmp

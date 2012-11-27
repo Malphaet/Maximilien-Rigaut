@@ -34,6 +34,10 @@ $(EXEC): $(OBJ)/$(MAIN).o $(OBJ)/wrappers.o $(OBJ)/lpackets.o $(OBJ)/lclists.o
 	$(QUIET)echo "MOVE" $@ "=>" $(DEST) $(DEST)/$(MAIN).h
 	$(QUIET)mv $@ $(DEST)/
 	$(QUIET)ln -sf $(PLACE)/$(INC)/$(MAIN).h $(DEST)/$(MAIN).h
+	$(QUIET)ln -sf $(PLACE)/$(INC)/structures.h $(DEST)/structures.h
+	$(QUIET)ln -sf $(PLACE)/$(INC)/wrappers.h $(DEST)/wrappers.h
+	$(QUIET)ln -sf $(PLACE)/$(INC)/lpackets.h $(DEST)/lpsckets.h
+
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h $(INC)/structures.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
@@ -57,14 +61,14 @@ edit:
 	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md Doxyfile &
 	
 clean:
+	$(QUIET)echo ""
+	$(QUIET)echo "__"$@"__"
 	$(QUIET)echo "RMVE" $(OBJ)/*.o $(TMP)/* $(DOC)/*
 	$(QUIET)rm -f $(OBJ)/*.o
 	$(QUIET)rm -f $(TMP)/*
 	$(QUIET)rm -rf $(DOC)/*
 	
 cleaner: clean
-	$(QUIET)echo ""
-	$(QUIET)echo "__"$@"__"
 	$(QUIET)echo "RMVE" $(BIN)/$(EXEC) $(DEST)/$(EXEC) $(DEST)/$(MAIN).h $(BIN)/test
 	$(QUIET)rm -f $(BIN)/*
 	$(QUIET)rm -f $(DEST)/$(EXEC)
