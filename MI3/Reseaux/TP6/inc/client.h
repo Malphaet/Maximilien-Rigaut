@@ -1,5 +1,5 @@
 /*
- * utils.h
+ * client.h
  * 
  * Copyright 2012 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -12,20 +12,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  */
 
 
 #include <stdio.h>
+#include <liblsockets.h>
 
-#ifndef __UTILS_H__
-#define __UTILS_H__
 
-/* ========= Defines ==========*/
-/* Functions */
-#define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
-#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
-#define FPRINT(msg)	{fprintf(stdout,msg);fflush(stdout);}
-
-#endif

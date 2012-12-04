@@ -10,25 +10,29 @@ DOC = doc
 TMP = tmp
 
 INCS = $(INC)
-
+LIB = liblsockets/$(INC)
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
 CFLAGS = -W -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC)
-LDFLAGS = 
-EXEC=server
+		 -std=c99 -Wshadow -O2 -I$(INC) -I$(LIB) -L$(LIB)
+LDFLAGS = -I$(LIB) -L$(LIB)
+EXEC=server client
 
-all: $(BIN)/$(EXEC)
+all: 
+	$(QUIET)echo "Making library"
+	$(QUIET)make -e QUIET="" -e PRINT="true" -s -C liblsockets/ cleaner all
+	$(QUIET)echo "Making project"
+	$(QUIET)make $(EXEC:%=$(BIN)/%)
 
-$(BIN)/$(EXEC): $(OBJ)/server.o
+$(EXEC:%=$(BIN)/%): $(OBJ)/server.o $(OBJ)/client.o
 	$(QUIET)echo ""
 	$(QUIET)echo "__"$@"__"
 	$(QUIET)echo "LINK" $^ "=>" $@
-	$(QUIET)$(CC) $(LDFLAGS) -o $@ $^
+	$(QUIET)$(CC) $(LDFLAGS) -o $@ ${@:$(BIN)/%=$(OBJ)/%.o} -llsockets
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
-	$(QUIET)$(CC) $(CFLAGS) -o $@ -c $<
+	$(QUIET)$(CC) $(CFLAGS) -o $@ -c $< -llsockets
 
 init:
 	mkdir -p $(DIRS)

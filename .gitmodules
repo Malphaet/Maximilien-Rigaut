@@ -1,0 +1,3 @@
+[submodule "MI3/Reseaux/TP6/liblsockets"]
+	path = MI3/Reseaux/TP6/liblsockets
+	url = git@github.com:Malphaet/liblsockets.git
