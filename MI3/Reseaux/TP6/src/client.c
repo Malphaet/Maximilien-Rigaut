@@ -15,37 +15,18 @@
  * 
  */
 
-#if defined __STRICT_ANSI__ && !defined _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
+#include <time.h>
 #include <stdio.h>
-#include <signal.h>
 #include "client.h"
-
+#include <sys/wait.h>
+#define _POSIX_C_SOURCE	199309L
 #define ADRESS "127.0.0.1:4242"
 
-volatile int should_quit;
-
-void termination_handler (int signum){
-	if (signum==SIGINT||signum==SIGTERM){
-		printf("\rGoodbye\n");
-		should_quit=1;
-	}
-}
 
 int main(){
 	lsocket*serv=make_lsocket(ADRESS);
 	lpacket*pck;
 	int p;
-	struct sigaction new_action;
-	
-	/* Sigaction */
-	new_action.sa_handler = termination_handler;
-	sigemptyset(&new_action.sa_mask);
-	new_action.sa_flags = 0;
-	
-	sigaction(SIGTERM,&new_action,NULL);
-	sigaction(SIGINT,&new_action,NULL);
 	
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
@@ -58,29 +39,31 @@ int main(){
 	printf("done !\n%s\n",pck->message);
 	lpacket_drop(pck);
 	
-	///* Send results */
+	/* Minimal client */
 	if ((p=fork())<0) ERROR("Forking error dude");
 	if (!p){
 		/* Listening process */
-		while (!should_quit){
+		while (1){
 			pck=message_receive(serv,NULL);
 			printf("\r%s\n",pck->message);
+			if (pck->type!=msg_text) break;
 			lpacket_drop(pck);
 		}
-		exit(EXIT_SUCCESS);
+		close_lsocket(serv,0);
+		lpacket_drop(pck);
+		return 0;
 	}
 	
+	/* Sending process */
+	#define SEND(msg) usleep(42); message_send(serv,msg_text,msg);
+	SEND("Hello");
+	SEND("Hello again");
 	
-	message_send(serv,msg_text,"Here I am");
-	message_send(serv,msg_text,"Hello again");
-	//message_receive(serv,NULL);
-	///* Quit */
-	kill(p,SIGTERM);
-	message_send(serv,msg_kill,"Ciao");
-	//printf("Exiting\n",getpid());
-	
+	/* Quit */
+	WHERE;
 	sleep(1);
-	close_lsocket(serv,0);
+	message_send(serv,msg_kill,"Ciao");
+	waitpid(p,NULL,0);
+	//close_lsocket(serv,0);
 	return 0;
 }
-

@@ -48,7 +48,7 @@ int main(void){
 	int optval=1;
 	int*actives_sockets,i;
 	struct sigaction new_action;
-	
+
 	lsocket*server,*sender;
 	lpodrum*sockets;
 	lpacket*pck;
@@ -85,38 +85,39 @@ int main(void){
 		
 		for(i=0;actives_sockets[i]!=LPOP_ERROR;i++){
 			/* 0 is the server address: new connections comes from here */
-			//WHERE; printf("%i\n",i);
 			if (actives_sockets[i]==0){
 				/* Send an answer with the new connection */
+				WHERE;
 				sender=accept_lsocket(server);
 				add_lsocket(sockets,sender,POLLIN|POLLOUT);
 				
-				message_send(sender,msg_recv,"w3lc0me us3r");
+				message_send(sender,msg_recv,"[S3RV3R] w3lc0me us3r");
 				printf("Client connected %s\n",sender->addr);
 				
-				//pck=message_receive(sender,NULL);
-				//printf("%s\n",pck->message);
 				continue;
 			}
-			/* Wait for the communication */
-			printf("[Server] Waiting incomming transmission\n");
-			pck=message_receive(get_lsocket(sockets,actives_sockets[i]),&sender);
 			
-			if (pck->type==msg_text){
-				printf("[%s] sended <%i> %s\n",
-				sender?sender->addr:get_lsocket(sockets,actives_sockets[i])->addr,
-				/*sender?(int)sender->file:get_lsocket(sockets,actives_sockets[i])->file,*/
-				pck->type,pck->message);
-			} else if (pck->type==msg_kill){
-				/* If he wants to die, well, kill it */
-				printf("Client diconnected\n");
-				del_lsocket(sockets,actives_sockets[i]);	
-			} else {
-				// We won't need him in that case
-				//WHERE;
-				//close_lsocket(sender,0);
+			if (get_event(sockets,actives_sockets[i])^POLLIN){
+				/* Wait for the communication */
+				printf("Waiting for incomming communication\n");
+				
+				pck=message_receive(get_lsocket(sockets,actives_sockets[i]),&sender);
+			
+				if (pck->type==msg_text){
+					printf("[%s] sended %s\n",sender->addr,pck->message);
+				} else if (pck->type==msg_kill){
+					/* If he wants to die, well, kill it */
+					printf("[Server] Client diconnected\n");
+					message_send(sender,msg_kill,"[S3RV3R] g00dby3 us3r");
+					del_lsocket(sockets,actives_sockets[i]);	
+				} else if (pck->type==msg_wtf){
+					ERROR("WTF Happened ?");
+					del_lsocket(sockets,actives_sockets[i]);
+				} else {
+					WHERE;printf("%s ???\n",pck->message);
+				}
+				lpacket_drop(pck);
 			}
-			lpacket_drop(pck);
 		}
 		free(actives_sockets);
 	}
