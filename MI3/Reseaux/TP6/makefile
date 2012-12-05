@@ -28,7 +28,7 @@ $(EXEC:%=$(BIN)/%): $(OBJ)/server.o $(OBJ)/client.o
 	$(QUIET)echo ""
 	$(QUIET)echo "__"$@"__"
 	$(QUIET)echo "LINK" $^ "=>" $@
-	$(QUIET)$(CC) $(LDFLAGS) -o $@ ${@:$(BIN)/%=$(OBJ)/%.o} -llsockets
+	$(QUIET)$(CC) $(LDFLAGS) -o $@ ${@:$(BIN)/%=$(OBJ)/%.o} -llsockets -lcrypt
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(QUIET)echo "MAKE" $^ "=>" $@

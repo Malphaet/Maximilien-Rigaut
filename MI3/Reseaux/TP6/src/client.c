@@ -14,56 +14,88 @@
  * GNU General Public License for more details.
  * 
  */
-
-#include <time.h>
-#include <stdio.h>
-#include "client.h"
-#include <sys/wait.h>
 #define _POSIX_C_SOURCE	199309L
+#include <time.h>
+#include "client.h"
+#include "crypto.c"
+
 #define ADRESS "127.0.0.1:4242"
+#define QUIT "!quit\n"
+
+#define SEND(msg) {nanosleep(&delay,NULL); message_send(serv,msg_text,msg);}
+#define GET(msg)  {if (fgets(msg,SIZE_BUFFER-1,stdin)==NULL) ERROR("What did you do dude ?");}
 
 
 int main(){
 	lsocket*serv=make_lsocket(ADRESS);
 	lpacket*pck;
+	char message[SIZE_BUFFER],user[SIZE_BUFFER];
 	int p;
-	
+	struct timespec delay; delay.tv_sec = 0; delay.tv_nsec = 2000000L;
+  
+    
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
 	connect_lsocket(serv,NULL);
 	
-	/* Handshake */
-	FPRINT("Establishing connection...");
-	message_send(serv,msg_sync,"bitopode:rugissant");
+	/* Wait for reply */
+	FPRINT("[HAL] Establishing connection...");
 	pck=message_receive(serv,NULL);
 	printf("done !\n%s\n",pck->message);
 	lpacket_drop(pck);
 	
+	
+	/* Connecting */
+	printf("[HAL] Good evening user.\n > Please identify yourself: ");
+	GET(user); user[strlen(user)-1]=0;
+	message_send(serv,msg_name,user);
+		
 	/* Minimal client */
 	if ((p=fork())<0) ERROR("Forking error dude");
 	if (!p){
 		/* Listening process */
 		while (1){
 			pck=message_receive(serv,NULL);
-			printf("\r%s\n",pck->message);
-			if (pck->type!=msg_text) break;
-			lpacket_drop(pck);
+			
+			switch (pck->type){
+				case msg_text:
+					printf("\r%s\n",pck->message);
+					break;
+				case msg_pass: /* Identification */
+					printf("\r%s\n",pck->message);
+					printf("> Password: ");
+					GET(message);
+					message_send(serv,msg_pass,lcrypt(message));
+					pck=message_receive(serv,NULL);
+					lpacket_drop(pck);
+					break;
+				default:
+					printf("Unhandled mode !");
+					kill(getppid(),SIGKILL);
+					goto quit;
+			}
 		}
-		close_lsocket(serv,0);
-		lpacket_drop(pck);
-		return 0;
+		
+		quit:
+			close_lsocket(serv,0);
+			lpacket_drop(pck);
+			return 0;
 	}
 	
 	/* Sending process */
-	#define SEND(msg) usleep(42); message_send(serv,msg_text,msg);
-	SEND("Hello");
-	SEND("Hello again");
+	while (1) {
+		GET(message);
+		if (!strcmp(message,"!quit\n")) {
+			WHERE;
+			break;
+		}
+		SEND(message);
+	}
 	
 	/* Quit */
-	WHERE;
-	sleep(1);
 	message_send(serv,msg_kill,"Ciao");
+	//sleep(1); kill(p,SIGKILL);
 	waitpid(p,NULL,0);
-	//close_lsocket(serv,0);
+	close_lsocket(serv,0);
 	return 0;
 }

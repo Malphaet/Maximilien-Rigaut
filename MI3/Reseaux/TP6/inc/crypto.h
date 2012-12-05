@@ -1,5 +1,5 @@
 /*
- * client.h
+ * crypto.h
  * 
  * Copyright 2012 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -12,13 +12,24 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ * 
+ * 
  */
 
 
+#ifndef __CRYPTO_H__
+#define __CRYPTO_H__
+
+#define SIZE_PASSWD 64
+#define HASH_POWR 5
+
+char*				lcrypt		(char*passwd);
+unsigned int		jhash		(const char*,int);
 
 
-#include <stdio.h>
-#include <liblsockets.h>
-#include <sys/wait.h>
-
+#endif

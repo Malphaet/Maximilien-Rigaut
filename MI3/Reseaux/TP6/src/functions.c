@@ -20,13 +20,40 @@ int create_user(char*login,char*password){
 	struct user usr;
 	if (nbusers>=MAX_USERS) return -1;
 	strcpy(usr.login,login);
-	strcpy(usr.passwd,password);
-	usr.status=1;
-	usr.socket=-1;
+	strcpy(usr.passwd,lcrypt(password));
+	usr.status=0;
+	usr.socket=NULL;
 	allusers[nbusers++]=usr;
 	return nbusers;
 }
 
+int create_user_toidentify(lsocket*sck){
+	struct toidentify pend;
+	if (nbtoidentify>=MAX_PENDING) return -1;
+	pend.socket=sck;
+	alltoidentify[nbtoidentify++]=pend;
+	return nbtoidentify-1;
+}
+
+int find_user(char*name){
+	int i;
+	for(i=0;i<nbusers;i++) if (!strcmp(name,allusers[i].login)) return i;
+	return -1;
+}
+
+int find_socket_toidentify(lsocket*sck){
+	int i;
+	for(i=0;i<nbtoidentify;i++)	if (alltoidentify[i].socket->file==sck->file) return i;
+	return -1;
+}
+
+int find_socket(int sck){
+	int i;
+	for(i=0;i<nbusers;i++) if (sck->file==allusers[i].socket->file) return i;
+	return -1;
+}
+
+/*
 int set_login_user(struct toidentify*ident){
 	int i;
 	for(i=0;i<nbusers;i++){
@@ -38,28 +65,6 @@ int set_login_user(struct toidentify*ident){
 			} else return -1;
 		}
 	}
-	return -1;
-}
-
-int create_user_toidentify(int sck){
-	struct toidentify pend;
-	if (nbtoidentify>=MAX_PENDING) return -1;
-	pend.socket=sck;
-	alltoidentify[nbtoidentify++]=pend;
-	return nbtoidentify-1;
-}
-
-/* */
-int find_socket(int sck){
-	int i;
-	for(i=0;i<nbusers;i++)
-		if (sck-=allusers[i].socket) return i;
-	return -1;
-}
-
-int find_socket_toidentify(int sck){
-	int i;
-	for(i=0;i<nbtoidentify;i++)	if (alltoidentify[i].socket==sck) return i;
 	return -1;
 }
 
@@ -97,29 +102,4 @@ int send_message(struct message*mess){
 int cut_message(char*command,char*content,const char*message){
 	return sscanf(message,"%s:%s",command,content);
 }
-
-int prepare_read(fd_set *set){
-	int i,max=0;
-	FD_ZERO(set);
-	for(i=0;i<nbusers;i++){
-		max=MAX(allusers[i].socket,max);
-		FD_SET(allusers[i].socket,set);
-	}
-	return max;
-}
-
-int prepare_write(fd_set *set){
-	int i,max=0;
-	FD_ZERO(set);
-	for(i=0;i<nbmessages;i++){
-		max=MAX(allmessages[i].sendto,max);
-		FD_SET(allmessages[i].sendto,set);
-	}
-	
-	return max;	
-}
-
-int global_wait(){
-	
-	return 1;
-}
+*/

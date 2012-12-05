@@ -21,36 +21,37 @@
 
 /* Defines */
 #define MAX(a,b) (a)>(b)?(a):(b)
+#define SIZE_PASSWD 64
 
 /* Structures */
 
 struct user{
 	char login[40];
-	char passwd[40];
+	char passwd[14];
 	short status;
-	int socket;
+	lsocket* socket;
 };
 
 struct message{
 	char message[1000];
-	int sender; // index
-	int sendto; //index
+	int sender; // index->socket ?
+	int sendto; //index->socket ?
 };
 
 struct toidentify{
 	char login[40];
-	char passwd[40];
-	int socket;
+	lsocket*socket;
 };
 
 /* Prototype */
 
-//int create_user(char*,char*);
-//int set_login_user(struct toidentify*);
+int create_user(char*,char*);
+int find_user(char*);
+int set_login_user(struct toidentify*);
 
 //int find_socket(int);
-//int find_socket_toidentify(int);
-//int create_user_toidentify(int);
+int find_socket_toidentify(lsocket*);
+int create_user_toidentify(lsocket*);
 
 //int add_message(char*,int,int);
 //int get_message(struct message*);
