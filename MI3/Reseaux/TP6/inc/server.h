@@ -23,8 +23,23 @@
 #define MAX(a,b) (a)>(b)?(a):(b)
 #define SIZE_PASSWD 64
 
-/* Structures */
+#define DELETE_SOCKET del_lsocket(sockets,actives_sockets[i]);
 
+#define MSG_CONNATMP printf("[SERVER] Unregistered user \"%s\" attempted to connect <%s>\n",pck->message,sender->addr);
+#define MSG_CONNPROG printf("[SERVER] %s is attempting to connect <%s>\n",pck->message,sender->addr);
+#define MSG_CONNPASS printf("[SERVER] Unregistered user is sending a password %s <%s>\n",pck->message,sender->addr);
+#define MSG_WRNGPASS printf("[SERVER] User is sending a passwd %s <%s>\n",pck->message,sender->addr);
+#define MSG_USERCONN printf("[SERVER] User <%s> is connected",sender->addr);
+#define MSG_RECEIVED printf("[%s] sended %s\n",sender->addr,pck->message);
+#define MSG_CLNTQUIT printf("[Server] Client diconnected <%s>\n",sender->addr);
+
+#define SND_ACK message_send(sender,msg_recv,"[SERVER] Everything's running smoothly.");
+#define SND_CONNDENY message_send(sender,msg_kill,"[SERVER] I'm afraid I can't let you in.");
+#define SND_CONNPROC sprintf(buffer,"[SERVER] I don't beleive you are %s.",pck->message);message_send(sender,msg_pass,buffer);
+#define SND_MSGGREET message_send(sender,msg_text,"[SERVER] It's been a looong time");
+#define SND_CLNTQUIT message_send(sender,msg_kill,"[SERVER] This conversation can serve no purpose any more. Goodbye");
+
+/* Structures */
 struct user{
 	char login[40];
 	char passwd[14];
@@ -49,7 +64,7 @@ int create_user(char*,char*);
 int find_user(char*);
 int set_login_user(struct toidentify*);
 
-//int find_socket(int);
+int find_socket(lsocket*);
 int find_socket_toidentify(lsocket*);
 int create_user_toidentify(lsocket*);
 

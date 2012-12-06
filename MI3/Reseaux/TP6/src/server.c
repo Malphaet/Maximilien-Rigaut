@@ -21,6 +21,7 @@
 #include "server.h"
 #include "liblsockets.h"
 #include <signal.h>
+#include "crypto.h"
 
 #define PORT 4242
 #define MAXBUFFER 16384
@@ -35,6 +36,7 @@ int nbusers,nbmessages,nbtoidentify;
 volatile int should_quit;
 
 #include "functions.c"
+#include "crypto.c"
 
 #define CATCH_SIGNALS 	new_action.sa_handler = termination_handler;\
 						sigemptyset(&new_action.sa_mask);\
@@ -54,12 +56,15 @@ void termination_handler (int signum){
 int main(void){
 	char buffer[SIZE_BUFFER+1];
 	//char buffer2[MAXBUFFER+1] = "Welcome\n";
-	int optval=1,*actives_sockets,i,id;
+	int optval=1,*actives_sockets,i,id,id2;
 	struct sigaction new_action;
 	
 	lsocket*server,*sender;
 	lpodrum*sockets;
 	lpacket*pck;
+	lclist*pending_deletion=make_lclist();
+	/* Print informations */
+	if (BUILD_NUMBER) printf("Server hash building value %x\n",BUILD_NUMBER);
 	
 	/* Init usefull variables */
 	nbusers=0;nbmessages=0;nbtoidentify=0;
@@ -96,7 +101,7 @@ int main(void){
 				add_lsocket(sockets,sender,POLLIN|POLLOUT);
 				if (create_user_toidentify(sender)<0) del_lsocket(sockets,actives_sockets[i]);
 				
-				message_send(sender,msg_recv,"[SERVER] Everything's running smoothly.");
+				SND_ACK;
 				printf("Client connected %s\n",sender->addr);
 				continue;
 			}
@@ -105,45 +110,57 @@ int main(void){
 				/* Wait for the communication */				
 				pck=message_receive(get_lsocket(sockets,actives_sockets[i]),&sender);
 				switch(pck->type){
-					case msg_name: // User wants to register to the server
+					case msg_name: // DONE // User wants to register to the server
 						if ((id=find_socket_toidentify(sender))<0) ERROR("Zombie connection");
 						if (find_user(pck->message)<0){
-							printf("[SERVER] Unregistered user \"%s\" attempted to connect\n",pck->message);
-							message_send(sender,msg_kill,"[SERVER] I'm afraid I can't let you in.");
-							del_lsocket(sockets,actives_sockets[i]);
+							MSG_CONNATMP;
+							SND_CONNDENY;
+							DELETE_SOCKET;
 						} else {
-							printf("[SERVER] %s is attempting to connect\n",pck->message);
-							sprintf(buffer,"[SERVER] I don't beleive you are %s.",pck->message);
-							message_send(sender,msg_pass,buffer);
+							MSG_CONNPROG;
+							SND_CONNPROC;
 						}
 						break;
 					case msg_pass: // User wants to give his passphrase
-						if ((id=find_socket_toidentify(sender))<0) ERROR("Zombie connection");
-						// Do stuff
+						WHERE;
+						if ((id=find_socket_toidentify(sender))<0||(id2=find_user(alltoidentify[id].login))<0){
+							DELETE_SOCKET;
+							MSG_CONNPASS;
+							break;
+						}
+						if (strcmp(allusers[id2].login,pck->message)){
+							DELETE_SOCKET;
+							//add_lclist(pending_deletion,id); // Make as a function
+							MSG_WRNGPASS;
+						} else {
+							allusers[id2].status=1;
+							MSG_USERCONN;
+							SND_MSGGREET;
+						}
 						break;
 					case msg_text:
-						printf("[%s] sended %s\n",sender->addr,pck->message);
-						// Add the message to the resending queue list
+						MSG_RECEIVED;
+						// Resend the message
 						break;
 					case msg_kill: // User wants to DIE
 						// Be verbose
-						// Unregister him
-						printf("[Server] Client diconnected\n");
-						message_send(sender,msg_kill,"[S3RV3R] g00dby3 us3r");
-						del_lsocket(sockets,actives_sockets[i]);	
+						MSG_CLNTQUIT;
+						SND_CLNTQUIT;
+						DELETE_SOCKET;
 						break;
 					case msg_wtf: // Avoid that
-						del_lsocket(sockets,actives_sockets[i]);
+						DELETE_SOCKET;
 						WARNING("WTF Happened ?");
-						printf("Abort Abort !\n");
 						break;
 					default: // Even worse
-						printf("Unhandled action\n");
-						printf("%s\n",pck->message);
+						printf("Unhandled action\n%s\n",pck->message);
 						if (pck->type>msg_errors) ERROR("Unhandled error happened");
 						break;
 				}
 				lpacket_drop(pck);
+				//while ((id=pop_lclist(pending_deletion))!=LPOP_ERROR) { //Make it as a function
+					//Delete the id
+				//}
 			}
 		}
 		free(actives_sockets);

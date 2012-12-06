@@ -23,7 +23,7 @@
 #define QUIT "!quit\n"
 
 #define SEND(msg) {nanosleep(&delay,NULL); message_send(serv,msg_text,msg);}
-#define GET(msg)  {if (fgets(msg,SIZE_BUFFER-1,stdin)==NULL) ERROR("What did you do dude ?");}
+#define GET(msg)  do{if (fgets(msg,SIZE_BUFFER-1,stdin)==NULL) ERROR("Error waiting for user message");}while(0);
 
 
 int main(){
@@ -32,8 +32,10 @@ int main(){
 	char message[SIZE_BUFFER],user[SIZE_BUFFER];
 	int p;
 	struct timespec delay; delay.tv_sec = 0; delay.tv_nsec = 2000000L;
-  
-    
+	
+	/* Print informations */
+	if (BUILD_NUMBER) printf("Client hash building value %x\n",BUILD_NUMBER);
+	
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
 	connect_lsocket(serv,NULL);
@@ -51,38 +53,37 @@ int main(){
 	message_send(serv,msg_name,user);
 		
 	/* Minimal client */
-	if ((p=fork())<0) ERROR("Forking error dude");
-	if (!p){
-		/* Listening process */
-		while (1){
-			pck=message_receive(serv,NULL);
-			
-			switch (pck->type){
-				case msg_text:
-					printf("\r%s\n",pck->message);
-					break;
-				case msg_pass: /* Identification */
-					printf("\r%s\n",pck->message);
-					printf("> Password: ");
-					GET(message);
-					message_send(serv,msg_pass,lcrypt(message));
-					pck=message_receive(serv,NULL);
-					lpacket_drop(pck);
-					break;
-				default:
-					printf("Unhandled mode !");
-					kill(getppid(),SIGKILL);
-					goto quit;
-			}
-		}
-		
-		quit:
-			close_lsocket(serv,0);
-			lpacket_drop(pck);
-			return 0;
-	}
 	
-	/* Sending process */
+	while (1){
+		pck=message_receive(serv,NULL);
+		
+		switch (pck->type){
+			case msg_text:
+				printf("\r%s\n",pck->message);
+				break;
+			case msg_pass: /* Identification */
+				printf("%s\n > Password: ",pck->message);
+				GET(message);
+				message_send(serv,msg_pass,lcrypt(message));
+				pck=message_receive(serv,NULL);
+				lpacket_drop(pck);
+				
+				if ((p=fork())<0) ERROR("Forking error dude");
+				if (p) goto sending_process;
+				
+				break;
+			case msg_kill: /* Quit */
+				printf("\r%s\n",pck->message);
+				kill(getppid(),SIGKILL);
+				goto quit;
+			default:
+				printf("Unhandled mode !");
+				kill(getppid(),SIGKILL);
+				goto quit;
+		}
+	}
+
+	sending_process:
 	while (1) {
 		GET(message);
 		if (!strcmp(message,"!quit\n")) {
@@ -91,6 +92,16 @@ int main(){
 		}
 		SEND(message);
 	}
+	
+	quit:
+		close_lsocket(serv,0);
+		lpacket_drop(pck);
+		return 0;
+
+	
+	/* Sending process */
+	
+	
 	
 	/* Quit */
 	message_send(serv,msg_kill,"Ciao");

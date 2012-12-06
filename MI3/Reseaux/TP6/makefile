@@ -16,6 +16,11 @@ DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 CFLAGS = -W -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -O2 -I$(INC) -I$(LIB) -L$(LIB)
 LDFLAGS = -I$(LIB) -L$(LIB)
+#ifeq (`which git`,"")
+BUILD_SHA:=0
+#else
+BUILD_SHA:=0x`git show --abbrev-commit HEAD | grep '^commit' | sed -e 's/commit //'`
+#endif
 EXEC=server client
 
 all: 
@@ -32,7 +37,7 @@ $(EXEC:%=$(BIN)/%): $(OBJ)/server.o $(OBJ)/client.o
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
-	$(QUIET)$(CC) $(CFLAGS) -o $@ -c $< -llsockets
+	$(QUIET)$(CC) $(CFLAGS) -DBUILD_NUMBER=${BUILD_SHA} -o $@ -c $< -llsockets
 
 init:
 	mkdir -p $(DIRS)

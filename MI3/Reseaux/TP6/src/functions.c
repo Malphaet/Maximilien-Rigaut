@@ -47,7 +47,7 @@ int find_socket_toidentify(lsocket*sck){
 	return -1;
 }
 
-int find_socket(int sck){
+int find_socket(lsocket*sck){
 	int i;
 	for(i=0;i<nbusers;i++) if (sck->file==allusers[i].socket->file) return i;
 	return -1;
