@@ -62,9 +62,8 @@ int main(void){
 	lsocket*server,*sender;
 	lpodrum*sockets;
 	lpacket*pck;
-	lclist*pending_deletion=make_lclist();
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Server hash building value %x\n",BUILD_NUMBER);
+	if (BUILD_NUMBER) printf("Server version number 0.1:%x\n",BUILD_NUMBER);
 	
 	/* Init usefull variables */
 	nbusers=0;nbmessages=0;nbtoidentify=0;
@@ -85,7 +84,7 @@ int main(void){
 	add_lsocket(sockets,server,POLLIN);
 	
 	/* Create some test users */
-	create_user("Dave","odisey");
+	create_user("Dave","odyssey");
 	create_user("Shell","portal");
 		
 	/* Start server */
@@ -110,7 +109,7 @@ int main(void){
 				/* Wait for the communication */				
 				pck=message_receive(get_lsocket(sockets,actives_sockets[i]),&sender);
 				switch(pck->type){
-					case msg_name: // DONE // User wants to register to the server
+					case msg_name: // Done // User wants to register to the server
 						if ((id=find_socket_toidentify(sender))<0) ERROR("Zombie connection");
 						if (find_user(pck->message)<0){
 							MSG_CONNATMP;
@@ -119,23 +118,26 @@ int main(void){
 						} else {
 							MSG_CONNPROG;
 							SND_CONNPROC;
+							strcpy(alltoidentify[id].login,pck->message);
 						}
 						break;
 					case msg_pass: // User wants to give his passphrase
-						WHERE;
-						if ((id=find_socket_toidentify(sender))<0||(id2=find_user(alltoidentify[id].login))<0){
-							DELETE_SOCKET;
+						if (((id=find_socket_toidentify(sender))<0)||((id2=find_user(alltoidentify[id].login))<0)){
 							MSG_CONNPASS;
+							SND_CONNDENY;
+							DELETE_SOCKET;
 							break;
 						}
-						if (strcmp(allusers[id2].login,pck->message)){
+						if (strcmp(allusers[id2].passwd,pck->message)){
+							SND_CONNDENY;
 							DELETE_SOCKET;
 							//add_lclist(pending_deletion,id); // Make as a function
 							MSG_WRNGPASS;
 						} else {
-							allusers[id2].status=1;
+							allusers[id2].status=1; // You are connected
 							MSG_USERCONN;
 							SND_MSGGREET;
+							//add_lclist(pending_deletion,id); // Make as a function
 						}
 						break;
 					case msg_text:
@@ -148,13 +150,17 @@ int main(void){
 						SND_CLNTQUIT;
 						DELETE_SOCKET;
 						break;
+					case msg_zero: // Client disconected (Zero bytes read)
+						DELETE_SOCKET;
+						MSG_CLNTQUIT;
+						break;
 					case msg_wtf: // Avoid that
 						DELETE_SOCKET;
 						WARNING("WTF Happened ?");
 						break;
 					default: // Even worse
 						printf("Unhandled action\n%s\n",pck->message);
-						if (pck->type>msg_errors) ERROR("Unhandled error happened");
+						if (pck->type>msg_errors) WARNING("Unhandled error happened");
 						break;
 				}
 				lpacket_drop(pck);

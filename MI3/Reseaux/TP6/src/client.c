@@ -22,19 +22,21 @@
 #define ADRESS "127.0.0.1:4242"
 #define QUIT "!quit\n"
 
+#define MAX(a,b) (a)>(b)?(a):(b)
 #define SEND(msg) {nanosleep(&delay,NULL); message_send(serv,msg_text,msg);}
-#define GET(msg)  do{if (fgets(msg,SIZE_BUFFER-1,stdin)==NULL) ERROR("Error waiting for user message");}while(0);
+#define GET(msg)  do{if (fgets(msg,SIZE_BUFFER-1,stdin)==NULL) ERROR("Error waiting for user message");\
+					msg[MAX(strlen(msg)-1,0)]='\0';}while(0);
 
 
 int main(){
 	lsocket*serv=make_lsocket(ADRESS);
 	lpacket*pck;
 	char message[SIZE_BUFFER],user[SIZE_BUFFER];
-	int p;
+	int p=0;
 	struct timespec delay; delay.tv_sec = 0; delay.tv_nsec = 2000000L;
-	
+
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Client hash building value %x\n",BUILD_NUMBER);
+	if (BUILD_NUMBER) printf("Client version number 0.1:%x\n",BUILD_NUMBER);
 	
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
@@ -49,7 +51,7 @@ int main(){
 	
 	/* Connecting */
 	printf("[HAL] Good evening user.\n > Please identify yourself: ");
-	GET(user); user[strlen(user)-1]=0;
+	GET(user);
 	message_send(serv,msg_name,user);
 		
 	/* Minimal client */
@@ -63,39 +65,42 @@ int main(){
 				break;
 			case msg_pass: /* Identification */
 				printf("%s\n > Password: ",pck->message);
+				lpacket_drop(pck);
 				GET(message);
 				message_send(serv,msg_pass,lcrypt(message));
 				pck=message_receive(serv,NULL);
-				lpacket_drop(pck);
 				
-				if ((p=fork())<0) ERROR("Forking error dude");
-				if (p) goto sending_process;
-				
-				break;
+				if (pck->type==msg_kill) goto quit;
+				if (!p) if ((p=fork())<0) ERROR("Forking error dude");
+				if (p) goto sending_process; // Sending Process
+				break; // Stay receiving
 			case msg_kill: /* Quit */
 				printf("\r%s\n",pck->message);
-				kill(getppid(),SIGKILL);
+				if (p) kill(p,SIGKILL);
 				goto quit;
 			default:
 				printf("Unhandled mode !");
-				kill(getppid(),SIGKILL);
+				if (p) kill(p,SIGKILL);
 				goto quit;
 		}
+		lpacket_drop(pck);
 	}
 
 	sending_process:
-	while (1) {
-		GET(message);
-		if (!strcmp(message,"!quit\n")) {
-			WHERE;
-			break;
+		//lpacket_drop(pck);
+		while (1) {
+			printf("%s> ",user);
+			GET(message);
+			if (!strcmp(message,"!quit")) {
+				WHERE;
+				break;
+			}
+			SEND(message);
 		}
-		SEND(message);
-	}
 	
 	quit:
-		close_lsocket(serv,0);
 		lpacket_drop(pck);
+		close_lsocket(serv,0);
 		return 0;
 
 	

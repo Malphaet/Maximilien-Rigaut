@@ -27,9 +27,9 @@
 
 #define MSG_CONNATMP printf("[SERVER] Unregistered user \"%s\" attempted to connect <%s>\n",pck->message,sender->addr);
 #define MSG_CONNPROG printf("[SERVER] %s is attempting to connect <%s>\n",pck->message,sender->addr);
-#define MSG_CONNPASS printf("[SERVER] Unregistered user is sending a password %s <%s>\n",pck->message,sender->addr);
-#define MSG_WRNGPASS printf("[SERVER] User is sending a passwd %s <%s>\n",pck->message,sender->addr);
-#define MSG_USERCONN printf("[SERVER] User <%s> is connected",sender->addr);
+#define MSG_CONNPASS printf("[SERVER] Unregistered user is sending a password (%s) <%s>\n",pck->message,sender->addr);
+#define MSG_WRNGPASS printf("[SERVER] User sent a wrong passwd %s <%s>\n",pck->message,sender->addr);
+#define MSG_USERCONN printf("[SERVER] User <%s> is connected\n",sender->addr);
 #define MSG_RECEIVED printf("[%s] sended %s\n",sender->addr,pck->message);
 #define MSG_CLNTQUIT printf("[Server] Client diconnected <%s>\n",sender->addr);
 
