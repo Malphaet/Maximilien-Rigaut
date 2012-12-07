@@ -63,7 +63,7 @@ int main(void){
 	lpodrum*sockets;
 	lpacket*pck;
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Server version 0.1 (build:%x)\n",BUILD_NUMBER);
+	if (BUILD_NUMBER) printf("Server version %s (build:%s)\n",BUILD_VERSION,BUILD_NUMBER);
 	
 	/* Init usefull variables */
 	nbusers=0;nbmessages=0;nbtoidentify=0;

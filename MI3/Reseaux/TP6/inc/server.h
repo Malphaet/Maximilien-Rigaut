@@ -15,6 +15,7 @@
  */
 
 #include "liblsockets.h"
+#include "version.h"
 
 #ifndef __SERV_H__
 #define __SERV_H__

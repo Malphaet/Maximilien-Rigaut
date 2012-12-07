@@ -36,7 +36,7 @@ int main(){
 	struct timespec delay; delay.tv_sec = 0; delay.tv_nsec = 2000000L;
 
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Client version 0.1 (build:%x)\n",BUILD_NUMBER);
+	if (BUILD_NUMBER) printf("Client version %s (build:%s)\n",BUILD_VERSION,BUILD_NUMBER);
 	printf("%s\n",BUILD_VERSION);
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
@@ -78,8 +78,12 @@ int main(){
 				printf("\r%s\n",pck->message);
 				if (p) kill(p,SIGKILL);
 				goto quit;
+			case msg_zero: // Server disconeted
+				printf("[HAL]I know that you were planning to disconnect me\n");
+				if (p) kill(p,SIGKILL);
+				goto quit;
 			default:
-				printf("Unhandled mode !");
+				printf("Unhandled mode !\n");
 				if (p) kill(p,SIGKILL);
 				goto quit;
 		}

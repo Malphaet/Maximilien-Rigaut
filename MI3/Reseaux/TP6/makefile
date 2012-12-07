@@ -16,17 +16,13 @@ DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 CFLAGS = -W -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -O2 -I$(INC) -I$(LIB) -L$(LIB)
 LDFLAGS = -I$(LIB) -L$(LIB)
-#ifeq (`which git`,"")
-BUILD_SHA:=0
-BUILD_TAG:="0.1"
-#else
-BUILD_SHA:=0x`git show --abbrev-commit HEAD | grep '^commit' | sed -e 's/commit //'`
-BUILD_TAG:=`git describe --tags --abbrev=0`
-#BUILD_TAG="$(BUILD_TAG)"
-#endif
+
+BUILD_SHA=`git show --abbrev-commit HEAD | grep '^commit' | sed -e 's/commit //'` 
+BUILD_TAG=`git describe --tags --match "v[0-9]*" --abbrev=0 HEAD`
+
 EXEC=server client
 
-all: 
+all: version
 	$(QUIET)echo "Making library"
 	$(QUIET)make -e QUIET="" -e PRINT="true" -s -C liblsockets/ cleaner all
 	$(QUIET)echo "Making project"
@@ -40,7 +36,13 @@ $(EXEC:%=$(BIN)/%): $(OBJ)/server.o $(OBJ)/client.o
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
-	$(QUIET)$(CC) $(CFLAGS) -DBUILD_NUMBER=${BUILD_SHA} -DBUILD_VERSION=${BUILD_TAG} -o $@ -c $< -llsockets
+	$(QUIET)$(CC) $(CFLAGS) -o $@ -c $< -llsockets
+
+version:
+ifneq (`which git`,"")
+	$(QUIET)echo "#define BUILD_NUMBER \"$(BUILD_SHA)\"" > inc/version.h
+	$(QUIET)echo "#define BUILD_VERSION \"$(BUILD_TAG)\"" >> inc/version.h
+endif
 
 init:
 	mkdir -p $(DIRS)

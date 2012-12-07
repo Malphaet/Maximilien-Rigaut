@@ -22,3 +22,4 @@
 #include <liblsockets.h>
 #include <sys/wait.h>
 #include "crypto.h"
+#include "version.h"
