@@ -18,8 +18,11 @@ CFLAGS = -W -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe
 LDFLAGS = -I$(LIB) -L$(LIB)
 #ifeq (`which git`,"")
 BUILD_SHA:=0
+BUILD_TAG:="0.1"
 #else
 BUILD_SHA:=0x`git show --abbrev-commit HEAD | grep '^commit' | sed -e 's/commit //'`
+BUILD_TAG:=`git describe --tags --abbrev=0`
+#BUILD_TAG="$(BUILD_TAG)"
 #endif
 EXEC=server client
 
@@ -37,7 +40,7 @@ $(EXEC:%=$(BIN)/%): $(OBJ)/server.o $(OBJ)/client.o
 
 $(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
-	$(QUIET)$(CC) $(CFLAGS) -DBUILD_NUMBER=${BUILD_SHA} -o $@ -c $< -llsockets
+	$(QUIET)$(CC) $(CFLAGS) -DBUILD_NUMBER=${BUILD_SHA} -DBUILD_VERSION=${BUILD_TAG} -o $@ -c $< -llsockets
 
 init:
 	mkdir -p $(DIRS)

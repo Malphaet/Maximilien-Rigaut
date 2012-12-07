@@ -20,7 +20,8 @@ int create_user(char*login,char*password){
 	struct user usr;
 	if (nbusers>=MAX_USERS) return -1;
 	strcpy(usr.login,login);
-	strcpy(usr.passwd,lcrypt(password));
+	// Double encryption means, user have to make a collision to authenticate
+	strcpy(usr.passwd,lcrypt(lcrypt(password))); 
 	usr.status=0;
 	usr.socket=NULL;
 	allusers[nbusers++]=usr;

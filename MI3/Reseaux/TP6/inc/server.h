@@ -23,7 +23,7 @@
 #define MAX(a,b) (a)>(b)?(a):(b)
 #define SIZE_PASSWD 64
 
-#define DELETE_SOCKET del_lsocket(sockets,actives_sockets[i]);
+#define DELETE_SOCKET {del_lsocket(sockets,actives_sockets[i]);WHERE;}
 
 #define MSG_CONNATMP printf("[SERVER] Unregistered user \"%s\" attempted to connect <%s>\n",pck->message,sender->addr);
 #define MSG_CONNPROG printf("[SERVER] %s is attempting to connect <%s>\n",pck->message,sender->addr);

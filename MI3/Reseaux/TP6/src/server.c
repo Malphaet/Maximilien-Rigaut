@@ -63,7 +63,7 @@ int main(void){
 	lpodrum*sockets;
 	lpacket*pck;
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Server version number 0.1:%x\n",BUILD_NUMBER);
+	if (BUILD_NUMBER) printf("Server version 0.1 (build:%x)\n",BUILD_NUMBER);
 	
 	/* Init usefull variables */
 	nbusers=0;nbmessages=0;nbtoidentify=0;
@@ -97,7 +97,7 @@ int main(void){
 			if (actives_sockets[i]==0){
 				/* Send an answer with the new connection */
 				sender=accept_lsocket(server);
-				add_lsocket(sockets,sender,POLLIN|POLLOUT);
+				add_lsocket(sockets,sender,POLLIN);
 				if (create_user_toidentify(sender)<0) del_lsocket(sockets,actives_sockets[i]);
 				
 				SND_ACK;
@@ -105,7 +105,7 @@ int main(void){
 				continue;
 			}
 			
-			if (get_event(sockets,actives_sockets[i])^POLLIN){
+			if (get_event(sockets,actives_sockets[i])==POLLIN){
 				/* Wait for the communication */				
 				pck=message_receive(get_lsocket(sockets,actives_sockets[i]),&sender);
 				switch(pck->type){
@@ -128,7 +128,7 @@ int main(void){
 							DELETE_SOCKET;
 							break;
 						}
-						if (strcmp(allusers[id2].passwd,pck->message)){
+						if (strcmp(allusers[id2].passwd,lcrypt(pck->message))){
 							SND_CONNDENY;
 							DELETE_SOCKET;
 							//add_lclist(pending_deletion,id); // Make as a function
@@ -159,6 +159,7 @@ int main(void){
 						WARNING("WTF Happened ?");
 						break;
 					default: // Even worse
+						DELETE_SOCKET;
 						printf("Unhandled action\n%s\n",pck->message);
 						if (pck->type>msg_errors) WARNING("Unhandled error happened");
 						break;

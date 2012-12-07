@@ -36,8 +36,8 @@ int main(){
 	struct timespec delay; delay.tv_sec = 0; delay.tv_nsec = 2000000L;
 
 	/* Print informations */
-	if (BUILD_NUMBER) printf("Client version number 0.1:%x\n",BUILD_NUMBER);
-	
+	if (BUILD_NUMBER) printf("Client version 0.1 (build:%x)\n",BUILD_NUMBER);
+	printf("%s\n",BUILD_VERSION);
 	/* Open sockets */
 	open_lsocket(serv,AF_INET,SOCK_STREAM);
 	connect_lsocket(serv,NULL);
