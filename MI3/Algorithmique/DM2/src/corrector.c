@@ -40,12 +40,14 @@
  */
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
-	unsigned int i,j,max,hash,*nbmatching,val,max2,*found_hashs,founds;
+	unsigned int hash,*nbmatching,val,*found_hashs;
+	int max,max2,MAX,MAX2,i,j,founds;
 	lclist**suggests;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 	
 	/* Variable initialisation */
-	max=strlen(word);
+	//max=strlen(word);
+	alllen(word,&max,&MAX);
 	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word"); //freed
 	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list"); //freed
 	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
@@ -90,11 +92,12 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		while ((node=node->next)!=NULL) {
 			/* Avoid words with error on the first letter, cruel but efficient */
 			if (((char*)node->data)[0]!=word[0]) continue;
-			max2=strlen((char*)node->data);
+			//max2=strlen((char*)node->data);
+			alllen((char*)node->data,&max2,&MAX2);
 			/* Only analyse the guesses who are jacquard-close to the word to correct */
 			if (((nbmatching[hash]*10)/(max+max2-nbmatching[hash]))>1){
 				/* Calculate the ponderated levenshtein distance */
-				val=levenshtein((char*)node->data,word);
+				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1);
 				
 				/* Add the guess to results */
 				if (!qualified[val]) qualified[val]=make_lclist();
@@ -182,11 +185,11 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 	}
 	/* No matchs, display the guesses */
 	#ifdef build_tests
-	if (st==2) {
-		printf("Analysing %s...(%s) led to no match\n",str,goal);
-		for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);
-		printf("\n");
-	}
+	//if (st==2) {
+		//printf("Analysing %s...(%s) led to no match\n",str,goal);
+		//for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);
+		//printf("\n");
+	//}
 	#endif
 	
 	return st;
@@ -198,7 +201,7 @@ int main (int argc, char *argv[]){
 	if (argc<3) OUT("Usage: corrector <dictonnary> <mistake file>");
 
 	#ifdef build_tests
-		//exec_tests
+		exec_tests
 	#endif
 	correct_all(argv[1],argv[2]);
 	

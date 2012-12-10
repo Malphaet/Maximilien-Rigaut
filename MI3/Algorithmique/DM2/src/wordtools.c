@@ -25,12 +25,12 @@
  * @param w1,w2 The words to compare
  * @return the distance, in permutation and additions/deletion between the two words aka the levenshtein distance
  */
-unsigned int levenshtein(char*w1,char*w2){
+unsigned int levenshtein(char*w1,char*w2,int l,int l2){
 	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
-	int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
+	//int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
 	int*table=calloc(1,sizeof(int)*(l)*(l2));
-
+	
 	if (table==NULL) ERROR("Malloc table");
 	for (i=0;i<l;i+=1) GT(table,i,0)=i;
 	for (i=0;i<l2;i+=1) GT(table,0,i)=i;
@@ -174,4 +174,12 @@ int hashdict_in(lclist**hashd,char*str){
  * @return 1 if differents 0 if equal (for conformity purpose with strcmp) */
 int strheq(const char*w1,const char*w2){
 	return jhash(w1)!=jhash(w2);
+}
+
+void alllen(char*w,int*l,int*L){
+	*l=*L=0;
+	while(u8_nextchar(w,l)!=0) {
+		(*L)++;
+	}
+	(*l)--;
 }

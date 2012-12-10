@@ -56,13 +56,13 @@
 #define HASH_POWR 5			/**< Power of two to elevate the checksum */
 
 /*==== Prototype ====*/
-unsigned int	levenshtein				(char*,char*);			/* The levenshtein functions */
+unsigned int	levenshtein				(char*,char*,int,int);			/* The levenshtein functions */
 unsigned int 	jhash_char				(const char*,int);		/* Hash function */
 lclist**		build_hashdict			(char*);				/* Build the hash dictionnary */
 void 			hashdict_addword		(lclist**,unsigned int,char*,int,unsigned int); /* Add the word into the dictionnary */
 int 			hashdict_in				(lclist**,char*);		/* Is the word into the dictionnary */
 lclist**		build_3tupledict		(char*);				/* Build the 3tuples */
 int				strheq					(const char*,const char*); /* Are the word hashes equals ? */
-
+void 			alllen					(char*,int*,int*);
 #endif /* __LEVENSHTEIN__H__ */
 
