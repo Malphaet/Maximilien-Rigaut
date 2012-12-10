@@ -178,14 +178,8 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 	for (i=0;i<10;i+=1) {
 		if (founds[i]!=NULL) {
 			if (strcmp(goal,founds[i])==0){st=(i!=0);break;}
-			#ifndef build_tests
-				//free(founds[i]);
-			#endif
 		} else break;
 	}
-	#ifndef build_tests
-		//free(founds);
-	#endif
 	/* No matchs, display the guesses */
 	#ifdef build_tests
 	if (st==2) {
@@ -204,7 +198,7 @@ int main (int argc, char *argv[]){
 	if (argc<3) OUT("Usage: corrector <dictonnary> <mistake file>");
 
 	#ifdef build_tests
-		exec_tests
+		//exec_tests
 	#endif
 	correct_all(argv[1],argv[2]);
 	

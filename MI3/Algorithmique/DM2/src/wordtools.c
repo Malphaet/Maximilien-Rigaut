@@ -57,8 +57,9 @@ unsigned int levenshtein(char*w1,char*w2){
  * @return The unsigned int of the hash
  */
 unsigned int jhash_char(const char*word,int hash_size){
-	unsigned int i,hash=0,l=strlen(word),finalhash=-1,mask=-1;
-	for (i=0;i<l;i++) hash=((hash<<HASH_POWR)-hash+(unsigned int)word[i]);
+	unsigned int hash=0,finalhash=-1,mask=-1;
+	const char*letter=word;
+	while (*letter!=0) hash=((hash<<HASH_POWR)-hash+(unsigned int)*(letter++));
 	
 	/* Strip the checksum (Here some XORing for entropy purposes) */
 	mask=mask>>(sizeof(int)*8-hash_size);
@@ -81,7 +82,7 @@ lclist**build_hashdict(char*path){
 	
 	while(0<fscanf(f,"%[^\n]\n",str)){
 		/* Calculate hash */
-		hashdict_addword(hashd,jhash(str),str,0);
+		hashdict_addword(hashd,jhash(str),str,0,strlen(str));
 	}
 	fclose(f);
 		
@@ -109,7 +110,7 @@ lclist**build_3tupledict(char*path){
 		for (i=0;i<max;i+=1){
 			for (j=0;j<3;j+=1) tuple[j]=news[i+j];
 			hash=jhash(tuple);
-			hashdict_addword(tupled,hash,str,1);
+			hashdict_addword(tupled,hash,str,1,max);
 		}
 		free(news);
 	}
@@ -127,9 +128,9 @@ lclist**build_3tupledict(char*path){
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it.
  */
-void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash){
+void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash,unsigned int max){
 	char *sve_str;
-	unsigned int max=strlen(str);
+	//unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
 	
 	old_node=node=hashd[hash];

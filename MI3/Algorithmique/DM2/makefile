@@ -11,9 +11,9 @@ TMP = tmp
 RSC = ressources
 
 NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O3 -I$(INC) 
+		 -std=c99 -Wshadow -O2 -I$(INC) 
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -I$(INC) -g -D build_tests
+		 -std=c99 -Wshadow -O2 -I$(INC) -g -D build_tests
 CFLAGS = $(DFLAGS)
 LDFLAGS = 
 

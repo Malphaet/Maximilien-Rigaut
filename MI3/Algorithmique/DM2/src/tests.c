@@ -24,7 +24,7 @@
 #define T_PATH "./tmp/tests.txt"
 #define T_OPEN FILE*test=fopen(T_PATH,"w+"); if (test==NULL) ERROR("Cannot open test file");
 #define T_CLOSE fclose(test);
-#define exec_tests 	printf("> Writing test results at %s\n",T_PATH);\
+#define exec_tests printf("> Writing test results at %s\n",T_PATH);\
 					printf("> Testing hash function\n");\
 					test_jhash();\
 					printf("> Testing hash dict building function\n");\
@@ -34,8 +34,9 @@
 
 void test_jhash(){
 	TIMER_INIT;
-	int i;unsigned long int res;
-	char*cluster[]={
+	unsigned long int res;
+	unsigned int hash,i,size=18;
+	char*bin,*cluster[]={
 					"Dark Angels",
 					"Emperor's Children",
 					"Iron Warriors",
@@ -54,15 +55,20 @@ void test_jhash(){
 					"Salamanders",
 					"Raven Guard",
 					"Alpha Legion"};
-	int size=18;
 	T_OPEN;
 	TIMER_STRT;
 	
 	for (i=0;i<nb_test;i+=1) jhash(val_test);
 	TIMER_STOP;
 	res=TIMER_USEC;
-	while (size--)	fprintf(test,"%05x %s %s\n",jhash(cluster[size]),itobin(jhash(cluster[size]),HASH_M_SIZE),cluster[size]);
+	while (size--)	{
+		hash=jhash(cluster[size]);
+		bin=itobin(hash,HASH_M_SIZE);
+		fprintf(test,"%05x %s %s\n",hash,bin,cluster[size]);
+		free(bin);
+	}
 	printf("Time elapsed: %li ms. Hash speed: %li hashs per ms\n",res/1000,nb_test/(res/1000));
+	T_CLOSE;
 }
 
 void test_hashtable(){
