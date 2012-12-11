@@ -19,7 +19,7 @@
  */
 
 /* Test functions */
-#define nb_test 10000000
+#define nb_test 100000000
 #define val_test "*"
 #define T_PATH "./tmp/tests.txt"
 #define T_OPEN FILE*test=fopen(T_PATH,"w+"); if (test==NULL) ERROR("Cannot open test file");
@@ -147,9 +147,9 @@ void test_3tuples(){
 	}
 	T_CLOSE;
 	
-	printf("Time elapsed: %li ms, alpha: %f, word digested: %d, worst collision: %d\n",TIMER_USEC/1000,(float)nb/HASH_DSIZ,nb,max_col-1);
+	printf("Time elapsed: %li ms, alpha: %f, tuples digested: %d, worst collision: %d\n",TIMER_USEC/1000,(float)nb/HASH_DSIZ,nb,max_col-1);
 	printf("Hash repartition :\nk Number\n");
-	for (i=0;i<20;i+=1){
+	for (i=0;i<10;i+=1){
 		if (hashs_col[i]) printf("%d %6d\n",i,hashs_col[i]);
 	}
 }

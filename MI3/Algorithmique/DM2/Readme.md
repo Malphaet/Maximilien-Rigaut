@@ -3,10 +3,10 @@ Orthographic Corrector  {#mainpage}
 
 ## Installation
 
-> + `make init`
-> + `make`
-> + `make doc`
-> + `./bin/corrector ressources/dico.txt ressources/fautes2012.txt`
+    make init
+    make
+    make doc
+    ./bin/corrector ressources/dico.txt ressources/fautes2012.txt
 
 ## Introduction
 

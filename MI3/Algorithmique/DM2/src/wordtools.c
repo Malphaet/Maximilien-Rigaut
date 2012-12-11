@@ -163,8 +163,8 @@ void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash,unsig
 int hashdict_in(lclist**hashd,char*str){
 	lclist*node;
 	unsigned int hash=jhash(str);
-	if (!(node=hashd[hash])) return 0;
 	
+	if (!(node=hashd[hash])) return 0;
 	while((node=node->next)!=NULL) if (strcmp((char*)node->data,str)) return 1;
 	return 0;
 }
@@ -176,10 +176,13 @@ int strheq(const char*w1,const char*w2){
 	return jhash(w1)!=jhash(w2);
 }
 
-void alllen(char*w,int*l,int*L){
-	*l=*L=0;
-	while(u8_nextchar(w,l)!=0) {
-		(*L)++;
-	}
-	(*l)--;
+/* Calculate both lenghts for speed purpose 
+ * @param w The word to measure
+ * @param l The ascii length
+ * @param L The utf length
+ */
+void alllen(char*word,int*ascii,int*utf){
+	*ascii=*utf=0;
+	while(u8_nextchar(word,ascii)!=0) (*utf)++;
+	(*ascii)--; // The last 0 doesn't count
 }

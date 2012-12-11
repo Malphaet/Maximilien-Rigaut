@@ -26,6 +26,10 @@
 /* Includes */
 
 #include "wordtools.h"
+char*substitutions[][2]={
+	{"oe","œ"}
+};
+#define SIZE_LIST 10
 
 char**			ten_bests				(char*,lclist**,lclist**); /* Return the ten best guesses for the given word */
 void			correct_all				(char*,char*);				/**< Correct all words, compare */	

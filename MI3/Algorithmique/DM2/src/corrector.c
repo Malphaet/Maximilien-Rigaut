@@ -40,17 +40,17 @@
  */
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
-	unsigned int hash,*nbmatching,val,*found_hashs;
-	int max,max2,MAX,MAX2,i,j,founds;
-	lclist**suggests;		/* Value that each tuple suggests */
+	unsigned int hash,*nbmatching,*found_hashs;
+	int max=0,max2=0,MAX=0,MAX2=0,i,j,founds,k=0,l=0,val;
+	lclist**suggests,**tweaks;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
-	
+
 	/* Variable initialisation */
-	//max=strlen(word);
 	alllen(word,&max,&MAX);
 	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word"); //freed
 	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list"); //freed
-	bests=calloc(11,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
+	tweaks=calloc(max<<4,sizeof(lclist*));	if (!tweaks) ERROR("Malloc tweaks list");
+	bests=calloc(SIZE_LIST+1,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
 	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");//freed
 	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words"); //freed
 	found_hashs=malloc(705600*sizeof(unsigned int)); if (!found_hashs) ERROR("Malloc found hashes"); //freed
@@ -66,22 +66,47 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	strcpy(news+1,word);
 	news[0]='$';news[max+1]='$';
 	
+	
+	#define t(i)	tuple[i]
+	#define w(j)	news[i+j]
+	#define s(j) 	substitutions[0][1][j];
+	#define in(n,j) substitutions[0][0][j]==(n)
+	#define addtuple(x) hash=jhash(x);\
+						 suggests[k++]=tuples[hash];
+	#define addtweak(x) hash=jhash(x);\
+						 tweaks[l++]=tuples[hash];
+	
 	for (i=0;i<max;i+=1){
-		for (j=0;j<3;j+=1) tuple[j]=news[i+j];
-		hash=jhash(tuple);
-		suggests[i]=tuples[hash];
+		t(0)=w(0);
+		if (in(t(1)=w(1),0)) {
+			if (in(t(2)=w(2),1)){
+				t(0)=w(0); t(1)=s(0); t(2)=s(1);
+				addtweak(tuple);
+				t(0)=s(0); t(1)=s(1); t(2)=w(3);
+				addtweak(tuple);
+			}
+		}
+		t(1)=w(1);
+		t(2)=w(2);
+		addtuple(tuple);
 	}
 	
 	/* Calculate number of matching tuples */
 	founds=0;
-	for (i=0;i<max;i+=1){
+	for (i=0;i<k;i+=1){
 		node=suggests[i];
-		if (node) while((node=node->next)!=NULL) {
+		if (node) while((node=node->next)!=NULL) { // @todo Explain in details
 			hash=jhash((char*)node->data);
 			if ((++nbmatching[hash])==1) found_hashs[founds++]=hash;
 		}
 	}
-	
+	for (i=0;i<l;i+=1){
+		node=tweaks[i];
+		if (node) while((node=node->next)!=NULL) { // @todo Explain in details
+			hash=jhash((char*)node->data);
+			if ((nbmatching[hash]+=5)) found_hashs[founds++]=hash;
+		}
+	}
 	/** Extract best suggestions 
 	 *  @todo Make this readable
 	 */
@@ -91,27 +116,29 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		node=hashd[hash];
 		while ((node=node->next)!=NULL) {
 			/* Avoid words with error on the first letter, cruel but efficient */
-			if (((char*)node->data)[0]!=word[0]) continue;
-			//max2=strlen((char*)node->data);
+			if (/*((char*)node->data)[0]>0 &&*/ ((char*)node->data)[0]!=word[0]) continue;
 			alllen((char*)node->data,&max2,&MAX2);
 			/* Only analyse the guesses who are jacquard-close to the word to correct */
-			if (((nbmatching[hash]*10)/(max+max2-nbmatching[hash]))>1){
+			if ((((max+max2-nbmatching[hash]*10)*10)/(nbmatching[hash]+1))>1){
 				/* Calculate the ponderated levenshtein distance */
-				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1);
-				
+				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1)-nbmatching[hash]+max;
+				val=val>0?val:0;
+
 				/* Add the guess to results */
 				if (!qualified[val]) qualified[val]=make_lclist();
 				add_lclist(qualified[val],(void*)node->data);
 			}
 		}
-		
 	}
 	
 	j=0;
 	for (i=0;i<100;i++){
 		node=qualified[i];
 		if (node){ 
-			while((node=node->next)!=NULL) if (j<10) bests[j++]=(char*)node->data;
+			while((node=node->next)!=NULL) {
+				//if (jhash((char*)node->data)==0x30a8f) printf("%s->%s:%d %d\n",(char*)node->data,word,j,nbmatching[jhash((char*)node->data)]);
+				if (j<SIZE_LIST) bests[j++]=(char*)node->data; //else goto finish;
+			}
 			drop_lclist(qualified[i]);
 		}
 	}
@@ -178,18 +205,18 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 	
 	/* Show the score */
 	st=2;
-	for (i=0;i<10;i+=1) {
+	for (i=0;i<SIZE_LIST;i+=1) {
 		if (founds[i]!=NULL) {
 			if (strcmp(goal,founds[i])==0){st=(i!=0);break;}
 		} else break;
 	}
 	/* No matchs, display the guesses */
 	#ifdef build_tests
-	//if (st==2) {
-		//printf("Analysing %s...(%s) led to no match\n",str,goal);
-		//for (i=0;i<10;i+=1) if (founds[i])printf("%s ",founds[i]);
-		//printf("\n");
-	//}
+	if (st==2) {
+		printf("Analysing %s...(%s) led to no match\n",str,goal);
+		for (i=0;i<SIZE_LIST;i+=1) if (founds[i])printf("%s ",founds[i]);
+		printf("\n");
+	}
 	#endif
 	
 	return st;
@@ -201,7 +228,7 @@ int main (int argc, char *argv[]){
 	if (argc<3) OUT("Usage: corrector <dictonnary> <mistake file>");
 
 	#ifdef build_tests
-		exec_tests
+		//exec_tests
 	#endif
 	correct_all(argv[1],argv[2]);
 	
