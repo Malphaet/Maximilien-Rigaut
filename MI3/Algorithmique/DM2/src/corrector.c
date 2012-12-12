@@ -41,7 +41,7 @@
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
 	unsigned int hash,*found_hashs;
-	int *nbmatching,max=0,max2=0,MAX=0,MAX2=0,i,j,founds,k=0,l=0,val;
+	int *nbmatching,max=0,max2=0,MAX=0,MAX2=0,i,j=1,founds=0,k=0,l=0,val;
 	lclist**suggests,**tweaks;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 
@@ -49,7 +49,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	alllen(word,&max,&MAX);
 	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word"); //freed
 	suggests=calloc(max,sizeof(lclist*));	if (!suggests) ERROR("Malloc suggestion list"); //freed
-	tweaks=calloc(max<<4,sizeof(lclist*));	if (!tweaks) ERROR("Malloc tweaks list");
+	tweaks=calloc(max<<4,sizeof(lclist*));	if (!tweaks) ERROR("Malloc tweaks list"); //freed
 	bests=calloc(SIZE_LIST+1,sizeof(char*));		if (!bests) ERROR("Malloc result list"); //later freed
 	nbmatching=calloc(HASH_DSIZ,sizeof(unsigned int));	if (!nbmatching) ERROR("Malloc number of matching tuples");//freed
 	qualified=calloc(101,sizeof(lclist*));	if (!qualified) ERROR("Malloc qualified words"); //freed
@@ -58,7 +58,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	/* Check into the dictionnary for existence */
 	node=hashd[jhash(word)];
 	if (node) while ((node=node->next)!=NULL) if (strcmp(word,(char*)node->data)==0){
-		bests[0]=(char*)node->data; bests[1]=NULL;
+		bests[0]=(char*)node->data; j=1; //bests[1]=NULL;
 		goto finish;
 	}
 	
@@ -66,90 +66,89 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	strcpy(news+1,word);
 	news[0]='$';news[max+1]='$';
 	
-	
-	#define t(i)	tuple[i]
-	#define w(j)	news[i+j]
-	#define s(j) 	substitutions[0][1][j];
-	#define in(n,j) substitutions[0][0][j]==(n)
-	#define addtuple(x) hash=jhash(x);\
-						 suggests[k++]=tuples[hash];
-	#define addtweak(x) hash=jhash(x);\
-						 tweaks[l++]=tuples[hash];
+	#define t(i)	tuple[i] 							//< The i-th letter of the tuple
+	#define w(j)	news[i+j]							//< The i-th letter of the current word
+	#define S(j) 	substitutions[0][1][j]				//< The j-th letter to substitute to
+	#define s(j) 	substitutions[0][0][j]				//< The j-th letter of the substitution
+	#define addtuple	hash=jhash(tuple);\
+						suggests[k++]=tuples[hash];		//< Add the current tuple
+	#define addtweak	hash=jhash(tuple);\
+						tweaks[l++]=tuples[hash];		//< Add the current tweak
 	
 	for (i=0;i<max;i+=1){
 		t(0)=w(0);
-		if (in(t(1)=w(1),0)) {
-			if (in(t(2)=w(2),1)){
-				t(0)=w(0); t(1)=s(0); t(2)=s(1);
-				addtweak(tuple);
-				t(0)=s(0); t(1)=s(1); t(2)=w(3);
-				addtweak(tuple);
+		if (w(1)==s(0)) {
+			if (w(2)==s(1)){
+				t(0)=w(0); t(1)=S(0); t(2)=S(1);
+				addtweak;
+				t(0)=S(0); t(1)=S(1); t(2)=w(3);
+				addtweak;
 			}
 		}
 		t(1)=w(1);
 		t(2)=w(2);
-		addtuple(tuple);
+		addtuple;
 	}
 	
 	/* Calculate number of matching tuples */
-	founds=0;
 	for (i=0;i<k;i+=1){
 		node=suggests[i];
-		if (node) while((node=node->next)!=NULL) { // @todo Explain in details
-			hash=jhash((char*)node->data);
+		if (node) while((node=node->next)!=NULL) {
+			/* Save the hash, and number of encountering of the given data */
+			hash=jhash((char*)node->data); 
 			if ((++nbmatching[hash])==1) found_hashs[founds++]=hash;
 		}
 	}
 	for (i=0;i<l;i+=1){
 		node=tweaks[i];
-		if (node) while((node=node->next)!=NULL) { // @todo Explain in details
+		while((node=node->next)!=NULL) {
+			/* The special values are weighted a little more, to compensate */
 			hash=jhash((char*)node->data);
-			if (hash==810478) {
-				//printf("%s<-%s\n",word,(char*)node->data);
-				found_hashs[founds++]=hash;
-			}
 			if ((nbmatching[hash]+=5)==5) found_hashs[founds++]=hash;
 		}
 	}
-	/** Extract best suggestions 
-	 *  @todo Make this readable
-	 */
+	
+	#define newW ((char*)node->data) //< The current word
+	/* Extract best suggestions */
 	for (j=0;j<founds;j+=1){ 
-		/* Collisions may occur, however levenshtein will take care of that */
-		hash=found_hashs[j];
-		node=hashd[hash];
+		/* Assign hash and node. Hash collisions may occur, however levenshtein will take care of that */
+		node=hashd[hash=found_hashs[j]];
 		while ((node=node->next)!=NULL) {
-			/* Avoid words with error on the first letter, cruel but efficient */
-			if (((char*)node->data)[0]>0 && ((char*)node->data)[0]!='h'&& ((char*)node->data)[0]!=word[0]) continue;
-			alllen((char*)node->data,&max2,&MAX2);
-			/* Only analyse the guesses who are jacquard-close to the word to correct */
+			/* Avoid words with error on the first letter, cruel but efficient.
+			 * Exception are special first letters (error on hyphens) 
+			 *   and h as fisrt letter (not pronounced he sometimes leads to mistakes) */
+			if (newW[0]>0 && newW[0]!=word[0] && word[0]!='h') continue;
+			
+			alllen(newW,&max2,&MAX2);
+			/* Only analyse the guesses who are invert-jacquard-close to the word to correct 
+			 * Due to the new nature of ::nbmatching, it became necessary to invert the jacquard distance to avoid 0 div error */
 			if ((((max+max2-(nbmatching[hash])))/(nbmatching[hash]+1))<6){
 				/* Calculate the ponderated levenshtein distance */
-				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1)+max-nbmatching[hash];
-				val=val>0?val:0;
-				//if (hash==810478) printf("%s->%s - %d\n",word,(char*)node->data,val);
-				/* Add the guess to results */
-				if (!qualified[val]) qualified[val]=make_lclist();
-				add_lclist(qualified[val],(void*)node->data);
+				val=(val=levenshtein(newW,word,MAX2+1,MAX+1)+max-nbmatching[hash])>0?val:0;
+				/* Add the guess to results if close enough to the initial word */
+				if (val<ERROR_LIMIT){
+					if (!qualified[val]) qualified[val]=make_lclist();
+					add_lclist(qualified[val],newW);
+				}
 			}
 		}
 	}
 	
 	j=0;
-	for (i=0;i<100;i++){
+	for (i=0;i<ERROR_LIMIT;i++){
 		node=qualified[i];
 		if (node){ 
-			while((node=node->next)!=NULL) {
-				//if (jhash((char*)node->data)==0x30a8f) printf("%s->%s:%d %d\n",(char*)node->data,word,j,nbmatching[jhash((char*)node->data)]);
-				if (j<SIZE_LIST) bests[j++]=(char*)node->data; //else goto finish;
-			}
+			while((node=node->next)!=NULL)	
+				if (j<SIZE_LIST) bests[j++]=(char*)node->data; 
+				else goto finish; // As soon as the list is full, get out
 			drop_lclist(qualified[i]);
 		}
 	}
-	bests[j]=NULL;
+
 	
 	/* Clean and exit */
 	finish:
+		bests[j]=NULL;
 		free(news);
 		free(suggests);
 		free(nbmatching);

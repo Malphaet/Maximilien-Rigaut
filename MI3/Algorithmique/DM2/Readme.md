@@ -13,7 +13,7 @@ Orthographic Corrector  {#mainpage}
 ## Modules
 Here is a quick description of the implemented modules, covering their main functionnalities.
 ### Levenshtein distance
-+ Calculate the difference between two strings
++ Calculate the difference between two strings, this function is utf8 friendly, and only covers utf8 specials chars.
 
 ### Hash codes
 + Hashing a string
@@ -59,12 +59,6 @@ Hashing a word dictionnary the XOR function produce +2% to -120% less collisions
 ## Usage
 
 ## Todo
-+ @ref todo
-+ Free a lot more ressources
 + Update and complete this page
   + Add data as examples
-+ Add utf8 support to word recognition
-+ Better @ref build_3tupledict, maybe a subfunction
 + Threadify it a little
-+ Aim at the 0 leak !
-

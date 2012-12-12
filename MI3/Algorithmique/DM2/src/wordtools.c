@@ -23,12 +23,12 @@
 /** The levenshtein function
  * Note that the function return the ponderated levenshtein function with 2 digits precision.
  * @param w1,w2 The words to compare
+ * @param l,l2 The length of the words to compare
  * @return the distance, in permutation and additions/deletion between the two words aka the levenshtein distance
  */
 unsigned int levenshtein(char*w1,char*w2,int l,int l2){
 	int cost,i=1,j=1,w_i=0,w_j=0;
 	u_int32_t w1_val;
-	//int l=u8_strlen(w1)+1,l2=u8_strlen(w2)+1;
 	int*table=calloc(1,sizeof(int)*(l)*(l2));
 	
 	if (table==NULL) ERROR("Malloc table");
@@ -124,20 +124,19 @@ lclist**build_3tupledict(char*path){
  * @param hash The hash of the given object
  * @param str The object hashed, to store if unique
  * @param subhash Check if collisions are genuine
+ * @param max The lenght of the word (hence the number of 3-tuples)
  * This function works in a very particular fashion, 
  * in the way that is doesn't calculate the hash and solve the collision,
  * but relie on the calling function to provide the tools for it.
  */
 void hashdict_addword(lclist**hashd,unsigned int hash,char*str,int subhash,unsigned int max){
 	char *sve_str;
-	//unsigned int max=strlen(str);
 	lclist*node,*new_node,*old_node;
 	
 	old_node=node=hashd[hash];
 	/* Either the hash generate collision */
 	if (node) {
 		/* If the hash is already present, skip it */
-		/** @todo Find a better redondency check */
 		if (!subhash) while ((node=node->next)!=NULL) {old_node=node; if (strcmp((char*)node->data,str)==0) return;}
 	/* Either it doesn't */
 	} else hashd[hash]=old_node=make_lclist();
@@ -176,10 +175,10 @@ int strheq(const char*w1,const char*w2){
 	return jhash(w1)!=jhash(w2);
 }
 
-/* Calculate both lenghts for speed purpose 
- * @param w The word to measure
- * @param l The ascii length
- * @param L The utf length
+/** Calculate both lenghts for speed purpose 
+ * @param word The word to measure
+ * @param ascii The ascii length
+ * @param utf The utf length
  */
 void alllen(char*word,int*ascii,int*utf){
 	*ascii=*utf=0;
