@@ -40,8 +40,8 @@
  */
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
-	unsigned int hash,*nbmatching,*found_hashs;
-	int max=0,max2=0,MAX=0,MAX2=0,i,j,founds,k=0,l=0,val;
+	unsigned int hash,*found_hashs;
+	int *nbmatching,max=0,max2=0,MAX=0,MAX2=0,i,j,founds,k=0,l=0,val;
 	lclist**suggests,**tweaks;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 
@@ -104,7 +104,11 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		node=tweaks[i];
 		if (node) while((node=node->next)!=NULL) { // @todo Explain in details
 			hash=jhash((char*)node->data);
-			if ((nbmatching[hash]+=5)) found_hashs[founds++]=hash;
+			if (hash==810478) {
+				//printf("%s<-%s\n",word,(char*)node->data);
+				found_hashs[founds++]=hash;
+			}
+			if ((nbmatching[hash]+=5)==5) found_hashs[founds++]=hash;
 		}
 	}
 	/** Extract best suggestions 
@@ -116,14 +120,14 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		node=hashd[hash];
 		while ((node=node->next)!=NULL) {
 			/* Avoid words with error on the first letter, cruel but efficient */
-			if (/*((char*)node->data)[0]>0 &&*/ ((char*)node->data)[0]!=word[0]) continue;
+			if (((char*)node->data)[0]>0 && ((char*)node->data)[0]!='h'&& ((char*)node->data)[0]!=word[0]) continue;
 			alllen((char*)node->data,&max2,&MAX2);
 			/* Only analyse the guesses who are jacquard-close to the word to correct */
-			if ((((max+max2-nbmatching[hash]*10)*10)/(nbmatching[hash]+1))>1){
+			if ((((max+max2-(nbmatching[hash])))/(nbmatching[hash]+1))<6){
 				/* Calculate the ponderated levenshtein distance */
-				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1)-nbmatching[hash]+max;
+				val=levenshtein((char*)node->data,word,MAX2+1,MAX+1)+max-nbmatching[hash];
 				val=val>0?val:0;
-
+				//if (hash==810478) printf("%s->%s - %d\n",word,(char*)node->data,val);
 				/* Add the guess to results */
 				if (!qualified[val]) qualified[val]=make_lclist();
 				add_lclist(qualified[val],(void*)node->data);
@@ -182,7 +186,7 @@ void correct_all(char*dict,char*errs){
 	st=stats[0]+stats[1]+stats[2];
 	printf("Analysis complete, lasted %ldms.\n%d words were first guess, %d were amongs the guesses and %d weren't found.\n",
 	TIMER_USEC/1000,stats[0],stats[1],stats[2]);
-	printf("   M    F    N\n%3d%% %3d%% %3d%%\n",stats[0]*100/st,stats[1]*100/st,stats[2]*100/st);
+	printf("   M    F    N\n%3.2f%% %3.2f%% %3.2f%%\n",((float)stats[0]*100)/st,((float)stats[1]*100)/st,((float)stats[2]*100)/st);
 	
 	for(i=0;i<HASH_DSIZ;i++) if (hashd[i]) drop_lclist(hashd[i]);
 	for(i=0;i<HASH_DSIZ;i++) if (tuples[i]) drop_lclist(tuples[i]);
@@ -227,8 +231,11 @@ int correct(char*str,char*goal,lclist**hashd,lclist**tuples){
 int main (int argc, char *argv[]){
 	if (argc<3) OUT("Usage: corrector <dictonnary> <mistake file>");
 
+	printf("%s %d\n","œil",jhash("œil"));
+	printf("%s %d\n","oeil",jhash("oeil"));
+
 	#ifdef build_tests
-		//exec_tests
+		exec_tests
 	#endif
 	correct_all(argv[1],argv[2]);
 	
