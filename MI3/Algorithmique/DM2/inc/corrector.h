@@ -29,7 +29,7 @@
 #include <pthread.h>
 
 /** Substitutions to perform */
-#define MAX_THREADS 4
+#define MAX_THREADS 8
 char*substitutions[][2]={
 	{"oe","œ"}
 };

@@ -54,7 +54,7 @@ struct params{
 	int max;					// Frozen
 	int MAX;					// Frozen
 };
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex[ERROR_LIMIT];
 
 void*add_suggestions(void*par){
 	struct params*P=(struct params*)par;
@@ -80,15 +80,18 @@ void*add_suggestions(void*par){
 				/* Calculate the ponderated levenshtein distance */
 				val=(val=levenshtein(newW,P->word,MAX2+1,P->MAX+1)+P->max-P->nbmatching[hash])>0?val:0;
 				/* Add the guess to results if close enough to the initial word */
-				pthread_mutex_lock(&mutex);
+				
 				if (val<ERROR_LIMIT){
+					pthread_mutex_lock(&(mutex[val]));
 					if (!P->qualified[val]) P->qualified[val]=make_lclist();
 					add_lclist(P->qualified[val],newW);
+					pthread_mutex_unlock(&(mutex[val]));
 				}
-				pthread_mutex_unlock(&mutex);
+				
 			}
 		}
 	}
+	free(par);
 	return NULL;
 }
 
@@ -216,6 +219,8 @@ void correct_all(char*dict,char*errs){
 	lclist**hashd=build_hashdict(dict);
 	lclist**tuples=build_3tupledict(dict);
 	TIMER_INIT;
+	
+	for(i=0;i<ERROR_LIMIT;i++) pthread_mutex_init(&(mutex[i]),NULL);
 	
 	printf("Starting analysis...\n");
 	if ((f=fopen(errs,"r"))==NULL) ERROR("Opening file");
