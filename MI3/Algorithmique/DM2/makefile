@@ -15,7 +15,7 @@ NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-lo
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -O2 -I$(INC) -g -D build_tests
 CFLAGS = $(DFLAGS)
-LDFLAGS = 
+LDFLAGS = -lpthread
 
 
 EXEC=corrector

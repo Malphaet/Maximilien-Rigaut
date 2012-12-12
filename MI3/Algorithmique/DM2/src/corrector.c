@@ -25,11 +25,73 @@
 	#include "tests.c"
 #endif
 
+
+#define init_sugg_thread(i,j)	P->vMin=i;\
+								P->vMax=j;\
+								P->hashd=hashd;\
+								P->qualified=qualified;\
+								P->found_hashs=found_hashs;\
+								P->nbmatching=nbmatching;\
+								P->word=word;\
+								P->max=max;\
+								P->MAX=MAX;
+
+							
 /** @file corrector.c Word corrector */
 /** @defgroup correctf Correction functions 
  * @brief A handful correction function
  * @{
  */
+
+struct params{
+	int vMin;					// Thread dependent
+	int vMax;					// Thread dependent
+	lclist**hashd; 				// Frozen
+	lclist**qualified;			// Mutex protected
+	unsigned int*found_hashs;	// Frozen
+	int*nbmatching; 			// Frozen
+	char*word;					// Frozen
+	int max;					// Frozen
+	int MAX;					// Frozen
+};
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void*add_suggestions(void*par){
+	struct params*P=(struct params*)par;
+	lclist*node;
+	int max2,MAX2,val,j;
+	unsigned int hash;
+	
+	#define newW ((char*)node->data) //< The current word
+	/* Extract best suggestions */
+	for (j=P->vMin;j<P->vMax;j+=1){ 
+		/* Assign hash and node. Hash collisions may occur, however levenshtein will take care of that */
+		node=P->hashd[hash=P->found_hashs[j]];
+		while ((node=node->next)!=NULL) {
+			/* Avoid words with error on the first letter, cruel but efficient.
+			 * Exception are special first letters (error on hyphens) 
+			 *   and h as fisrt letter (not pronounced he sometimes leads to mistakes) */
+			if (newW[0]>0 && newW[0]!=P->word[0] && P->word[0]!='h') continue;
+			
+			alllen(newW,&max2,&MAX2);
+			/* Only analyse the guesses who are invert-jacquard-close to the word to correct 
+			 * Due to the new nature of ::nbmatching, it became necessary to invert the jacquard distance to avoid 0 div error */
+			if ((((P->max+max2-(P->nbmatching[hash])))/(P->nbmatching[hash]+1))<6){
+				/* Calculate the ponderated levenshtein distance */
+				val=(val=levenshtein(newW,P->word,MAX2+1,P->MAX+1)+P->max-P->nbmatching[hash])>0?val:0;
+				/* Add the guess to results if close enough to the initial word */
+				pthread_mutex_lock(&mutex);
+				if (val<ERROR_LIMIT){
+					if (!P->qualified[val]) P->qualified[val]=make_lclist();
+					add_lclist(P->qualified[val],newW);
+				}
+				pthread_mutex_unlock(&mutex);
+			}
+		}
+	}
+	return NULL;
+}
+
 
 /** Find the ten best correction guesses for the given word
  * @todo Make the function Leak free
@@ -44,7 +106,9 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	int *nbmatching,max=0,max2=0,MAX=0,MAX2=0,i,j=1,founds=0,k=0,l=0,val;
 	lclist**suggests,**tweaks;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
-
+	struct params*P;
+	pthread_t thread_id[MAX_THREADS];
+	
 	/* Variable initialisation */
 	alllen(word,&max,&MAX);
 	news=calloc(max+3,sizeof(char));		if (!news) ERROR("Malloc new word"); //freed
@@ -74,7 +138,7 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 						suggests[k++]=tuples[hash];		//< Add the current tuple
 	#define addtweak	hash=jhash(tuple);\
 						tweaks[l++]=tuples[hash];		//< Add the current tweak
-	
+					
 	for (i=0;i<max;i+=1){
 		t(0)=w(0);
 		if (w(1)==s(0)) {
@@ -108,32 +172,14 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		}
 	}
 	
-	#define newW ((char*)node->data) //< The current word
-	/* Extract best suggestions */
-	for (j=0;j<founds;j+=1){ 
-		/* Assign hash and node. Hash collisions may occur, however levenshtein will take care of that */
-		node=hashd[hash=found_hashs[j]];
-		while ((node=node->next)!=NULL) {
-			/* Avoid words with error on the first letter, cruel but efficient.
-			 * Exception are special first letters (error on hyphens) 
-			 *   and h as fisrt letter (not pronounced he sometimes leads to mistakes) */
-			if (newW[0]>0 && newW[0]!=word[0] && word[0]!='h') continue;
-			
-			alllen(newW,&max2,&MAX2);
-			/* Only analyse the guesses who are invert-jacquard-close to the word to correct 
-			 * Due to the new nature of ::nbmatching, it became necessary to invert the jacquard distance to avoid 0 div error */
-			if ((((max+max2-(nbmatching[hash])))/(nbmatching[hash]+1))<6){
-				/* Calculate the ponderated levenshtein distance */
-				val=(val=levenshtein(newW,word,MAX2+1,MAX+1)+max-nbmatching[hash])>0?val:0;
-				/* Add the guess to results if close enough to the initial word */
-				if (val<ERROR_LIMIT){
-					if (!qualified[val]) qualified[val]=make_lclist();
-					add_lclist(qualified[val],newW);
-				}
-			}
-		}
+	for(i=0;i<MAX_THREADS;i++){
+		if (!(P=malloc(sizeof(struct params)))) ERROR("Thread params");
+		init_sugg_thread((i*founds/MAX_THREADS),((i+1)*founds/MAX_THREADS));
+		pthread_create(&thread_id[i], NULL, add_suggestions, P);
 	}
 	
+	for(j=0;j<MAX_THREADS;j++) pthread_join(thread_id[j], NULL);
+
 	j=0;
 	for (i=0;i<ERROR_LIMIT;i++){
 		node=qualified[i];

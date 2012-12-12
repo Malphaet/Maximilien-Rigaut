@@ -26,7 +26,10 @@
 /* Includes */
 
 #include "wordtools.h"
+#include <pthread.h>
+
 /** Substitutions to perform */
+#define MAX_THREADS 4
 char*substitutions[][2]={
 	{"oe","œ"}
 };
