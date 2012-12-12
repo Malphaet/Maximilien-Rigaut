@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <unistd.h>
 #include "utils.h"
 #include "utf8.h"
 #include "clist.h"

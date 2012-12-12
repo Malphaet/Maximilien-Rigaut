@@ -54,12 +54,15 @@ struct params{
 	int max;					// Frozen
 	int MAX;					// Frozen
 };
+
+#if MAX_THREADS!=1
 pthread_mutex_t mutex[ERROR_LIMIT];
+#endif
 
 void*add_suggestions(void*par){
 	struct params*P=(struct params*)par;
 	lclist*node;
-	int max2,MAX2,val,j;
+	int max2=0,MAX2=0,val,j;
 	unsigned int hash;
 	
 	#define newW ((char*)node->data) //< The current word
@@ -82,10 +85,14 @@ void*add_suggestions(void*par){
 				/* Add the guess to results if close enough to the initial word */
 				
 				if (val<ERROR_LIMIT){
+					#if MAX_THREADS!=1
 					pthread_mutex_lock(&(mutex[val]));
+					#endif
 					if (!P->qualified[val]) P->qualified[val]=make_lclist();
 					add_lclist(P->qualified[val],newW);
+					#if MAX_THREADS!=1
 					pthread_mutex_unlock(&(mutex[val]));
+					#endif
 				}
 				
 			}
@@ -106,11 +113,13 @@ void*add_suggestions(void*par){
 char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 	char tuple[4]={0,0,0,0},*news,**bests;
 	unsigned int hash,*found_hashs;
-	int *nbmatching,max=0,max2=0,MAX=0,MAX2=0,i,j=1,founds=0,k=0,l=0,val;
+	int *nbmatching,max=0,MAX=0,i,j=1,founds=0,k=0,l=0;
 	lclist**suggests,**tweaks;		/* Value that each tuple suggests */
 	lclist**qualified,*node;
 	struct params*P;
+	#if MAX_THREADS!=1
 	pthread_t thread_id[MAX_THREADS];
+	#endif
 	
 	/* Variable initialisation */
 	alllen(word,&max,&MAX);
@@ -175,14 +184,21 @@ char**ten_bests(char*word,lclist**tuples,lclist**hashd){
 		}
 	}
 	
-	for(i=0;i<MAX_THREADS;i++){
-		if (!(P=malloc(sizeof(struct params)))) ERROR("Thread params");
-		init_sugg_thread((i*founds/MAX_THREADS),((i+1)*founds/MAX_THREADS));
-		pthread_create(&thread_id[i], NULL, add_suggestions, P);
-	}
+	/* Split the adding in few threads, one thread means no threads at all */
+	#if MAX_THREADS!=1
+		for(i=0;i<MAX_THREADS;i++){
+			if (!(P=malloc(sizeof(struct params)))) ERROR("Thread params");
+			init_sugg_thread((i*founds/MAX_THREADS),((i+1)*founds/MAX_THREADS));
+			pthread_create(&thread_id[i], NULL, add_suggestions, P);
+		}
 	
-	for(j=0;j<MAX_THREADS;j++) pthread_join(thread_id[j], NULL);
-
+		for(j=0;j<MAX_THREADS;j++) pthread_join(thread_id[j], NULL);
+	#else 
+		if (!(P=malloc(sizeof(struct params)))) ERROR("Thread params");
+		init_sugg_thread(0,founds);
+		add_suggestions(P);
+	#endif
+	
 	j=0;
 	for (i=0;i<ERROR_LIMIT;i++){
 		node=qualified[i];
@@ -219,13 +235,15 @@ void correct_all(char*dict,char*errs){
 	lclist**hashd=build_hashdict(dict);
 	lclist**tuples=build_3tupledict(dict);
 	TIMER_INIT;
-	
+	#if MAX_THREADS!=1
 	for(i=0;i<ERROR_LIMIT;i++) pthread_mutex_init(&(mutex[i]),NULL);
+	#endif
 	
 	printf("Starting analysis...\n");
 	if ((f=fopen(errs,"r"))==NULL) ERROR("Opening file");
 	
 	TIMER_STRT;
+	i=0;
 	while ((fscanf(f,"%[^>]>%[^\n]\n",str,goal))>0){
 		/* Find bests matches */
 		st=correct(str,goal,hashd,tuples);
