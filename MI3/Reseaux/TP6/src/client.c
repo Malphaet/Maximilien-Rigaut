@@ -79,7 +79,7 @@ int main(){
 				if (p) kill(p,SIGKILL);
 				goto quit;
 			case msg_zero: // Server disconeted
-				printf("[HAL]I know that you were planning to disconnect me\n");
+				printf("[HAL] I know that you were planning to disconnect me\n");
 				if (p) kill(p,SIGKILL);
 				goto quit;
 			default:
