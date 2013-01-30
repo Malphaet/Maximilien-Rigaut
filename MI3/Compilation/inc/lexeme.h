@@ -41,11 +41,18 @@ char *SYMBOLS[]={
 char *KEYWORDS[]={
 	"integer", "boolean", "array of", "mod", "begin", "end", "if",
 	"then","else","while","do","function","procedure","while",
-	"read","program","var"
+	"read","program","var","false","true"
 };
 
+#define SIZE_CHAR 256
 int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
+int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
 int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
+
+#define VAL_CHAR(index) index
+#define VAL_ONESYMS(index) SIZE_CHAR+1+index
+#define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
+#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
 /* ======== Prototype =========*/
 
 int yylex();

@@ -1,6 +1,6 @@
 ;
 
-program p;
+program var integer : ; := p ;
 
 var
-   b : integer;
+   b : integer ;

@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "lexeme.h"
+#include <string.h>
+#include <ctype.h>
 
 /* ========= Defines ==========*/
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
@@ -56,7 +58,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-int is_symbol(const char chr){
+int is_single_symbol(const char chr){
 	int i;
 	char nc;
 	for(i=0;i<SIZE_ONESYMS;i++)
@@ -69,21 +71,45 @@ int is_symbol(const char chr){
 				ungetc(chr,yyin);
 				return 0;
 			}
-			return i+257;
+			return VAL_ONESYMS(i);
 		}
 	return 0;
 }
 
+int is_symbol(const char*str){
+	int i;
+	for(i=0;i<SIZE_SYMBOLS;i++)
+		if (strcmp(SYMBOLS[i],str)==0) return VAL_SYMBOLS(i);
+	
+	for(i=0;i<SIZE_KEYWORDS;i++)
+		if (strcmp(KEYWORDS[i],str)==0) return VAL_KEYWORDS(i);
+	
+	return 0;
+}
 
 int yylex(){
-	int val,nbchar;
-	char chr=getc(yyin);
-	if ((val=is_symbol(chr))) {
+	int val,nbchar=0;
+	char chr;
+	
+	do {
+		chr=getc(yyin);
+		if (chr==0) return 0;
+	} while (isspace(chr));
+	
+	if ((val=is_single_symbol(chr))) {
 		yytext[0]=chr;
 		yytext[1]=0;
 		return val;
 	}
-	/* Add chars, compare */
+	yytext[0]=chr;
+	while ((chr=getc(yyin))!=0){
+		if (isspace(chr)) {
+			yytext[++nbchar]=0;
+			return is_symbol(yytext);
+		}
+		yytext[++nbchar]=chr;
+	}
+	
 	return 0;
 }
 
