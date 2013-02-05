@@ -45,14 +45,14 @@ char VAR[256];
 
 int main(int argc, char **argv) {
 	int uniteCourante;
-	if (argc<2) OUT("Not enough arguments");
+	if (argc<2) OUT("lplcc error : Not enough arguments");
 	
 	yyin = fopen(argv[1], "r");
-	if(yyin == NULL) ERROR("Impossible d'ouvrir le fichier");
+	if(yyin == NULL) ERROR("lplcc error : File not found");
 	
 	uniteCourante = yylex();
 	while (uniteCourante != 0) {
-		printf("(%s, %d)\n", yytext, uniteCourante);
+		printf("(\"%s\", %d)\n", yytext, uniteCourante);
 		uniteCourante = yylex();
 	}
 	return 0;
@@ -63,13 +63,14 @@ int is_single_symbol(const char chr){
 	char nc;
 	for(i=0;i<SIZE_ONESYMS;i++)
 		if (ONESYMS[i][0]==chr) {
-			if (chr==':' && (nc=getc(yyin))=='=') {
+			if (chr==':') if ((nc=getc(yyin))=='=') {
 				ungetc(chr,yyin);
-				return 0;
+				WHERE;
+				return -1;
 			}
-			if (chr=='.' && (nc=getc(yyin))=='.') {
+			if (chr=='.') if ((nc=getc(yyin))=='.') {
 				ungetc(chr,yyin);
-				return 0;
+				return -1;
 			}
 			return VAL_ONESYMS(i);
 		}
@@ -77,13 +78,18 @@ int is_single_symbol(const char chr){
 }
 
 int is_symbol(const char*str){
-	int i;
-	for(i=0;i<SIZE_SYMBOLS;i++)
-		if (strcmp(SYMBOLS[i],str)==0) return VAL_SYMBOLS(i);
+	int i,j;
+	for(i=0;i<SIZE_SYMBOLS;i++){
+		j=strcmp(SYMBOLS[i],str);
+		if (j==0) return VAL_SYMBOLS(i);
+		if (j>0) break;
+	}
 	
-	for(i=0;i<SIZE_KEYWORDS;i++)
-		if (strcmp(KEYWORDS[i],str)==0) return VAL_KEYWORDS(i);
-	
+	for(i=0;i<SIZE_KEYWORDS;i++){
+		j=strcmp(KEYWORDS[i],str);
+		if (j==0) return VAL_KEYWORDS(i);
+		if (j>0) break;
+	}
 	return 0;
 }
 
@@ -91,25 +97,33 @@ int yylex(){
 	int val,nbchar=0;
 	char chr;
 	
-	do {
-		chr=getc(yyin);
-		if (chr==0) return 0;
-	} while (isspace(chr));
+	do {chr=getc(yyin);}
+	while (isspace(chr));
 	
-	if ((val=is_single_symbol(chr))) {
-		yytext[0]=chr;
+	yytext[0]=chr;
+	if (chr==EOF) return 0;
+	
+	/* Either it's a single character symbol*/
+	if ((val=is_single_symbol(chr))>0) {
 		yytext[1]=0;
 		return val;
 	}
-	yytext[0]=chr;
-	while ((chr=getc(yyin))!=0){
+	
+	/* Either it's a multiple character symbol */
+	while ((chr=getc(yyin))!=EOF){ 
 		if (isspace(chr)) {
+			yytext[++nbchar]=0;
+			return is_symbol(yytext);
+		}
+		if ((val<0)&(ispunct(chr))) {
+			yytext[++nbchar]=chr;
 			yytext[++nbchar]=0;
 			return is_symbol(yytext);
 		}
 		yytext[++nbchar]=chr;
 	}
 	
+	/* Else it's alphanum */
 	return 0;
 }
 

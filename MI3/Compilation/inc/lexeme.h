@@ -32,16 +32,14 @@
 
 
 char *ONESYMS[]={
-	"[","]","(",")",".","*","/","+","-",":","<",">","=",";"
+	"(", ")", "*", "+", "-", ".", "/", ":", ";", "<", "=", ">", "[", "]"
 };
 
 char *SYMBOLS[]={
-	":=","<=",">=",".."
+	"..", ":=", "<=", ">="
 };
 char *KEYWORDS[]={
-	"integer", "boolean", "array of", "mod", "begin", "end", "if",
-	"then","else","while","do","function","procedure","while",
-	"read","program","var","false","true"
+	"array of", "begin", "boolean", "do", "else", "end", "false", "function", "if", "integer", "mod", "procedure", "program", "read", "then", "true", "var", "while", "while"
 };
 
 #define SIZE_CHAR 256
