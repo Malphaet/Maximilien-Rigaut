@@ -13,11 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
- * 
  * 
  */
 
@@ -33,20 +28,19 @@
 
 /* =========== Functions ===========*/
 
+#define DOUBLE_SYMBOL_CHECK(a,b) if ((chr==a)&((nc=getc(yyin))==b)) {ungetc(nc,yyin);return -1;}
+
 int is_single_symbol(const char chr){
 	int i;
 	char nc;
 	for(i=0;i<SIZE_ONESYMS;i++)
 		if (ONESYMS[i][0]==chr) {
-			if (chr==':') if ((nc=getc(yyin))=='=') {
-				ungetc(chr,yyin);
-				WHERE;
-				return -1;
-			}
-			if (chr=='.') if ((nc=getc(yyin))=='.') {
-				ungetc(chr,yyin);
-				return -1;
-			}
+			/* Check if it's a double symbol */
+			DOUBLE_SYMBOL_CHECK(':','=');
+			DOUBLE_SYMBOL_CHECK('.','.');
+			DOUBLE_SYMBOL_CHECK('<','=');
+			DOUBLE_SYMBOL_CHECK('>','=');
+			
 			return VAL_ONESYMS(i);
 		}
 	return 0;
@@ -98,8 +92,17 @@ int yylex(){
 		yytext[++nbchar]=chr;
 	}
 	
-	/* Else it's alphanum */
-	
+	/* Else it's an alphanumeric variable */
+	WHERE;
+	if (isalpha(chr)){
+		while ((chr=getc(yyin))!=EOF){ 
+			if (isspace(chr)|((chr!='_')&ispunct(chr))) {
+				yytext[++nbchar]=0;
+				return VAR;
+			}
+			yytext[++nbchar]=chr;
+		}
+	}
 	return 0;
 }
 

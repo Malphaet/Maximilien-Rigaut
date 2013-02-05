@@ -13,11 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
- * 
  * 
  */
 
@@ -48,4 +43,5 @@ const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
 #define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
 #define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
 
-
+/* UUUUUUPGRADE IT */
+#define VAR 500

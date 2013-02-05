@@ -41,7 +41,6 @@ doc: .PHONY
 	$(QUIET)doxygen Doxyfile
 	$(QUIET)echo "MAKE DOCS"
 
-
 edit:
 	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md Doxyfile &
 	

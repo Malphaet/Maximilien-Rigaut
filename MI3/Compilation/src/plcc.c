@@ -13,12 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
- * 
- * 
  */
 
 
@@ -29,10 +23,10 @@
 
 int main(int argc, char **argv) {
 	int uniteCourante;
-	if (argc<2) OUT("lplcc error : Not enough arguments");
+	if (argc<2) OUT("plcc error : Not enough arguments");
 	
 	yyin = fopen(argv[1], "r");
-	if(yyin == NULL) ERROR("lplcc error : File not found");
+	if(yyin == NULL) ERROR("plcc error : File not found");
 	
 	uniteCourante = yylex();
 	while (uniteCourante != 0) {
