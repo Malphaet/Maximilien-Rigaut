@@ -1,5 +1,5 @@
 /*
- * lexeme.h
+ * utils.h
  * 
  * Copyright 2013 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -21,31 +21,14 @@
  * 
  */
 
+/* ===== Global variables =====*/
 
-/* ======== Constants =========*/
-
-const char *ONESYMS[]={
-	"(", ")", "*", "+", "-", ".", "/", ":", ";", "<", "=", ">", "[", "]"
-};
-
-const char *SYMBOLS[]={
-	"..", ":=", "<=", ">="
-};
-const char *KEYWORDS[]={
-	"array", "begin", "boolean", "do", "else", 
-	"end", "false", "function", "if", "integer",
-	"mod", "of", "procedure", "program", "read", 
-	"then", "true", "var", "while", "while"
-};
-
-#define SIZE_CHAR 256
-const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
-const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
-const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
-
-#define VAL_CHAR(index) index
-#define VAL_ONESYMS(index) SIZE_CHAR+1+index
-#define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
-#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
+char yytext[512];
+FILE *yyin;
 
 
+/* ========= Defines ==========*/
+
+#define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
+#define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
+#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}

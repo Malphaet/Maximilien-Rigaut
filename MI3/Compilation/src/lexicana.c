@@ -1,5 +1,5 @@
 /*
- * tp1.c
+ * lexeme.c
  * 
  * Copyright 2013 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -21,42 +21,17 @@
  * 
  */
 
-
-
 /* ========= Includes =========*/
-
 #include <stdio.h>
 #include <stdlib.h>
-#include "lexeme.h"
 #include <string.h>
 #include <ctype.h>
 
-/* ========= Defines ==========*/
-#define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
-#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+#include "utils.h"
+#include "lexeme.h"
+#include "lexicana.h"
 
-/* =========== Main ===========*/
-
-char yytext[256];
-FILE *yyin;
-
-char VAR[256];
-
-int main(int argc, char **argv) {
-	int uniteCourante;
-	if (argc<2) OUT("lplcc error : Not enough arguments");
-	
-	yyin = fopen(argv[1], "r");
-	if(yyin == NULL) ERROR("lplcc error : File not found");
-	
-	uniteCourante = yylex();
-	while (uniteCourante != 0) {
-		printf("(\"%s\", %d)\n", yytext, uniteCourante);
-		uniteCourante = yylex();
-	}
-	return 0;
-}
+/* =========== Functions ===========*/
 
 int is_single_symbol(const char chr){
 	int i;
@@ -124,6 +99,7 @@ int yylex(){
 	}
 	
 	/* Else it's alphanum */
+	
 	return 0;
 }
 

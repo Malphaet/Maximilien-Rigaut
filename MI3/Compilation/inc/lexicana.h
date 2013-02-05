@@ -22,30 +22,14 @@
  */
 
 
-/* ======== Constants =========*/
+#ifndef LEXEME_H
+#define LEXEME_H
 
-const char *ONESYMS[]={
-	"(", ")", "*", "+", "-", ".", "/", ":", ";", "<", "=", ">", "[", "]"
-};
+/* ======== Prototype =========*/
 
-const char *SYMBOLS[]={
-	"..", ":=", "<=", ">="
-};
-const char *KEYWORDS[]={
-	"array", "begin", "boolean", "do", "else", 
-	"end", "false", "function", "if", "integer",
-	"mod", "of", "procedure", "program", "read", 
-	"then", "true", "var", "while", "while"
-};
+int yylex					();
+int is_single_symbol		(const char);
+int is_symbol				(const char*);
+int yylex					();
 
-#define SIZE_CHAR 256
-const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
-const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
-const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
-
-#define VAL_CHAR(index) index
-#define VAL_ONESYMS(index) SIZE_CHAR+1+index
-#define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
-#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
-
-
+#endif

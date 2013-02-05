@@ -1,5 +1,5 @@
 /*
- * lexeme.h
+ * plcc.c
  * 
  * Copyright 2013 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -22,30 +22,22 @@
  */
 
 
-/* ======== Constants =========*/
+#include <stdio.h>
+#include <stdlib.h>
+#include "utils.h"
+#include "lexicana.h"
 
-const char *ONESYMS[]={
-	"(", ")", "*", "+", "-", ".", "/", ":", ";", "<", "=", ">", "[", "]"
-};
-
-const char *SYMBOLS[]={
-	"..", ":=", "<=", ">="
-};
-const char *KEYWORDS[]={
-	"array", "begin", "boolean", "do", "else", 
-	"end", "false", "function", "if", "integer",
-	"mod", "of", "procedure", "program", "read", 
-	"then", "true", "var", "while", "while"
-};
-
-#define SIZE_CHAR 256
-const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
-const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
-const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
-
-#define VAL_CHAR(index) index
-#define VAL_ONESYMS(index) SIZE_CHAR+1+index
-#define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
-#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
-
-
+int main(int argc, char **argv) {
+	int uniteCourante;
+	if (argc<2) OUT("lplcc error : Not enough arguments");
+	
+	yyin = fopen(argv[1], "r");
+	if(yyin == NULL) ERROR("lplcc error : File not found");
+	
+	uniteCourante = yylex();
+	while (uniteCourante != 0) {
+		printf("(\"%s\", %d)\n", yytext, uniteCourante);
+		uniteCourante = yylex();
+	}
+	return 0;
+}
