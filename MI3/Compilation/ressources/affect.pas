@@ -1,6 +1,7 @@
 program affectation;
+{strange comment here}
 var 
-   a : integer;
+   a : in{and here}teger;
 begin
    a := 2;
 end.

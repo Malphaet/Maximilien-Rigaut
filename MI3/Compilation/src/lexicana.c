@@ -26,9 +26,12 @@
 #include "lexeme.h"
 #include "lexicana.h"
 
-/* =========== Functions ===========*/
+/* =========== Defines ===========*/
 
 #define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))&((nc=getc(yyin))==(b))){ungetc(nc,yyin);return -1;}ungetc(nc,yyin);}while (0);
+int commenting=0;
+
+/* =========== Functions ===========*/
 
 int is_single_symbol(const char chr){
 	int i;
@@ -53,7 +56,11 @@ int is_symbol(const char*str){
 		if (j==0) return VAL_SYMBOLS(i);
 		if (j>0) break;
 	}
-	
+	return 0;
+}
+
+int is_reserved(const char*str){
+	int i,j;
 	for(i=0;i<SIZE_KEYWORDS;i++){
 		j=strcmp(KEYWORDS[i],str);
 		if (j==0) return VAL_KEYWORDS(i);
@@ -62,44 +69,54 @@ int is_symbol(const char*str){
 	return 0;
 }
 
+char get_next_char(){
+	char chr;
+	if (commenting){
+		do {chr=getc(yyin);}
+		while ((chr!='}')||(chr==EOF));
+		return getc(yyin);
+	}
+	if ((chr=getc(yyin))=='{') return get_next_char();
+	else return chr;
+}
+	
 int yylex(){
 	int val=0,nbchar=0;
 	char chr;
 	
-	do {chr=getc(yyin);}
+	/** Strip leading spaces */
+	do {chr=get_next_char();}
 	while (isspace(chr));
 	
+	/** Putting first character in the table */
 	yytext[0]=chr;
 	if (chr==EOF) return 0;
 	
-	/* Either it's a single character symbol*/
-	if ((val=is_single_symbol(chr))>0) {
+	/** Check for symbol presence */
+	if ((val=is_single_symbol(chr))>0) { /* Either it's a single character symbol*/
 		yytext[1]=0;
 		return val;
+	} else if (val<0){ /* This one is expecting one more character */
+		chr=getc(yyin);
+		yytext[++nbchar]=chr;
+		yytext[++nbchar]=0;
+		return is_symbol(yytext); /* Can't have more than 2 symbols -> Error or Succes here */ 
 	}
 	
 	/* Either it's a multiple character symbol */
-	while ((chr=getc(yyin))!=EOF){ 
-		if ((val<0)/*&(ispunct(chr))*/) { /* Because symbol is twiced -> Analyse */
-			yytext[++nbchar]=chr;
-			yytext[++nbchar]=0;
-			return is_symbol(yytext); /* Can't have more than 2 symbols -> STOP */ /**@todo Update this to get clever */
-		}
-		
+	while ((chr=get_next_char())!=EOF){ 
 		if (isspace(chr)|ispunct(chr)) {
 			yytext[++nbchar]=0;
-			
 			ungetc(chr,yyin);
 			nbchar--;
-			
-			if ((val=is_symbol(yytext))) return val; /**@todo Update this to get clever */
+			if ((val=is_reserved(yytext))) return val; /**@todo Update this to get clever */
 			else break;
 		}
 		yytext[++nbchar]=chr;
 	}
 	
 	/* Else it's an alphanumeric variable */
-	while ((chr=getc(yyin))!=EOF){		
+	while ((chr=get_next_char())!=EOF){		
 		if (isspace(chr)|((chr!='_')&&(ispunct(chr)))) {
 			ungetc(chr,yyin);
 			yytext[++nbchar]=0;

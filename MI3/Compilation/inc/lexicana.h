@@ -20,11 +20,13 @@
 #ifndef LEXEME_H
 #define LEXEME_H
 
+
 /* ======== Prototype =========*/
 
 int yylex					();
 int is_single_symbol		(const char);
 int is_symbol				(const char*);
+int is_reserved				(const char*);
 int yylex					();
 
 #endif
