@@ -28,7 +28,7 @@
 
 /* =========== Functions ===========*/
 
-#define DOUBLE_SYMBOL_CHECK(a,b) if ((chr==a)&((nc=getc(yyin))==b)) {ungetc(nc,yyin);return -1;}
+#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))&((nc=getc(yyin))==(b))){ungetc(nc,yyin);return -1;}ungetc(nc,yyin);}while (0);
 
 int is_single_symbol(const char chr){
 	int i;
@@ -63,7 +63,7 @@ int is_symbol(const char*str){
 }
 
 int yylex(){
-	int val,nbchar=0;
+	int val=0,nbchar=0;
 	char chr;
 	
 	do {chr=getc(yyin);}
@@ -80,29 +80,31 @@ int yylex(){
 	
 	/* Either it's a multiple character symbol */
 	while ((chr=getc(yyin))!=EOF){ 
-		if (isspace(chr)) {
-			yytext[++nbchar]=0;
-			return is_symbol(yytext);
-		}
-		if ((val<0)&(ispunct(chr))) {
+		if ((val<0)/*&(ispunct(chr))*/) { /* Because symbol is twiced -> Analyse */
 			yytext[++nbchar]=chr;
 			yytext[++nbchar]=0;
-			return is_symbol(yytext);
+			return is_symbol(yytext); /* Can't have more than 2 symbols -> STOP */ /**@todo Update this to get clever */
+		}
+		
+		if (isspace(chr)|ispunct(chr)) {
+			yytext[++nbchar]=0;
+			if (ispunct(chr)) ungetc(chr,yyin);
+			if ((val=is_symbol(yytext))) return val; /**@todo Update this to get clever */
+			else break;
 		}
 		yytext[++nbchar]=chr;
 	}
 	
 	/* Else it's an alphanumeric variable */
-	WHERE;
-	if (isalpha(chr)){
-		while ((chr=getc(yyin))!=EOF){ 
-			if (isspace(chr)|((chr!='_')&ispunct(chr))) {
-				yytext[++nbchar]=0;
-				return VAR;
-			}
-			yytext[++nbchar]=chr;
+	
+	while ((chr=getc(yyin))!=EOF){ 
+		if (isspace(chr)|((chr!='_')&ispunct(chr))) {
+			yytext[++nbchar]=0;
+			return IDENT;
 		}
+		yytext[++nbchar]=chr;
 	}
+	
 	return 0;
 }
 

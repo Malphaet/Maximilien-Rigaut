@@ -30,7 +30,7 @@ const char *KEYWORDS[]={
 	"array", "begin", "boolean", "do", "else", 
 	"end", "false", "function", "if", "integer",
 	"mod", "of", "procedure", "program", "read", 
-	"then", "true", "var", "while", "while"
+	"then", "true", "var", "while"
 };
 
 #define SIZE_CHAR 256
@@ -44,4 +44,25 @@ const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
 #define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
 
 /* UUUUUUPGRADE IT */
-#define VAR 500
+
+#define ARRAY 		1
+#define BEGIN 		2
+#define BOOLEAN 	3
+#define DO			4
+#define ELSE 		5
+#define END		6
+#define FALSE		7
+#define FUNCTION	8
+#define IF			9
+#define INTEGER	10
+#define MOD		11
+#define OF			12
+#define PROCEDURE	13
+#define PROGRAM	14
+#define READ		15
+#define THEN		16
+#define TRUE		17
+#define VAR		18
+#define WHILE		19
+
+#define IDENT 500
