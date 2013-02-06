@@ -88,7 +88,10 @@ int yylex(){
 		
 		if (isspace(chr)|ispunct(chr)) {
 			yytext[++nbchar]=0;
-			if (ispunct(chr)) ungetc(chr,yyin);
+			
+			ungetc(chr,yyin);
+			nbchar--;
+			
 			if ((val=is_symbol(yytext))) return val; /**@todo Update this to get clever */
 			else break;
 		}
@@ -96,9 +99,9 @@ int yylex(){
 	}
 	
 	/* Else it's an alphanumeric variable */
-	
-	while ((chr=getc(yyin))!=EOF){ 
-		if (isspace(chr)|((chr!='_')&ispunct(chr))) {
+	while ((chr=getc(yyin))!=EOF){		
+		if (isspace(chr)|((chr!='_')&&(ispunct(chr)))) {
+			ungetc(chr,yyin);
 			yytext[++nbchar]=0;
 			return IDENT;
 		}

@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 	
 	uniteCourante = yylex();
 	while (uniteCourante != 0) {
-		printf("(\"%s\", %d)\n", yytext, uniteCourante);
+		printf("%s, %d\n", yytext, uniteCourante);
 		uniteCourante = yylex();
 	}
 	return 0;

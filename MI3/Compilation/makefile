@@ -56,3 +56,5 @@ cleaner: clean
 
 .PHONY:
 
+test:
+	for i in `l ressources/*.pas` do; echo "./bin/p";done;
