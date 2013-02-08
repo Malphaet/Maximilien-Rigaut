@@ -28,7 +28,8 @@
 
 /* =========== Defines ===========*/
 
-#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))&((nc=getc(yyin))==(b))){ungetc(nc,yyin);return -1;}ungetc(nc,yyin);}while (0);
+#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))&&((nc=getc(yyin))==(b))){ungetc(nc,yyin);return-1;}}while (0);
+
 int commenting=0;
 
 /* =========== Functions ===========*/
@@ -71,13 +72,12 @@ int is_reserved(const char*str){
 
 char get_next_char(){
 	char chr;
-	if (commenting){
-		do {chr=getc(yyin);}
-		while ((chr!='}')||(chr==EOF));
-		return getc(yyin);
-	}
-	if ((chr=getc(yyin))=='{') return get_next_char();
-	else return chr;
+	if ((chr=getc(yyin))!='{') return chr;
+	
+	do {chr=getc(yyin);}
+	while ((chr!='}')||(chr==EOF));
+	
+	return get_next_char();
 }
 	
 int yylex(){
@@ -97,7 +97,7 @@ int yylex(){
 		yytext[1]=0;
 		return val;
 	} else if (val<0){ /* This one is expecting one more character */
-		chr=getc(yyin);
+		chr=get_next_char();
 		yytext[++nbchar]=chr;
 		yytext[++nbchar]=0;
 		return is_symbol(yytext); /* Can't have more than 2 symbols -> Error or Succes here */ 
@@ -105,7 +105,7 @@ int yylex(){
 	
 	/* Either it's a multiple character symbol */
 	while ((chr=get_next_char())!=EOF){ 
-		if (isspace(chr)|ispunct(chr)) {
+		if (isspace(chr)||ispunct(chr)) {
 			yytext[++nbchar]=0;
 			ungetc(chr,yyin);
 			nbchar--;
@@ -117,7 +117,7 @@ int yylex(){
 	
 	/* Else it's an alphanumeric variable */
 	while ((chr=get_next_char())!=EOF){		
-		if (isspace(chr)|((chr!='_')&&(ispunct(chr)))) {
+		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
 			ungetc(chr,yyin);
 			yytext[++nbchar]=0;
 			return IDENT;
