@@ -17,8 +17,8 @@
  */
 
 
-#ifndef LEXEME_H
-#define LEXEME_H
+#ifndef YYLEX_H
+#define YYLEX_H
 
 
 /* ======== Prototype =========*/

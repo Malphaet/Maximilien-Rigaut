@@ -24,7 +24,8 @@
 
 #include "utils.h"
 #include "lexeme.h"
-#include "lexicana.h"
+#include "identifiers.h"
+#include "yylex.h"
 
 /* =========== Defines ===========*/
 

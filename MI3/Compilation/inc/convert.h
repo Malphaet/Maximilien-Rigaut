@@ -1,5 +1,5 @@
 /*
- * plcc.c
+ * convert.h
  * 
  * Copyright 2013 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -13,30 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
+ * 
  */
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "utils.h"
-#include "yylex.h"
-#include "yyparse.h"
-
-int main(int argc, char **argv) {
-	if (argc<2) OUT("plcc error : Not enough arguments");
-	
-	yyin = fopen(argv[1], "r");
-	if(yyin == NULL) ERROR("plcc error : File not found");
-	
-	uc = yylex();
-	#ifdef DEBUG
-	while (uc != 0) {
-		printf("%s, %d\n", yytext, uc);
-		uc = yylex();
-	}
-	#endif
-	#ifndef DEBUG
-	programme(); 
-	#endif
-	return 0;
-}
+ 

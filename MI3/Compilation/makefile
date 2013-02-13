@@ -18,17 +18,21 @@ LDFLAGS =
 
 
 EXEC=plcc
-EXEC_O=lexicana
+EXEC_O=yylex yyparse
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
 
-all: $(EXEC)
+all: convert $(EXEC)
 
 init:
 	$(QUIET)echo "INIT" $(DIRS)
 	$(QUIET)mkdir -p $(DIRS)
 	
+convert: $(OBJ)/convert.o
+	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
+	$(QUIET)$(BIN)/convert $(INC)/identifiers.h
+
 $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
 	$(QUIET)echo "LINK" $^ "=>" $@
 	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
@@ -55,6 +59,3 @@ cleaner: clean
 	$(QUIET)rm -f $(BIN)/$(EXEC)
 
 .PHONY:
-
-test:
-	for i in `l ressources/*.pas` do; echo "./bin/p";done;

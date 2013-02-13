@@ -1,5 +1,5 @@
 /*
- * utils.h
+ * yyparse.h
  * 
  * Copyright 2013 Maximilien Rigaut <max[dot]rigaut[at]orange.fr>
  * 
@@ -13,18 +13,36 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ * 
+ * 
  */
 
-/* ===== Global variables =====*/
+#ifndef YYPARSE_H
+#define YYPARSE_H
+/* ========= Includes =========*/
 
-char yytext[512];
-FILE *yyin;
 
-/* ========= Defines ==========*/
 
-#define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define PLCC_WHERE WHERE
-#define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
-#define PLCC_ERROR(...) {PLCC_WHERE; fprintf(stderr,"plcc error:"); fprintf(stderr,__VA_ARGS__);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+/* ========= Typedef ==========*/
+/* ======== Prototype =========*/
 
-#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+/* Processed lexeme */
+int uc; 
+
+/* Xml tags */
+void markupClose(char *s);
+void markupOpen(char *s);
+void markupLeaf(char *s, char *val);
+
+/* Lexical analisys' functions */
+void programme();
+
+/* ... */
+
+
+
+#endif
