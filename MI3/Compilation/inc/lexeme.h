@@ -40,10 +40,15 @@ const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
 const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
 const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
 
+#define VAL_ONESYMS(index) index
+#define VAL_SYMBOLS(index) SIZE_CHAR+1+index
+#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_SYMBOLS+1+index
+
+/*
 #define VAL_CHAR(index) index
 #define VAL_ONESYMS(index) SIZE_CHAR+1+index
 #define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
 #define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
-
+*/
 
 #endif

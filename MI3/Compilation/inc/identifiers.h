@@ -1,28 +1,28 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
-#define SDOT_DOT 273
-#define SEQL     274
-#define SLES_EQL 275
-#define SSUP_EQL 276
-#define IDENT    298
-#define SARRAY 278
-#define SBEGIN 279
-#define SBOOLEAN 280
-#define SDO 281
-#define SELSE 282
-#define SEND 283
-#define SFALSE 284
-#define SFUNCTION 285
-#define SIF 286
-#define SINTEGER 287
-#define SMOD 288
-#define SOF 289
-#define SPROCEDURE 290
-#define SPROGRAM 291
-#define SREAD 292
-#define STHEN 293
-#define STRUE 294
-#define SVAR 295
-#define SWHILE 296
+#define SDOT_DOT 257
+#define SEQL     258
+#define SLES_EQL 259
+#define SSUP_EQL 260
+#define SIDENT   282
+#define SARRAY 262
+#define SBEGIN 263
+#define SBOOLEAN 264
+#define SDO 265
+#define SELSE 266
+#define SEND 267
+#define SFALSE 268
+#define SFUNCTION 269
+#define SIF 270
+#define SINTEGER 271
+#define SMOD 272
+#define SOF 273
+#define SPROCEDURE 274
+#define SPROGRAM 275
+#define SREAD 276
+#define STHEN 277
+#define STRUE 278
+#define SVAR 279
+#define SWHILE 280
 #endif

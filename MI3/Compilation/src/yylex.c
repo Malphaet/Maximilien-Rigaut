@@ -46,7 +46,7 @@ int is_single_symbol(const char chr){
 			DOUBLE_SYMBOL_CHECK('<','=');
 			DOUBLE_SYMBOL_CHECK('>','=');
 			
-			return VAL_ONESYMS(i);
+			return VAL_ONESYMS(chr);
 		}
 	return 0;
 }
@@ -71,12 +71,19 @@ int is_reserved(const char*str){
 	return 0;
 }
 
+#define ADD_LINE if (chr=='\n') line_number++; else char_number++;
+
 char get_next_char(){
 	char chr;
-	if ((chr=getc(yyin))!='{') return chr;
+	if ((chr=getc(yyin))!='{') {
+		ADD_LINE;
+		return chr;
+	}
 	
-	do {chr=getc(yyin);}
-	while ((chr!='}')||(chr==EOF));
+	do {
+		chr=getc(yyin);
+		ADD_LINE;
+	} while ((chr!='}')||(chr==EOF));
 	
 	return get_next_char();
 }
@@ -108,7 +115,7 @@ int yylex(){
 	while ((chr=get_next_char())!=EOF){ 
 		if (isspace(chr)||ispunct(chr)) {
 			yytext[++nbchar]=0;
-			ungetc(chr,yyin);
+			char_number--; ungetc(chr,yyin);
 			nbchar--;
 			if ((val=is_reserved(yytext))) return val; /**@todo Update this to get clever */
 			else break;
@@ -119,9 +126,9 @@ int yylex(){
 	/* Else it's an alphanumeric variable */
 	while ((chr=get_next_char())!=EOF){		
 		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
-			ungetc(chr,yyin);
+			char_number--; ungetc(chr,yyin);
 			yytext[++nbchar]=0;
-			return IDENT;
+			return SIDENT;
 		}
 		yytext[++nbchar]=chr;
 	}

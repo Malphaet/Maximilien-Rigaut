@@ -64,7 +64,7 @@ int main(int argc, char **argv){
 	fprintf(f,"#define SEQL     %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SLES_EQL %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SSUP_EQL %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define IDENT    %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
+	fprintf(f,"#define SIDENT   %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
 	for(i=0;i<SIZE_KEYWORDS;i++) {	
 		new=convertToUpperCase(KEYWORDS[i]);
 		fprintf(f,"#define S%s %d\n",new,VAL_KEYWORDS(i));

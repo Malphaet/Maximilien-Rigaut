@@ -22,10 +22,15 @@
 #include "yylex.h"
 #include "yyparse.h"
 
+char yytext[512],*file_in_progress;
+FILE *yyin;
+unsigned int line_number=1,char_number=0;
+
 int main(int argc, char **argv) {
 	if (argc<2) OUT("plcc error : Not enough arguments");
 	
 	yyin = fopen(argv[1], "r");
+	file_in_progress=argv[1];
 	if(yyin == NULL) ERROR("plcc error : File not found");
 	
 	uc = yylex();
@@ -36,7 +41,7 @@ int main(int argc, char **argv) {
 	}
 	#endif
 	#ifndef DEBUG
-	programme(); 
+	Programme(); 
 	#endif
 	return 0;
 }

@@ -39,10 +39,8 @@ void markupOpen(char *s);
 void markupLeaf(char *s, char *val);
 
 /* Lexical analisys' functions */
-void programme();
-
-/* ... */
-
-
+void Programme();
+void Corps();
+void ListeDeclVar();
 
 #endif

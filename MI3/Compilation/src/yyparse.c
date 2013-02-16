@@ -22,25 +22,54 @@
 #include "yyparse.h"
 #include "utils.h"
 
-extern char yytext[512];
-FILE *yyin;
+//extern char yytext[512];
+//extern char *file_in_progress;
+//extern unsigned int line_number,char_number;
+//FILE *yyin;
 
 /************* Rules */
 
-void programme(){
-  /*
-  Programme -> PROGRAM ID ';' Corps '.'
-  */
-  char *s = "program";
-  markupOpen(s);
-  if ((uc=yylex())!=IDENT) PLCC_ERROR("Syntax error : Expected identifier");
-  markupLeaf("id",yytext);
-  if ((uc=yylex())!=';') PLCC_ERROR("Syntax error : Expected ; found %s",yytext);
-  markupOpen(s);
+#define PLCC_SYNTAX_ERROR(expected,got,id) PLCC_ERROR("Syntax error : Expected %s. Found '%s' <%d>",expected,got,id);
+#define PLCC_GET(exp_id,exp) if ((uc=yylex())!=exp_id) PLCC_SYNTAX_ERROR(exp,yytext,uc);
+
+void Programme(){
+    /*
+    Program -> PROGRAM ID ';' Body '.'
+    */
+    char *s = "program";
+    markupOpen(s);
+    
+    PLCC_GET(SIDENT,"identifier");
+    markupLeaf("id",yytext);
+    PLCC_GET(';',"';'");
+    
+    Corps();
+    PLCC_GET('.',"'.'");
+    
+    
+    markupClose(s);
 }
 
+void Corps(){
+    char *s = "body";
+    markupOpen(s);
+    
+    PLCC_GET(SVAR,"var");
+    markupOpen("var");
+    
+    //ListeDeclVar();
+    
+    markupClose("var");
+    PLCC_GET(';',"';'");
+    
+    markupClose(s);
+}
+
+void ListeDeclVar(){
+    
+}
 /*
-  Programme -> PROGRAM ID ';' Corps '.'
+    Programme -> PROGRAM ID ';' Corps '.'
   Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
   ListeDeclVar -> DeclVar{ ';' DeclVar }
   DeclVar -> ID { ',' ID } ':' Type
@@ -72,13 +101,13 @@ void programme(){
 /********** Affichage */
 
 void markupOpen(char *s){
-  printf("<%s>\n",s);
+    printf("<%s>\n",s);
 }
 
 void markupClose(char *s){
-  printf("</%s>\n",s);
+    printf("</%s>\n",s);
 }
 
 void markupLeaf(char *s, char *val){
-  printf("<%s>%s</%s>\n",s , val, s);
+    printf("<%s>%s</%s>\n",s , val, s);
 }
