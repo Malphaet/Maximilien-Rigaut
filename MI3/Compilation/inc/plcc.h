@@ -16,8 +16,8 @@
  * 
  */
 
-#ifndef PLCC_H
-#define PLCC_H
+#ifndef THE_PLCC
+#define THE_PLCC
 /* ========= Includes =========*/
 
 /* ========= Defines ==========*/

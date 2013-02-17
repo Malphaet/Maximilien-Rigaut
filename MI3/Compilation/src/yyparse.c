@@ -28,72 +28,160 @@
 //FILE *yyin;
 
 /************* Rules */
+unsigned int ident_level=0;
 
-#define PLCC_SYNTAX_ERROR(expected) PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);
-//#define PLCC_GET(exp_id,exp) if ((uc=yylex())!=exp_id) PLCC_SYNTAX_ERROR(exp);
+#define PLCC_SYNTAX_ERROR(expected) {WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
+#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemendet error: %s <%d>",yytext,uc);}
+#define PLCC_IF(exp_id) if (uc==exp_id)
+#define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
 
 void Programme(){
 	//Program -> PROGRAM ID ';' Body '.'
 	
-	char *s = "program";
-	markupOpen(s);
+	PLCC_IFNOT(SPROGRAM,"program")
+	markupOpen("program"); PLCC_NEW; 
 	
-	if (PLCC_NEW!=SIDENT) PLCC_SYNTAX_ERROR("identifier");
-	markupLeaf("id",yytext);
+	PLCC_IFNOT(SIDENT,"identifier") 
+	markupLeaf("identifier",yytext); PLCC_NEW; 
 	
-	if (PLCC_NEW!=';') PLCC_SYNTAX_ERROR("';'");
-	PLCC_NEW; Corps();
+	PLCC_IFNOT(';',"';'");
+	PLCC_NEW; Corps(); 
 	
-	if (PLCC_NEW!='.') PLCC_SYNTAX_ERROR("'.'");
-	markupClose(s);
+	PLCC_IFNOT('.',"'.'");
+	markupClose("program");
 }
 
 void Corps(){
-	char *s = "body";
-	markupOpen(s);
-	
-	if (uc==SVAR){
-		markupOpen("var");
-		PLCC_NEW; ListeDeclVar();
-		if (PLCC_NEW!=';') PLCC_SYNTAX_ERROR("';'");
-		PLCC_NEW;
-		markupClose("var");
+	//Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
+	markupOpen("body");
+	PLCC_IF(SVAR){
+		ListeDeclVar();
+		//PLCC_IFNOT(';',"';'"); // Already checked
+		//PLCC_NEW; // Already done
 	}
-	while (uc==SPROCEDURE){
-		//DeclProcFun();
+	while (uc==SPROCEDURE||uc==SFUNCTION){
+		DeclProcFun();
 		//if (PLCC_NEW!=';') PLCC_SYNTAX_ERROR("';'");
 		PLCC_NEW;
 	}
-	//BlocInstr();
+	BlocInstr();
 	
-	markupClose(s);
+	markupClose("body");
 }
 
 void ListeDeclVar(){
-	//while (uc==SID){
-		//while (uc==SID){
-		//}
-	//}
+	//ListeDeclVar -> DeclVar{ ';' DeclVar }
+	while (uc==SVAR){
+		markupOpen("var");
+		PLCC_NEW; DeclVar();
+		PLCC_NEW; PLCC_IFNOT(';',"';'");
+		PLCC_NEW;
+		markupClose("var");
+	}
 }
+
+void DeclVar(){
+	//DeclVar -> ID { ',' ID } ':' Type
+	while (1){
+		PLCC_IFNOT(SIDENT,"identifier");
+		markupLeaf("id",yytext); PLCC_NEW; 
+		
+		PLCC_IF(':') break;
+		else PLCC_IFNOT(',',"','");
+		
+		PLCC_NEW;
+	}
+	PLCC_NEW; Type();
+}
+
+void Type(){
+	//Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
+	PLCC_IF(SINTEGER) markupLeaf("type",yytext);
+	else PLCC_IF(SBOOLEAN) markupLeaf("type",yytext);
+	else PLCC_IF(SARRAY){
+		PLCC_NEW; PLCC_IFNOT('[',"'['");
+		markupOpen("array");
+		
+		PLCC_NEW; PLCC_IFNOT(SNUMERAL,"number");
+		markupLeaf("from",yytext);
+		PLCC_NEW; PLCC_IFNOT(SDOT_DOT,"'..'");
+		PLCC_NEW; PLCC_IFNOT(SNUMERAL,"number");
+		markupLeaf("to",yytext);
+		PLCC_NEW; PLCC_IFNOT(']',"']'");
+		PLCC_NEW; PLCC_IFNOT(SOF,"of");
+		markupOpen("of");
+		PLCC_NEW; Type();
+		markupClose("of");
+		markupClose("array");
+	} else PLCC_SYNTAX_ERROR("type");
+}
+
+void DeclProcFun(){
+	//DeclProcFun -> DeclProcedure | DeclFunction
+	if (uc==SPROCEDURE) DeclProcedure();
+	else if (uc==SFUNCTION) DeclFunction();
+	else PLCC_SYNTAX_ERROR("procedure or function");
+	
+}
+
+void DeclProcedure(){
+	//DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
+	PLCC_IFNOT(SPROCEDURE,"procedure");
+	markupOpen("procedure");
+	
+	PLCC_NEW; PLCC_IFNOT(SIDENT,"identifier");
+	markupLeaf("id",yytext);
+	
+	PLCC_NEW; PLCC_IF('(') {
+		ListeDeclVar();
+		PLCC_NEW; PLCC_IFNOT(')',"')'");
+	}
+	
+	PLCC_NEW; PLCC_IFNOT(';',"';'");
+	Corps();
+}
+void DeclFunction(){
+	//DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
+	PLCC_NOT_IMPLEMENTED;
+}
+
+void BlocInstr(){
+	//BlocInstr -> BEGIN Instruction { ';' Instruction } END
+	PLCC_IFNOT(SBEGIN,"begin");
+	markupOpen("block_instr");
+	do {
+		Instruction();
+		//PLCC_NEW; //??
+	} while (uc==';');
+	PLCC_IFNOT(SEND,"end");
+	
+	markupClose("block_instr");
+}
+
+void Instruction(/* int next_id */){
+	//Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	PLCC_NOT_IMPLEMENTED;
+}
+
 /*
-	+Programme -> PROGRAM ID ';' Corps '.'
-	Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
-	ListeDeclVar -> DeclVar{ ';' DeclVar }
-DeclVar -> ID { ',' ID } ':' Type
-Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
-DeclProcFun -> DeclProcedure | DeclFunction 
-DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps 
+	+ Programme -> PROGRAM ID ';' Corps '.'
+	+ Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
+	* ListeDeclVar -> DeclVar{ ';' DeclVar }
+	* DeclVar -> ID { ',' ID } ':' Type
+	* Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
+	+ DeclProcFun -> DeclProcedure | DeclFunction 
+	* DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps 
 DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
 
 Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
 AffectInstr -> Variable AFFECT Expression 
-AppelProcedure -> ID [ '(' ParameterList ')' ] 
-AppelFunction -> ID '(' ListeParam ')'
-ListeParam -> Expression [ ',' Expression ] 
+AppelProcedure -> ID [ '(' ListeParam ')' ] ??
+AppelFunction -> ID '(' ListeParam ')'		??
+ListeParam -> Expression [ ',' Expression ] ??
 IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 WhileInstr -> WHILE Expression DO Instruction 
-BlocInstr -> BEGIN Instruction { ';' Instruction } END 
+	BlocInstr -> BEGIN Instruction { ';' Instruction } END 
 
 Expression -> Simpleexpression [ Relation Simpleexpression ]
 Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
@@ -109,13 +197,23 @@ Variable -> ID [ '[' Expression ']' ]
 /********** Affichage */
 
 void markupOpen(char *s){
+	unsigned int i;
+	for(i=0;i<ident_level;i++) printf(" ");
 	printf("<%s>\n",s);
+	
+	ident_level+=2;
 }
 
 void markupClose(char *s){
+	unsigned int i;
+	ident_level-=2;
+	
+	for(i=0;i<ident_level;i++) printf(" ");
 	printf("</%s>\n",s);
 }
 
 void markupLeaf(char *s, char *val){
+	unsigned int i;
+	for(i=0;i<ident_level;i++) printf(" ");
 	printf("<%s>%s</%s>\n",s , val, s);
 }

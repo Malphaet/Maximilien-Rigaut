@@ -42,5 +42,12 @@ void markupLeaf(char *s, char *val);
 void Programme();
 void Corps();
 void ListeDeclVar();
+void DeclVar();
+void Type();
+void DeclProcFun();
+void DeclProcedure();
+void DeclFunction();
 
+void BlocInstr();
+void Instruction(/*int*/);
 #endif

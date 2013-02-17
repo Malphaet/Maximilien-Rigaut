@@ -89,7 +89,7 @@ char get_next_char(){
 }
 	
 int yylex(){
-	int val=0,nbchar=0;
+	int val=0,nbchar=0,i;
 	char chr;
 	
 	/** Strip leading spaces */
@@ -123,12 +123,13 @@ int yylex(){
 		yytext[++nbchar]=chr;
 	}
 	
-	/* Else it's an alphanumeric variable */
+	/* Else it's an alphanumeric variable or constant */
 	while ((chr=get_next_char())!=EOF){		
 		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
 			char_number--; ungetc(chr,yyin);
 			yytext[++nbchar]=0;
-			return SIDENT;
+			for(i=0;i<nbchar;i++) if(!isdigit(yytext[i])) return SIDENT;
+			return SNUMERAL;
 		}
 		yytext[++nbchar]=chr;
 	}

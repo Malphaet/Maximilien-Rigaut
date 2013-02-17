@@ -6,6 +6,7 @@
 #define SLES_EQL 259
 #define SSUP_EQL 260
 #define SIDENT   282
+#define SNUMERAL 283
 #define SARRAY 262
 #define SBEGIN 263
 #define SBOOLEAN 264
