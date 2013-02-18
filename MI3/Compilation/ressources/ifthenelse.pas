@@ -1,7 +1,6 @@
 program sialors;
 
-var a, b : integer;
-var c,d: array [1..3] of integer;
+var a, b : integer; c,d: array [1..3] of integer;
 
 begin
    a := read();

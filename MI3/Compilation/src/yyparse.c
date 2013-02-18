@@ -31,7 +31,7 @@
 unsigned int ident_level=0;
 
 #define PLCC_SYNTAX_ERROR(expected) {WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
-#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemendet error: %s <%d>",yytext,uc);}
+#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
 #define PLCC_IF(exp_id) if (uc==exp_id)
 #define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
@@ -56,6 +56,7 @@ void Corps(){
 	//Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
 	markupOpen("body");
 	PLCC_IF(SVAR){
+		PLCC_NEW;
 		ListeDeclVar();
 		//PLCC_IFNOT(';',"';'"); // Already checked
 		//PLCC_NEW; // Already done
@@ -72,17 +73,17 @@ void Corps(){
 
 void ListeDeclVar(){
 	//ListeDeclVar -> DeclVar{ ';' DeclVar }
-	while (uc==SVAR){
+	while (uc==SIDENT){
 		markupOpen("var");
-		PLCC_NEW; DeclVar();
-		PLCC_NEW; PLCC_IFNOT(';',"';'");
+		DeclVar(); //PLCC_NEW;
+		if (uc!=';') {return;}
 		PLCC_NEW;
 		markupClose("var");
 	}
 }
 
+//! DeclVar -> ID { ',' ID } ':' Type
 void DeclVar(){
-	//DeclVar -> ID { ',' ID } ':' Type
 	while (1){
 		PLCC_IFNOT(SIDENT,"identifier");
 		markupLeaf("id",yytext); PLCC_NEW; 
@@ -95,8 +96,8 @@ void DeclVar(){
 	PLCC_NEW; Type();
 }
 
+//! Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
 void Type(){
-	//Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
 	PLCC_IF(SINTEGER) markupLeaf("type",yytext);
 	else PLCC_IF(SBOOLEAN) markupLeaf("type",yytext);
 	else PLCC_IF(SARRAY){
@@ -115,18 +116,19 @@ void Type(){
 		markupClose("of");
 		markupClose("array");
 	} else PLCC_SYNTAX_ERROR("type");
+	PLCC_NEW;
 }
 
+//! DeclProcFun -> DeclProcedure | DeclFunction
 void DeclProcFun(){
-	//DeclProcFun -> DeclProcedure | DeclFunction
 	if (uc==SPROCEDURE) DeclProcedure();
 	else if (uc==SFUNCTION) DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
 	
 }
 
+//! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
 void DeclProcedure(){
-	//DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
 	PLCC_IFNOT(SPROCEDURE,"procedure");
 	markupOpen("procedure");
 	
@@ -141,9 +143,28 @@ void DeclProcedure(){
 	PLCC_NEW; PLCC_IFNOT(';',"';'");
 	Corps();
 }
+
+//! DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps
 void DeclFunction(){
-	//DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
-	PLCC_NOT_IMPLEMENTED;
+	PLCC_IFNOT(SFUNCTION,"function");
+	markupOpen("function");
+	
+	PLCC_NEW; PLCC_IFNOT(SIDENT,"id");
+	markupLeaf("id",yytext);
+	PLCC_NEW; PLCC_IFNOT('(',"'('");
+	PLCC_NEW; ListeDeclVar();
+	
+	PLCC_IFNOT(')',"')'");
+	
+	PLCC_NEW; PLCC_IFNOT(':',"':'");
+	
+	markupOpen("return");
+	PLCC_NEW; Type();
+	markupClose("return");
+	
+	PLCC_IFNOT(';',"';'");
+	PLCC_NEW; Corps();
+	markupClose("function");
 }
 
 void BlocInstr(){
@@ -151,7 +172,7 @@ void BlocInstr(){
 	PLCC_IFNOT(SBEGIN,"begin");
 	markupOpen("block_instr");
 	do {
-		Instruction();
+		Instruction(SEND);
 		//PLCC_NEW; //??
 	} while (uc==';');
 	PLCC_IFNOT(SEND,"end");
@@ -159,9 +180,18 @@ void BlocInstr(){
 	markupClose("block_instr");
 }
 
-void Instruction(/* int next_id */){
+void Instruction(int next_id){
 	//Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	PLCC_IF(next_id) return; 	// Empty instruction
+	PLCC_IF(';') return; 		// Empty also
 	PLCC_NOT_IMPLEMENTED;
+	
+	//AffectInstr();
+	//AppelProcedure();
+	//IfInstr();
+	//WhileInstr();
+	//BlockInstr();
+	
 }
 
 /*
@@ -172,13 +202,13 @@ void Instruction(/* int next_id */){
 	* Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
 	+ DeclProcFun -> DeclProcedure | DeclFunction 
 	* DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps 
-DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
+	+ DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
 
-Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
 AffectInstr -> Variable AFFECT Expression 
 AppelProcedure -> ID [ '(' ListeParam ')' ] ??
 AppelFunction -> ID '(' ListeParam ')'		??
-ListeParam -> Expression [ ',' Expression ] ??
+ListeParam -> Expression { ',' Expression } ??
 IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 WhileInstr -> WHILE Expression DO Instruction 
 	BlocInstr -> BEGIN Instruction { ';' Instruction } END 

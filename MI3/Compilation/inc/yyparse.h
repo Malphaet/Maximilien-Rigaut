@@ -49,5 +49,5 @@ void DeclProcedure();
 void DeclFunction();
 
 void BlocInstr();
-void Instruction(/*int*/);
+void Instruction(int);
 #endif
