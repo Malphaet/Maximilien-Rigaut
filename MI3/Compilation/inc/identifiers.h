@@ -2,7 +2,7 @@
 #define SYMBOL_TABLE_H
 
 #define SDOT_DOT 257
-#define SEQL     258
+#define SDOT_EQL 258
 #define SLES_EQL 259
 #define SSUP_EQL 260
 #define SIDENT   282

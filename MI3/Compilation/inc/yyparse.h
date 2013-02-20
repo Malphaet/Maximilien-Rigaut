@@ -47,6 +47,7 @@ void Type();
 void DeclProcFun();
 void DeclProcedure();
 void DeclFunction();
+void ListeParam();
 
 void BlocInstr();
 void Instruction(int);

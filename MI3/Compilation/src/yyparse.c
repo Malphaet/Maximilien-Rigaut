@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "identifiers.h"
 #include "yylex.h"
 #include "yyparse.h"
@@ -52,18 +53,15 @@ void Programme(){
 	markupClose("program");
 }
 
+//! Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
 void Corps(){
-	//Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
 	markupOpen("body");
 	PLCC_IF(SVAR){
 		PLCC_NEW;
 		ListeDeclVar();
-		//PLCC_IFNOT(';',"';'"); // Already checked
-		//PLCC_NEW; // Already done
 	}
 	while (uc==SPROCEDURE||uc==SFUNCTION){
 		DeclProcFun();
-		//if (PLCC_NEW!=';') PLCC_SYNTAX_ERROR("';'");
 		PLCC_NEW;
 	}
 	BlocInstr();
@@ -71,8 +69,8 @@ void Corps(){
 	markupClose("body");
 }
 
+//! ListeDeclVar -> DeclVar{ ';' DeclVar }
 void ListeDeclVar(){
-	//ListeDeclVar -> DeclVar{ ';' DeclVar }
 	while (uc==SIDENT){
 		markupOpen("var");
 		DeclVar(); //PLCC_NEW;
@@ -167,33 +165,66 @@ void DeclFunction(){
 	markupClose("function");
 }
 
+//! BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END
 void BlocInstr(){
-	//BlocInstr -> BEGIN Instruction { ';' Instruction } END
 	PLCC_IFNOT(SBEGIN,"begin");
 	markupOpen("block_instr");
 	do {
 		Instruction(SEND);
-		//PLCC_NEW; //??
 	} while (uc==';');
 	PLCC_IFNOT(SEND,"end");
 	
 	markupClose("block_instr");
 }
 
+//! Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+//! All of them will be treated in one call
 void Instruction(int next_id){
-	//Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	char inst_name[512];
+	markupOpen("instruction");
 	PLCC_IF(next_id) return; 	// Empty instruction
 	PLCC_IF(';') return; 		// Empty also
-	PLCC_NOT_IMPLEMENTED;
 	
-	//AffectInstr();
-	//AppelProcedure();
-	//IfInstr();
-	//WhileInstr();
-	//BlockInstr();
+	PLCC_IF(SIDENT) {			// Either it's a procedure or an affect
+		strcpy(inst_name,yytext);
+		PLCC_NEW;
+		PLCC_IF(';') {			//!< AppelProcedure -> ID [ '(' ListeParam ')' ]
+			markupOpen("procedure");
+			markupLeaf("id",inst_name);
+			PLCC_NEW;
+			markupClose("procedure");
+		} else PLCC_IF('('){	//!< AppelProcedure -> ID [ '(' ListeParam ')' ]
+			markupOpen("procedure");
+			markupLeaf("id",inst_name);
+			PLCC_NEW; ListeParam();
+			PLCC_IFNOT(')',"')'");
+			markupClose("procedure");
+		} else PLCC_IF('['){	//!< Variable -> ID [ '[' Expression ']' ] 
+			//Variable
+		} else PLCC_IF(SDOT_EQL){//!< Variable -> ID [ '[' Expression ']' ] 
+			//Variable
+		} else PLCC_SYNTAX_ERROR("procedure or affect");
+	} else PLCC_IF(SIF){ //!< IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
+		markupOpen("if_instr");
+		
+		PLCC_NOT_IMPLEMENTED;
+	} else PLCC_IF(SWHILE){
+		PLCC_NOT_IMPLEMENTED;
+	} else PLCC_IF(SBEGIN){
+		BlocInstr();
+		PLCC_NOT_IMPLEMENTED;
+	} else PLCC_SYNTAX_ERROR("instruction");
 	
+	PLCC_NEW;
 }
 
+void Expression(){
+	PLCC_NOT_IMPLEMENTED;
+}
+
+void ListeParam(){
+	PLCC_NOT_IMPLEMENTED;
+}
 /*
 	+ Programme -> PROGRAM ID ';' Corps '.'
 	+ Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
@@ -203,15 +234,16 @@ void Instruction(int next_id){
 	+ DeclProcFun -> DeclProcedure | DeclFunction 
 	* DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps 
 	+ DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
-
+	
 	Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
-AffectInstr -> Variable AFFECT Expression 
-AppelProcedure -> ID [ '(' ListeParam ')' ] ??
-AppelFunction -> ID '(' ListeParam ')'		??
-ListeParam -> Expression { ',' Expression } ??
-IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
-WhileInstr -> WHILE Expression DO Instruction 
-	BlocInstr -> BEGIN Instruction { ';' Instruction } END 
+	AffectInstr -> Variable AFFECT Expression 
+	AppelProcedure -> ID [ '(' ListeParam ')' ]
+	ListeParam -> Expression { ',' Expression } | Empty
+	IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
+	WhileInstr -> WHILE Expression DO Instruction 
+	BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
+
+AppelFunction -> ID '(' ListeParam ')'
 
 Expression -> Simpleexpression [ Relation Simpleexpression ]
 Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
