@@ -31,5 +31,8 @@ extern unsigned int line_number,char_number;
 							fprintf(stderr,__VA_ARGS__);\
 							fprintf(stderr,"\n");\
 							exit(EXIT_FAILURE);}
+#define PLCC_WARNING(...)	{PLCC_WHERE;\
+							fprintf(stderr,"plcc warning: ");\
+							fprintf(stderr,__VA_ARGS__);}
 
 #define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}

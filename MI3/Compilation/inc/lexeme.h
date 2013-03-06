@@ -26,12 +26,12 @@ const char *ONESYMS[]={
 };
 
 const char *SYMBOLS[]={
-	"..", ":=", "<=", ">="
+	"..", ":=", "<=", "<>", ">="
 };
 const char *KEYWORDS[]={
-	"array", "begin", "boolean", "do", "else", 
+	"and", "array", "begin", "boolean", "do", "else", 
 	"end", "false", "function", "if", "integer",
-	"mod", "of", "procedure", "program", "read", 
+	"mod", "not", "of", "or", "procedure", "program", 
 	"then", "true", "var", "while"
 };
 

@@ -48,7 +48,14 @@ void DeclProcFun();
 void DeclProcedure();
 void DeclFunction();
 void ListeParam();
+void ListeDeclVar();
 
 void BlocInstr();
 void Instruction(int);
+void Expression();
+void SimpleExpression();
+void Facteur();
+void Predicat();
+void OpAdd();
+void Relation();
 #endif

@@ -71,7 +71,7 @@ int is_reserved(const char*str){
 	return 0;
 }
 
-#define ADD_LINE if (chr=='\n') line_number++; else char_number++;
+#define ADD_LINE if (chr=='\n') {line_number++;char_number=0;} else char_number++;
 
 char get_next_char(){
 	char chr;

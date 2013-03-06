@@ -33,6 +33,8 @@ unsigned int ident_level=0;
 
 #define PLCC_SYNTAX_ERROR(expected) {WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
 #define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
+#define PLCC_UNTESTED				{WHERE; PLCC_WARNING("The current section is untested/untrusted\n");}
+#define PLCC_ILL_IMPLEMENED		{WHERE; PLCC_WARNING("The current section isn't fully implemented yet\n");}
 #define PLCC_IF(exp_id) if (uc==exp_id)
 #define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
@@ -74,7 +76,7 @@ void ListeDeclVar(){
 	while (uc==SIDENT){
 		markupOpen("var");
 		DeclVar(); //PLCC_NEW;
-		if (uc!=';') {return;}
+		if (uc!=';') {markupClose("var"); return;}
 		PLCC_NEW;
 		markupClose("var");
 	}
@@ -119,14 +121,15 @@ void Type(){
 
 //! DeclProcFun -> DeclProcedure | DeclFunction
 void DeclProcFun(){
+	PLCC_UNTESTED;
 	if (uc==SPROCEDURE) DeclProcedure();
 	else if (uc==SFUNCTION) DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
-	
 }
 
 //! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
 void DeclProcedure(){
+	PLCC_UNTESTED;
 	PLCC_IFNOT(SPROCEDURE,"procedure");
 	markupOpen("procedure");
 	
@@ -144,6 +147,7 @@ void DeclProcedure(){
 
 //! DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps
 void DeclFunction(){
+	PLCC_UNTESTED;
 	PLCC_IFNOT(SFUNCTION,"function");
 	markupOpen("function");
 	
@@ -169,64 +173,204 @@ void DeclFunction(){
 void BlocInstr(){
 	PLCC_IFNOT(SBEGIN,"begin");
 	markupOpen("block_instr");
-	do {
-		Instruction(SEND);
-	} while (uc==';');
-	PLCC_IFNOT(SEND,"end");
 	
+	do {
+		PLCC_NEW; Instruction(SEND);
+	} while (uc==';');
+	PLCC_IFNOT(SEND,"end"); PLCC_NEW;
 	markupClose("block_instr");
 }
 
 //! Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
-//! All of them will be treated in one call
+//! All options will be treated without subroutine call
 void Instruction(int next_id){
 	char inst_name[512];
-	markupOpen("instruction");
-	PLCC_IF(next_id) return; 	// Empty instruction
+	
+	PLCC_IF(next_id) {return;} // Empty instruction
 	PLCC_IF(';') return; 		// Empty also
 	
-	PLCC_IF(SIDENT) {			// Either it's a procedure or an affect
-		strcpy(inst_name,yytext);
-		PLCC_NEW;
-		PLCC_IF(';') {			//!< AppelProcedure -> ID [ '(' ListeParam ')' ]
+	markupOpen("instruction");
+	PLCC_IF(SIDENT) {			// AppelProcedure | AffectInstr
+		strcpy(inst_name,yytext); PLCC_NEW;
+		
+		PLCC_IF(';') {			//!< AppelProcedure -> ID
 			markupOpen("procedure");
 			markupLeaf("id",inst_name);
 			PLCC_NEW;
 			markupClose("procedure");
-		} else PLCC_IF('('){	//!< AppelProcedure -> ID [ '(' ListeParam ')' ]
+			markupClose("instruction");
+		} else PLCC_IF('('){	//!< AppelProcedure -> ID '(' ListeParam ')'
 			markupOpen("procedure");
 			markupLeaf("id",inst_name);
 			PLCC_NEW; ListeParam();
-			PLCC_IFNOT(')',"')'");
+			PLCC_IFNOT(')',"')'"); PLCC_NEW;
 			markupClose("procedure");
-		} else PLCC_IF('['){	//!< Variable -> ID [ '[' Expression ']' ] 
-			//Variable
-		} else PLCC_IF(SDOT_EQL){//!< Variable -> ID [ '[' Expression ']' ] 
-			//Variable
+		} else PLCC_IF('['){	//!	AffectInstr -> Variable AFFECT Expression
+			//!< Variable -> ID '[' Expression ']'
+			
+			markupOpen("affect");
+			markupOpen("table");
+				markupLeaf("id",inst_name);
+				markupOpen("at");
+				PLCC_NEW; Expression();
+				PLCC_IFNOT(']',"']'"); PLCC_NEW;
+				markupClose("at");
+			markupClose("table");
+			
+			PLCC_IFNOT(SDOT_EQL,"':='");
+			
+			markupOpen("value");
+				PLCC_NEW; Expression();
+			markupClose("value");
+			markupClose("affect");
+			
+		} else PLCC_IF(SDOT_EQL){ //!	AffectInstr -> Variable AFFECT Expression
+			//!< Variable -> ID
+			markupOpen("affect");
+			markupLeaf("var",inst_name);
+			
+			PLCC_IFNOT(SDOT_EQL,"':='");
+			markupOpen("value");
+				PLCC_NEW; Expression();
+			markupClose("value");
+			markupClose("affect");
+			
 		} else PLCC_SYNTAX_ERROR("procedure or affect");
 	} else PLCC_IF(SIF){ //!< IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 		markupOpen("if_instr");
-		
 		PLCC_NOT_IMPLEMENTED;
-	} else PLCC_IF(SWHILE){
+	} else PLCC_IF(SWHILE){ //!< WhileInstr -> WHILE Expression DO Instruction
 		PLCC_NOT_IMPLEMENTED;
-	} else PLCC_IF(SBEGIN){
+	} else PLCC_IF(SBEGIN){ //!< BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
 		BlocInstr();
 		PLCC_NOT_IMPLEMENTED;
 	} else PLCC_SYNTAX_ERROR("instruction");
 	
+	markupClose("instruction");
+	//printf("%d %s\n",uc,yytext);
+}
+
+//! ListeParam -> Expression { ',' Expression } | Empty
+void ListeParam(){
+	PLCC_IF(')') return;
+	
+	markupOpen("liste_params");
+	while (1){
+		markupOpen("value");
+		Expression();
+		markupClose("value");
+		PLCC_IF(',') PLCC_NEW;
+		else break;
+	}
+	markupClose("liste_params");
+}
+
+//! Simpleexpression [ Relation Simpleexpression ]
+void Expression(){
+	//PLCC_ILL_IMPLEMENED;
+	markupOpen("expression");
+	SimpleExpression();
+	if(uc=='<'||uc=='='||uc=='>'||uc==SINF_EQL||uc==SSUP_EQL||uc==SDIF_THN) {
+		WHERE;
+		Relation();
+		SimpleExpression();
+	}
+	markupClose("expression");
+}
+
+//! SimpleExpression -> Facteur [ OpAdd SimpleExpression ] 
+void SimpleExpression(){
+	markupOpen("simple_expression");
+	Facteur(); 
+	if (uc=='+' || uc=='-' || uc==SOR) {OpAdd(); SimpleExpression();}
+	
+	markupClose("simple_expression");
+}
+
+//! Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
+void Facteur(){
+	PLCC_ILL_IMPLEMENED;
+	markupOpen("factor");
+	
+	//! RelationUnaire -> '-' | NOT
+	Predicat();
+	markupClose("factor");
+}
+
+//! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
+void Predicat(){
+	char inst_name[512];
+	markupOpen("predicat");
+	PLCC_IF(SNUMERAL) {
+		markupLeaf("numeral",yytext);
+	} else PLCC_IF(SIDENT){
+		strcpy(inst_name,yytext); PLCC_NEW;
+		PLCC_IF('('){			//!< AppelFunction -> ID '(' ListeParam ')'
+			markupLeaf("function",inst_name);
+			PLCC_NEW; ListeParam();
+			PLCC_IFNOT(')',"')'");
+		} else PLCC_IF('['){ 	//!< Variable -> ID '[' Expression ']'
+			markupOpen("table");
+			markupLeaf("id",inst_name);
+			markupOpen("at");
+			PLCC_NEW; Expression();
+			PLCC_IFNOT(']',"']'");
+			markupClose("table");
+			markupClose("at");
+		} else {				//!< Variable -> ID
+			markupLeaf("variable",inst_name);  
+			return;
+		}
+	} else PLCC_IF('('){		//< '(' Expression ')'
+			PLCC_NEW; Expression();
+			PLCC_IFNOT(')',"')'");
+	} else PLCC_SYNTAX_ERROR("identifier, numeral or '('");
+	
+	PLCC_NEW; 
+	markupClose("predicat");
+}
+
+//! OpMult -> '*' | DIV | MOD | AND
+void OpMult(){
+	PLCC_NOT_IMPLEMENTED;
+}
+
+void OpAdd(){ //! OpAdd -> '+' | '-' | OR
+	PLCC_IF('+'){
+		markupLeaf("operation","+");
+	} else PLCC_IF('-'){
+		markupLeaf("operation","-");
+	} else PLCC_IF(SOR){
+		markupLeaf("operation","or");
+	} else PLCC_SYNTAX_ERROR("'+','-' or 'or'");
 	PLCC_NEW;
 }
 
-void Expression(){
+//! Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
+void Relation(){
+	PLCC_IF('<'){
+		markupLeaf("relation","'<'");
+	} else PLCC_IF('='){
+		markupLeaf("relation","'='");
+	}else PLCC_IF('>'){
+		markupLeaf("relation","'>'");
+	}else PLCC_IF(SINF_EQL){
+		markupLeaf("relation","'<='");
+	}else PLCC_IF(SSUP_EQL){
+		markupLeaf("relation","'>='");
+	}else PLCC_IF(SDIF_THN){
+		markupLeaf("relation","'!='");
+	}else PLCC_SYNTAX_ERROR("relation");
+	PLCC_NEW;
+}
+
+//! AppelFunction -> ID '(' ListeParam ')'
+void AppelFunction(){
 	PLCC_NOT_IMPLEMENTED;
 }
 
-void ListeParam(){
-	PLCC_NOT_IMPLEMENTED;
-}
 /*
-	+ Programme -> PROGRAM ID ';' Corps '.'
+	* Programme -> PROGRAM ID ';' Corps '.'
 	+ Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
 	* ListeDeclVar -> DeclVar{ ';' DeclVar }
 	* DeclVar -> ID { ',' ID } ':' Type
@@ -235,25 +379,26 @@ void ListeParam(){
 	* DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps 
 	+ DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
 	
-	Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
-	AffectInstr -> Variable AFFECT Expression 
-	AppelProcedure -> ID [ '(' ListeParam ')' ]
-	ListeParam -> Expression { ',' Expression } | Empty
+	+ BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
+	- Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	- AffectInstr -> Variable AFFECT Expression 
+	+ AppelProcedure -> ID [ '(' ListeParam ')' ]
 	IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 	WhileInstr -> WHILE Expression DO Instruction 
-	BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
+	
 
-AppelFunction -> ID '(' ListeParam ')'
+	+ ListeParam -> Expression { ',' Expression } | Empty
+	AppelFunction -> ID '(' ListeParam ')'
 
-Expression -> Simpleexpression [ Relation Simpleexpression ]
-Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
-Simpleexpression -> Facteur [ OpAdd Simpleexpression ] 
-OpAdd -> '+' | '-' | OR
-Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
-RelationUnaire -> '-' | NOT
-OpMult -> '*' | DIV | MOD | AND
-Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
-Variable -> ID [ '[' Expression ']' ] 
+	- Expression -> Simpleexpression [ Relation SimpleExpression ]
+	+ Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
+	- SimpleExpression -> Facteur [ OpAdd SimpleExpression ] 
+	+ OpAdd -> '+' | '-' | OR
+	- Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
+	RelationUnaire -> '-' | NOT
+	OpMult -> '*' | DIV | MOD | AND
+	+ Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
+	X Variable -> ID [ '[' Expression ']' ] 
 */
 
 /********** Affichage */

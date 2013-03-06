@@ -62,7 +62,8 @@ int main(int argc, char **argv){
 	i=0;
 	fprintf(f,"#define SDOT_DOT %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SDOT_EQL %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SLES_EQL %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SINF_EQL %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SDIF_THN %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SSUP_EQL %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SIDENT   %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
 	fprintf(f,"#define SNUMERAL %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+2));
