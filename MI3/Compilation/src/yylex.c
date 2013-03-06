@@ -29,7 +29,11 @@
 
 /* =========== Defines ===========*/
 
-#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))&&((nc=getc(yyin))==(b))){ungetc(nc,yyin);return-1;}}while (0);
+#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))){\
+									  if((nc=get_next_char())==(b)){\
+										ungetc(nc,yyin);return-1;}\
+									  else ungetc(nc,yyin);}\
+									 } while (0);
 
 int commenting=0;
 
@@ -45,7 +49,7 @@ int is_single_symbol(const char chr){
 			DOUBLE_SYMBOL_CHECK('.','.');
 			DOUBLE_SYMBOL_CHECK('<','=');
 			DOUBLE_SYMBOL_CHECK('>','=');
-			
+			DOUBLE_SYMBOL_CHECK('<','>');
 			return VAL_ONESYMS(chr);
 		}
 	return 0;
@@ -108,7 +112,7 @@ int yylex(){
 		chr=get_next_char();
 		yytext[++nbchar]=chr;
 		yytext[++nbchar]=0;
-		return is_symbol(yytext); /* Can't have more than 2 symbols -> Error or Succes here */ 
+		return is_symbol(yytext);
 	}
 	
 	/* Either it's a multiple character symbol */

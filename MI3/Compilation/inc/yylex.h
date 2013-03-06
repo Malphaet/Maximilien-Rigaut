@@ -24,6 +24,7 @@
 /* ======== Prototype =========*/
 
 int yylex					();
+char get_next_char			();
 int is_single_symbol		(const char);
 int is_symbol				(const char*);
 int is_reserved				(const char*);

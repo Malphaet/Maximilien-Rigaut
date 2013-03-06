@@ -29,7 +29,7 @@
 //FILE *yyin;
 
 /************* Rules */
-unsigned int ident_level=0;
+int ident_level=0;
 
 #define PLCC_SYNTAX_ERROR(expected) {WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
 #define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
@@ -186,19 +186,18 @@ void BlocInstr(){
 void Instruction(int next_id){
 	char inst_name[512];
 	
-	PLCC_IF(next_id) {return;} // Empty instruction
+	PLCC_IF(next_id) return; // Empty instruction
 	PLCC_IF(';') return; 		// Empty also
 	
 	markupOpen("instruction");
 	PLCC_IF(SIDENT) {			// AppelProcedure | AffectInstr
 		strcpy(inst_name,yytext); PLCC_NEW;
-		
-		PLCC_IF(';') {			//!< AppelProcedure -> ID
+		PLCC_IF(';') {			//!< AppelProcedure -> ID @todo Upgrade for lame pascal specification
 			markupOpen("procedure");
 			markupLeaf("id",inst_name);
 			PLCC_NEW;
 			markupClose("procedure");
-			markupClose("instruction");
+			//markupClose("instruction");
 		} else PLCC_IF('('){	//!< AppelProcedure -> ID '(' ListeParam ')'
 			markupOpen("procedure");
 			markupLeaf("id",inst_name);
@@ -207,7 +206,6 @@ void Instruction(int next_id){
 			markupClose("procedure");
 		} else PLCC_IF('['){	//!	AffectInstr -> Variable AFFECT Expression
 			//!< Variable -> ID '[' Expression ']'
-			
 			markupOpen("affect");
 			markupOpen("table");
 				markupLeaf("id",inst_name);
@@ -238,22 +236,34 @@ void Instruction(int next_id){
 		} else PLCC_SYNTAX_ERROR("procedure or affect");
 	} else PLCC_IF(SIF){ //!< IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 		markupOpen("if_instr");
-		PLCC_NOT_IMPLEMENTED;
+			markupOpen("if");
+				PLCC_IFNOT(SIF,"if"); PLCC_NEW;
+				Expression();
+			markupClose("if");
+			markupOpen("then");
+				PLCC_IFNOT(STHEN,"then"); PLCC_NEW;
+				Instruction(SELSE);
+				PLCC_IFNOT(';',"';'"); PLCC_NEW;
+			markupClose("then");
+		PLCC_IF(SELSE) {
+			markupOpen("else");
+				PLCC_NEW;
+				Instruction(';');
+			markupClose("else");
+		}
+		markupClose("if_instr");
 	} else PLCC_IF(SWHILE){ //!< WhileInstr -> WHILE Expression DO Instruction
 		PLCC_NOT_IMPLEMENTED;
 	} else PLCC_IF(SBEGIN){ //!< BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
 		BlocInstr();
-		PLCC_NOT_IMPLEMENTED;
 	} else PLCC_SYNTAX_ERROR("instruction");
 	
 	markupClose("instruction");
-	//printf("%d %s\n",uc,yytext);
 }
 
 //! ListeParam -> Expression { ',' Expression } | Empty
 void ListeParam(){
 	PLCC_IF(')') return;
-	
 	markupOpen("liste_params");
 	while (1){
 		markupOpen("value");
@@ -267,11 +277,9 @@ void ListeParam(){
 
 //! Simpleexpression [ Relation Simpleexpression ]
 void Expression(){
-	//PLCC_ILL_IMPLEMENED;
 	markupOpen("expression");
 	SimpleExpression();
 	if(uc=='<'||uc=='='||uc=='>'||uc==SINF_EQL||uc==SSUP_EQL||uc==SDIF_THN) {
-		WHERE;
 		Relation();
 		SimpleExpression();
 	}
@@ -283,17 +291,15 @@ void SimpleExpression(){
 	markupOpen("simple_expression");
 	Facteur(); 
 	if (uc=='+' || uc=='-' || uc==SOR) {OpAdd(); SimpleExpression();}
-	
 	markupClose("simple_expression");
 }
 
 //! Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
 void Facteur(){
-	PLCC_ILL_IMPLEMENED;
 	markupOpen("factor");
-	
-	//! RelationUnaire -> '-' | NOT
+	if (uc=='-'||uc==SNOT)	RelationUnaire();
 	Predicat();
+	if (uc=='*'||uc==SMOD||uc==SAND||uc=='/') {OpMult();Facteur();}
 	markupClose("factor");
 }
 
@@ -319,6 +325,7 @@ void Predicat(){
 			markupClose("at");
 		} else {				//!< Variable -> ID
 			markupLeaf("variable",inst_name);  
+			markupClose("predicat");
 			return;
 		}
 	} else PLCC_IF('('){		//< '(' Expression ')'
@@ -326,16 +333,26 @@ void Predicat(){
 			PLCC_IFNOT(')',"')'");
 	} else PLCC_SYNTAX_ERROR("identifier, numeral or '('");
 	
-	PLCC_NEW; 
+	PLCC_NEW;
 	markupClose("predicat");
 }
 
 //! OpMult -> '*' | DIV | MOD | AND
 void OpMult(){
-	PLCC_NOT_IMPLEMENTED;
+	PLCC_IF('*'){
+		markupLeaf("operation","*");
+	} else PLCC_IF('/'){
+		markupLeaf("operation","/");
+	} else PLCC_IF(SMOD){
+		markupLeaf("operation","mod");
+	} else PLCC_IF(SAND){
+		markupLeaf("operation","and");
+	} else PLCC_SYNTAX_ERROR("'*','/', 'mod' or 'and'");
+	PLCC_NEW;
 }
 
-void OpAdd(){ //! OpAdd -> '+' | '-' | OR
+//! OpAdd -> '+' | '-' | OR
+void OpAdd(){
 	PLCC_IF('+'){
 		markupLeaf("operation","+");
 	} else PLCC_IF('-'){
@@ -364,6 +381,16 @@ void Relation(){
 	PLCC_NEW;
 }
 
+//! RelationUnaire -> '-' | NOT
+void RelationUnaire(){
+	PLCC_IF('-'){
+		markupLeaf("relation_unaire","'-'");
+	} else PLCC_IF(SNOT){
+		markupLeaf("relation_unaire","not");
+	} else PLCC_SYNTAX_ERROR("relation");
+	
+	PLCC_NEW;
+}
 //! AppelFunction -> ID '(' ListeParam ')'
 void AppelFunction(){
 	PLCC_NOT_IMPLEMENTED;
@@ -383,20 +410,20 @@ void AppelFunction(){
 	- Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
 	- AffectInstr -> Variable AFFECT Expression 
 	+ AppelProcedure -> ID [ '(' ListeParam ')' ]
-	IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
+	- IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 	WhileInstr -> WHILE Expression DO Instruction 
 	
 
 	+ ListeParam -> Expression { ',' Expression } | Empty
 	AppelFunction -> ID '(' ListeParam ')'
 
-	- Expression -> Simpleexpression [ Relation SimpleExpression ]
+	+ Expression -> Simpleexpression [ Relation SimpleExpression ]
 	+ Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
-	- SimpleExpression -> Facteur [ OpAdd SimpleExpression ] 
+	+ SimpleExpression -> Facteur [ OpAdd SimpleExpression ] 
 	+ OpAdd -> '+' | '-' | OR
-	- Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
-	RelationUnaire -> '-' | NOT
-	OpMult -> '*' | DIV | MOD | AND
+	+ Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
+	+ RelationUnaire -> '-' | NOT
+	+ OpMult -> '*' | DIV | MOD | AND
 	+ Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
 	X Variable -> ID [ '[' Expression ']' ] 
 */
@@ -404,23 +431,24 @@ void AppelFunction(){
 /********** Affichage */
 
 void markupOpen(char *s){
-	unsigned int i;
+	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
-	printf("<%s>\n",s);
+	printf("\033[1;30m<%s>\033[0m\n",s);
 	
 	ident_level+=2;
 }
 
 void markupClose(char *s){
-	unsigned int i;
+	int i;
 	ident_level-=2;
 	
 	for(i=0;i<ident_level;i++) printf(" ");
-	printf("</%s>\n",s);
+	printf("\033[1;30m</%s>\033[0m\n",s);
 }
 
 void markupLeaf(char *s, char *val){
-	unsigned int i;
+	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
-	printf("<%s>%s</%s>\n",s , val, s);
+	
+	printf("\033[1;31m<%s>\033[32m%s\033[1;31m</%s>\033[0m\n",s , val, s);
 }

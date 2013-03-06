@@ -57,5 +57,7 @@ void SimpleExpression();
 void Facteur();
 void Predicat();
 void OpAdd();
+void OpMult();
 void Relation();
+void RelationUnaire();
 #endif
