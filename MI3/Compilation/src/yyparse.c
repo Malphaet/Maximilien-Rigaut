@@ -243,7 +243,7 @@ void Instruction(int next_id){
 			markupOpen("then");
 				PLCC_IFNOT(STHEN,"then"); PLCC_NEW;
 				Instruction(SELSE);
-				PLCC_IFNOT(';',"';'"); PLCC_NEW;
+				PLCC_IF(';') PLCC_NEW;
 			markupClose("then");
 		PLCC_IF(SELSE) {
 			markupOpen("else");
@@ -253,7 +253,16 @@ void Instruction(int next_id){
 		}
 		markupClose("if_instr");
 	} else PLCC_IF(SWHILE){ //!< WhileInstr -> WHILE Expression DO Instruction
-		PLCC_NOT_IMPLEMENTED;
+		markupOpen("while_instr");
+			markupOpen("while");
+				PLCC_IFNOT(SWHILE,"while"); PLCC_NEW;
+				Expression();
+				PLCC_IFNOT(SDO,"do"); PLCC_NEW;
+			markupClose("while");
+			markupOpen("do");
+				Instruction(SEND);
+			markupClose("do");
+		markupClose("while_instr");
 	} else PLCC_IF(SBEGIN){ //!< BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
 		BlocInstr();
 	} else PLCC_SYNTAX_ERROR("instruction");
@@ -411,7 +420,7 @@ void AppelFunction(){
 	- AffectInstr -> Variable AFFECT Expression 
 	+ AppelProcedure -> ID [ '(' ListeParam ')' ]
 	- IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
-	WhileInstr -> WHILE Expression DO Instruction 
+	+ WhileInstr -> WHILE Expression DO Instruction 
 	
 
 	+ ListeParam -> Expression { ',' Expression } | Empty
