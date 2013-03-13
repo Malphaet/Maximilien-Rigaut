@@ -121,7 +121,6 @@ void Type(){
 
 //! DeclProcFun -> DeclProcedure | DeclFunction
 void DeclProcFun(){
-	PLCC_UNTESTED;
 	if (uc==SPROCEDURE) DeclProcedure();
 	else if (uc==SFUNCTION) DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
@@ -129,7 +128,6 @@ void DeclProcFun(){
 
 //! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
 void DeclProcedure(){
-	PLCC_UNTESTED;
 	PLCC_IFNOT(SPROCEDURE,"procedure");
 	markupOpen("procedure");
 	
@@ -147,7 +145,6 @@ void DeclProcedure(){
 
 //! DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps
 void DeclFunction(){
-	PLCC_UNTESTED;
 	PLCC_IFNOT(SFUNCTION,"function");
 	markupOpen("function");
 	
@@ -400,14 +397,11 @@ void RelationUnaire(){
 	
 	PLCC_NEW;
 }
-//! AppelFunction -> ID '(' ListeParam ')'
-void AppelFunction(){
-	PLCC_NOT_IMPLEMENTED;
-}
+
 
 /*
 	* Programme -> PROGRAM ID ';' Corps '.'
-	+ Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
+	* Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
 	* ListeDeclVar -> DeclVar{ ';' DeclVar }
 	* DeclVar -> ID { ',' ID } ':' Type
 	* Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
@@ -416,15 +410,15 @@ void AppelFunction(){
 	+ DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps 
 	
 	+ BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
-	- Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
-	- AffectInstr -> Variable AFFECT Expression 
+	+ Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
+	+ AffectInstr -> Variable AFFECT Expression 
 	+ AppelProcedure -> ID [ '(' ListeParam ')' ]
-	- IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
+	+ IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 	+ WhileInstr -> WHILE Expression DO Instruction 
 	
 
 	+ ListeParam -> Expression { ',' Expression } | Empty
-	AppelFunction -> ID '(' ListeParam ')'
+	X AppelFunction -> ID '(' ListeParam ')'
 
 	+ Expression -> Simpleexpression [ Relation SimpleExpression ]
 	+ Relation -> '<' | '=' | '>' | INFEG | DIFF | SUPEG 
