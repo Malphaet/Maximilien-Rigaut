@@ -18,7 +18,7 @@ LDFLAGS =
 
 
 EXEC=plcc
-EXEC_O=yylex yyparse
+EXEC_O=yylex yyparse arbre
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 

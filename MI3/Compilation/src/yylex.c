@@ -31,8 +31,8 @@
 
 #define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))){\
 									  if((nc=get_next_char())==(b)){\
-										ungetc(nc,yyin);return-1;}\
-									  else ungetc(nc,yyin);}\
+										ungetc(nc,yyin); return-1;}\
+									  else {ungetc(nc,yyin);}}\
 									 } while (0);
 
 int commenting=0;
@@ -93,12 +93,13 @@ char get_next_char(){
 }
 	
 int yylex(){
-	int val=0,nbchar=0,i;
+	int val=0;
 	char chr;
-	
+	word_size=0;
 	/** Strip leading spaces */
 	do {chr=get_next_char();}
 	while (isspace(chr));
+	
 	
 	/** Putting first character in the table */
 	yytext[0]=chr;
@@ -106,36 +107,35 @@ int yylex(){
 	
 	/** Check for symbol presence */
 	if ((val=is_single_symbol(chr))>0) { /* Either it's a single character symbol*/
-		yytext[1]=0;
+		yytext[++word_size]=0;
 		return val;
 	} else if (val<0){ /* This one is expecting one more character */
 		chr=get_next_char();
-		yytext[++nbchar]=chr;
-		yytext[++nbchar]=0;
+		yytext[++word_size]=chr;
+		yytext[++word_size]=0;
 		return is_symbol(yytext);
 	}
 	
 	/* Either it's a multiple character symbol */
 	while ((chr=get_next_char())!=EOF){ 
 		if (isspace(chr)||ispunct(chr)) {
-			yytext[++nbchar]=0;
+			yytext[++word_size]=0;
 			char_number--; ungetc(chr,yyin);
-			nbchar--;
 			if ((val=is_reserved(yytext))) return val; /**@todo Update this to get clever */
 			else break;
 		}
-		yytext[++nbchar]=chr;
+		yytext[++word_size]=chr;
 	}
-	
+	word_size--;
 	/* Else it's an alphanumeric variable or constant */
 	while ((chr=get_next_char())!=EOF){		
 		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
 			char_number--; ungetc(chr,yyin);
-			yytext[++nbchar]=0;
-			for(i=0;i<nbchar;i++) if(!isdigit(yytext[i])) return SIDENT;
+			yytext[++word_size]=0; word_size--;
+			/*for(i=0;i<word_size;i++)*/ if(!isdigit(yytext[0])) return SIDENT;
 			return SNUMERAL;
 		}
-		yytext[++nbchar]=chr;
+		yytext[++word_size]=chr;
 	}
 	
 	return 0;

@@ -25,7 +25,7 @@
 #define YYPARSE_H
 /* ========= Includes =========*/
 
-
+#include "arbre.h"
 
 /* ========= Typedef ==========*/
 /* ======== Prototype =========*/
@@ -38,26 +38,40 @@ void markupClose(char *s);
 void markupOpen(char *s);
 void markupLeaf(char *s, char *val);
 
+/*
+typedef struct n_l_instr_ n_l_instr;
+typedef struct n_instr_ n_instr;
+typedef struct n_exp_ n_exp;
+typedef struct n_l_exp_ n_l_exp;
+typedef struct n_var_ n_var;
+typedef struct n_l_dec_ n_l_dec;
+typedef struct n_dec_ n_dec;
+typedef struct n_type_ n_type;
+typedef struct n_l_fun_dec_ n_l_fun_dec;
+typedef struct n_fun_dec_ n_fun_dec;
+typedef struct n_prog_ n_prog;
+typedef struct n_appel_ n_appel;
+*/
+
 /* Lexical analisys' functions */
-void Programme();
-void Corps();
-void ListeDeclVar();
+n_prog*		Programme();
+n_prog*		Corps();
+n_l_dec*	ListeDeclVar();
 void DeclVar();
 void Type();
-void DeclProcFun();
-void DeclProcedure();
-void DeclFunction();
-void ListeParam();
-void ListeDeclVar();
+n_fun_dec*	DeclProcFun();
+n_fun_dec*	DeclProcedure();
+n_fun_dec*	DeclFunction();
+n_l_exp*	ListeParam();
 
-void BlocInstr();
+n_instr*	BlocInstr();
 void Instruction(int);
-void Expression();
+n_exp*		Expression();
 void SimpleExpression();
 void Facteur();
-void Predicat();
-void OpAdd();
-void OpMult();
+n_instr*	Predicat();
+operation	OpAdd();
+operation	OpMult();
 void Relation();
 void RelationUnaire();
 #endif

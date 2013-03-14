@@ -22,9 +22,9 @@
 #include "yylex.h"
 #include "yyparse.h"
 
-char yytext[512],*file_in_progress;
+char yytext[SIZE_TEXT],*file_in_progress;
 FILE *yyin;
-unsigned int line_number=1,char_number=0;
+unsigned int line_number=1,char_number=0,word_size=0;
 
 int main(int argc, char **argv) {
 	if (argc<2) OUT("plcc error : Not enough arguments");

@@ -17,9 +17,10 @@
 
 /* ===== Global variables =====*/
 
-extern char yytext[512],*file_in_progress;
+#define SIZE_TEXT 521
+extern char yytext[SIZE_TEXT],*file_in_progress;
 extern FILE *yyin;
-extern unsigned int line_number,char_number;
+extern unsigned int line_number,char_number,word_size;
 
 /* ========= Defines ==========*/
 

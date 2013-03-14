@@ -23,11 +23,6 @@
 #include "yyparse.h"
 #include "utils.h"
 
-//extern char yytext[512];
-//extern char *file_in_progress;
-//extern unsigned int line_number,char_number;
-//FILE *yyin;
-
 /************* Rules */
 int ident_level=0;
 
@@ -39,8 +34,9 @@ int ident_level=0;
 #define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
 
-void Programme(){
-	//Program -> PROGRAM ID ';' Body '.'
+//! Program -> PROGRAM ID ';' Body '.'
+n_prog *Programme(){
+	n_prog*prog;
 	
 	PLCC_IFNOT(SPROGRAM,"program")
 	markupOpen("program"); PLCC_NEW; 
@@ -49,37 +45,47 @@ void Programme(){
 	markupLeaf("identifier",yytext); PLCC_NEW; 
 	
 	PLCC_IFNOT(';',"';'");
-	PLCC_NEW; Corps(); 
+	PLCC_NEW; prog=Corps(); 
 	
 	PLCC_IFNOT('.',"'.'");
 	markupClose("program");
+	return prog;
 }
 
 //! Corps ->[ VAR ListeDeclVar ';' ] { DeclProcFun ';' } BlocInstr
-void Corps(){
+n_prog *Corps(){
+	n_l_dec*var=NULL;
+	n_l_fun_dec*l_fun=NULL;
+	n_fun_dec*fun=NULL;
+	n_instr*inst=NULL;
+	
 	markupOpen("body");
 	PLCC_IF(SVAR){
 		PLCC_NEW;
-		ListeDeclVar();
+		var=ListeDeclVar();
 	}
 	while (uc==SPROCEDURE||uc==SFUNCTION){
-		DeclProcFun();
+		fun=DeclProcFun();
 		PLCC_NEW;
+		l_fun=(n_l_fun_dec*) fun;
 	}
-	BlocInstr();
+	inst=BlocInstr();
 	
 	markupClose("body");
+	
+	return cree_n_prog(var,l_fun,inst);
 }
 
 //! ListeDeclVar -> DeclVar{ ';' DeclVar }
-void ListeDeclVar(){
+n_l_dec* ListeDeclVar(){
 	while (uc==SIDENT){
 		markupOpen("var");
 		DeclVar(); //PLCC_NEW;
-		if (uc!=';') {markupClose("var"); return;}
+		if (uc!=';') {markupClose("var"); break;}
 		PLCC_NEW;
 		markupClose("var");
 	}
+	return cree_n_l_dec(NULL,NULL);
 }
 
 //! DeclVar -> ID { ',' ID } ':' Type
@@ -98,6 +104,7 @@ void DeclVar(){
 
 //! Type -> INTEGER | BOOLEAN | ARRAY '[' NUMERAL '..' NUMERAL ']' OF Type
 void Type(){
+	//int size=word_size;
 	PLCC_IF(SINTEGER) markupLeaf("type",yytext);
 	else PLCC_IF(SBOOLEAN) markupLeaf("type",yytext);
 	else PLCC_IF(SARRAY){
@@ -120,38 +127,52 @@ void Type(){
 }
 
 //! DeclProcFun -> DeclProcedure | DeclFunction
-void DeclProcFun(){
-	if (uc==SPROCEDURE) DeclProcedure();
-	else if (uc==SFUNCTION) DeclFunction();
+n_fun_dec *DeclProcFun(){
+	n_fun_dec*liste=NULL;
+	if (uc==SPROCEDURE) liste=DeclProcedure();
+	else if (uc==SFUNCTION) liste=DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
+	return liste;
 }
 
 //! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
-void DeclProcedure(){
+n_fun_dec*DeclProcedure(){
+	char *nom;
+	n_type *t=NULL;
+	n_l_dec *param=NULL,*variables=NULL;
+	n_instr *corps=NULL;
+	
 	PLCC_IFNOT(SPROCEDURE,"procedure");
 	markupOpen("procedure");
 	
 	PLCC_NEW; PLCC_IFNOT(SIDENT,"identifier");
 	markupLeaf("id",yytext);
-	
+	nom=NULL;
 	PLCC_NEW; PLCC_IF('(') {
-		ListeDeclVar();
+		variables=ListeDeclVar();
 		PLCC_NEW; PLCC_IFNOT(')',"')'");
 	}
 	
 	PLCC_NEW; PLCC_IFNOT(';',"';'");
 	Corps();
+	
+	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
 
 //! DeclFunction -> FUNCTION ID '(' ListeDeclVar ')' ':' Type ';' Corps
-void DeclFunction(){
+n_fun_dec*DeclFunction(){
+	char *nom;	n_type *t=NULL;
+	n_l_dec *param=NULL,*variables=NULL;
+	n_instr *corps=NULL;
+	
 	PLCC_IFNOT(SFUNCTION,"function");
 	markupOpen("function");
 	
 	PLCC_NEW; PLCC_IFNOT(SIDENT,"id");
 	markupLeaf("id",yytext);
+	nom=NULL;
 	PLCC_NEW; PLCC_IFNOT('(',"'('");
-	PLCC_NEW; ListeDeclVar();
+	PLCC_NEW; variables=ListeDeclVar();
 	
 	PLCC_IFNOT(')',"')'");
 	
@@ -164,10 +185,12 @@ void DeclFunction(){
 	PLCC_IFNOT(';',"';'");
 	PLCC_NEW; Corps();
 	markupClose("function");
+	
+	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
 
 //! BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END
-void BlocInstr(){
+n_instr *BlocInstr(){
 	PLCC_IFNOT(SBEGIN,"begin");
 	markupOpen("block_instr");
 	
@@ -176,13 +199,16 @@ void BlocInstr(){
 	} while (uc==';');
 	PLCC_IFNOT(SEND,"end"); PLCC_NEW;
 	markupClose("block_instr");
+	return NULL;
 }
 
 //! Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
 //! All options will be treated without subroutine call
 void Instruction(int next_id){
-	char inst_name[512];
-	
+	char*inst_name=malloc(sizeof(char)*(word_size+2));
+	n_instr*instr;
+	n_var*var;
+	//int size=word_size;
 	PLCC_IF(next_id) return; // Empty instruction
 	PLCC_IF(';') return; 		// Empty also
 	
@@ -194,7 +220,7 @@ void Instruction(int next_id){
 			markupLeaf("id",inst_name);
 			PLCC_NEW;
 			markupClose("procedure");
-			//markupClose("instruction");
+			//isnt=cree_n_instr_appel();
 		} else PLCC_IF('('){	//!< AppelProcedure -> ID '(' ListeParam ')'
 			markupOpen("procedure");
 			markupLeaf("id",inst_name);
@@ -205,6 +231,7 @@ void Instruction(int next_id){
 			//!< Variable -> ID '[' Expression ']'
 			markupOpen("affect");
 			markupOpen("table");
+				var=cree_n_var_simple(inst_name);
 				markupLeaf("id",inst_name);
 				markupOpen("at");
 				PLCC_NEW; Expression();
@@ -219,6 +246,7 @@ void Instruction(int next_id){
 			markupClose("value");
 			markupClose("affect");
 			
+			//inst=cree_n_instr_affect(var,exp);
 		} else PLCC_IF(SDOT_EQL){ //!	AffectInstr -> Variable AFFECT Expression
 			//!< Variable -> ID
 			markupOpen("affect");
@@ -231,6 +259,7 @@ void Instruction(int next_id){
 			markupClose("affect");
 			
 		} else PLCC_SYNTAX_ERROR("procedure or affect");
+		
 	} else PLCC_IF(SIF){ //!< IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
 		markupOpen("if_instr");
 			markupOpen("if");
@@ -268,28 +297,39 @@ void Instruction(int next_id){
 }
 
 //! ListeParam -> Expression { ',' Expression } | Empty
-void ListeParam(){
-	PLCC_IF(')') return;
+n_l_exp*ListeParam(){
+	n_l_exp*curr,*tete,*queue;
+	PLCC_IF(')') return NULL;
 	markupOpen("liste_params");
+	curr=tete=cree_n_l_exp(Expression(),NULL);
+	
+	PLCC_IF(',') PLCC_NEW;
+	else return tete;
 	while (1){
 		markupOpen("value");
-		Expression();
+		
+		queue=cree_n_l_exp(Expression(),NULL);
+		curr->queue=queue;
+		
 		markupClose("value");
 		PLCC_IF(',') PLCC_NEW;
 		else break;
 	}
 	markupClose("liste_params");
+	return tete;
 }
 
-//! Simpleexpression [ Relation Simpleexpression ]
-void Expression(){
+//! Expression -> Simpleexpression [ Relation Simpleexpression ]
+n_exp*Expression(){
 	markupOpen("expression");
 	SimpleExpression();
 	if(uc=='<'||uc=='='||uc=='>'||uc==SINF_EQL||uc==SSUP_EQL||uc==SDIF_THN) {
+		//cree_n_exp_op();
 		Relation();
 		SimpleExpression();
 	}
 	markupClose("expression");
+	return NULL;
 }
 
 //! SimpleExpression -> Facteur [ OpAdd SimpleExpression ] 
@@ -310,8 +350,10 @@ void Facteur(){
 }
 
 //! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
-void Predicat(){
-	char inst_name[512];
+n_instr*Predicat(){
+	char*inst_name=malloc(sizeof(char)*(word_size+2));
+	n_exp*exp; n_instr*inst; n_l_exp*args;
+	
 	markupOpen("predicat");
 	PLCC_IF(SNUMERAL) {
 		markupLeaf("numeral",yytext);
@@ -319,21 +361,25 @@ void Predicat(){
 		strcpy(inst_name,yytext); PLCC_NEW;
 		PLCC_IF('('){			//!< AppelFunction -> ID '(' ListeParam ')'
 			markupLeaf("function",inst_name);
-			PLCC_NEW; ListeParam();
+			PLCC_NEW; args=ListeParam();
 			PLCC_IFNOT(')',"')'");
+			cree_n_appel(inst_name,args);
 		} else PLCC_IF('['){ 	//!< Variable -> ID '[' Expression ']'
+			
 			markupOpen("table");
 			markupLeaf("id",inst_name);
 			markupOpen("at");
-			PLCC_NEW; Expression();
+			PLCC_NEW; exp=Expression();
 			PLCC_IFNOT(']',"']'");
 			markupClose("table");
 			markupClose("at");
+			//inst=cree_n_var_indicee(inst_name,exp);
 		} else {				//!< Variable -> ID
-			markupLeaf("variable",inst_name);  
+			markupLeaf("variable",inst_name);
 			markupClose("predicat");
-			return;
+			return NULL;
 		}
+		
 	} else PLCC_IF('('){		//< '(' Expression ')'
 			PLCC_NEW; Expression();
 			PLCC_IFNOT(')',"')'");
@@ -341,30 +387,38 @@ void Predicat(){
 	
 	PLCC_NEW;
 	markupClose("predicat");
+	return inst;
 }
 
 //! OpMult -> '*' | DIV | MOD | AND
-void OpMult(){
+operation OpMult(){
 	PLCC_IF('*'){
 		markupLeaf("operation","*");
+		return fois;
 	} else PLCC_IF('/'){
 		markupLeaf("operation","/");
+		return divise;
 	} else PLCC_IF(SMOD){
 		markupLeaf("operation","mod");
+		return modulo;
 	} else PLCC_IF(SAND){
 		markupLeaf("operation","and");
+		return et;
 	} else PLCC_SYNTAX_ERROR("'*','/', 'mod' or 'and'");
 	PLCC_NEW;
 }
 
 //! OpAdd -> '+' | '-' | OR
-void OpAdd(){
+operation OpAdd(){
 	PLCC_IF('+'){
 		markupLeaf("operation","+");
+		return plus;
 	} else PLCC_IF('-'){
 		markupLeaf("operation","-");
+		return moins;
 	} else PLCC_IF(SOR){
 		markupLeaf("operation","or");
+		return ou;
 	} else PLCC_SYNTAX_ERROR("'+','-' or 'or'");
 	PLCC_NEW;
 }
