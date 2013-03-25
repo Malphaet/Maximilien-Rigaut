@@ -12,13 +12,13 @@ TMP = tmp
 NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
 		 -std=c99 -Wshadow -O2 -I$(INC) 
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) -g -D build_tests
-CFLAGS = $(NFLAGS)
+		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG
+CFLAGS = $(DFLAGS)
 LDFLAGS = 
 
 
 EXEC=plcc
-EXEC_O=yylex yyparse arbre
+EXEC_O=yylex yyparse arbre dico
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 

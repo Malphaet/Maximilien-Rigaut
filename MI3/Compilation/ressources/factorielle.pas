@@ -1,7 +1,7 @@
 program factorielle;
 
 function fact(a, n : integer) : integer;
-var c : integer;  
+var c : integer;
 begin
    if n = 0 then fact := 1
    else     

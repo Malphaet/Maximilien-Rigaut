@@ -49,12 +49,12 @@ struct n_fun_dec_{
   n_type *type;
   n_l_dec *variables;
   n_l_dec *param;
-  n_instr *corps;
+  n_prog *corps;
 };
 
 n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, 
 			   n_l_dec *param, n_l_dec *variables, 
-			   n_instr *corps);
+			   n_prog *corps);
 
 /*------ EXPRESSIONS ------*/
 

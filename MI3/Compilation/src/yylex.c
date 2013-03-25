@@ -29,30 +29,36 @@
 
 /* =========== Defines ===========*/
 
-#define DOUBLE_SYMBOL_CHECK(a,b) do {if((chr==(a))){\
-									  if((nc=get_next_char())==(b)){\
-										ungetc(nc,yyin); return-1;}\
-									  else {ungetc(nc,yyin);}}\
-									 } while (0);
+
+#define DOUBLE_SYMBOL_CHECK(b) if((nc)==(b)) {ungetc(nc,yyin);char_number--; return-1;}
+#define ADD_LINE if (chr=='\n') {line_number++;char_number=0;} else char_number++;
+#define DEL_LINE(c) do {ungetc(c,yyin);\
+						if (!char_number) {char_number=char_number_old;line_number--;}\
+						else char_number--;}\
+					 while (0);
 
 int commenting=0;
 
 /* =========== Functions ===========*/
 
 int is_single_symbol(const char chr){
-	int i;
+	int i,char_number_old=char_number;
 	char nc;
-	for(i=0;i<SIZE_ONESYMS;i++)
-		if (ONESYMS[i][0]==chr) {
-			/* Check if it's a double symbol */
-			DOUBLE_SYMBOL_CHECK(':','=');
-			DOUBLE_SYMBOL_CHECK('.','.');
-			DOUBLE_SYMBOL_CHECK('<','=');
-			DOUBLE_SYMBOL_CHECK('>','=');
-			DOUBLE_SYMBOL_CHECK('<','>');
-			return VAL_ONESYMS(chr);
-		}
-	return 0;
+	
+	/* Check if it's a double symbol */
+	nc=get_next_char();
+	switch(chr){
+		case ':': DOUBLE_SYMBOL_CHECK('=') break;
+		case '.': DOUBLE_SYMBOL_CHECK('.') break;
+		case '<': DOUBLE_SYMBOL_CHECK('=') DOUBLE_SYMBOL_CHECK('>') break;
+		case '>': DOUBLE_SYMBOL_CHECK('=') break;
+		default: 
+			DEL_LINE(nc);
+			for(i=0;i<SIZE_ONESYMS;i++) if (ONESYMS[i][0]==chr) return VAL_ONESYMS(chr);
+			return 0;
+	}
+	DEL_LINE(nc);
+	return VAL_ONESYMS(chr);
 }
 
 int is_symbol(const char*str){
@@ -75,8 +81,6 @@ int is_reserved(const char*str){
 	return 0;
 }
 
-#define ADD_LINE if (chr=='\n') {line_number++;char_number=0;} else char_number++;
-
 char get_next_char(){
 	char chr;
 	if ((chr=getc(yyin))!='{') {
@@ -93,7 +97,7 @@ char get_next_char(){
 }
 	
 int yylex(){
-	int val=0;
+	int val=0,char_number_old;
 	char chr;
 	word_size=0;
 	/** Strip leading spaces */
@@ -117,25 +121,28 @@ int yylex(){
 	}
 	
 	/* Either it's a multiple character symbol */
+	char_number_old=char_number;
 	while ((chr=get_next_char())!=EOF){ 
 		if (isspace(chr)||ispunct(chr)) {
 			yytext[++word_size]=0;
-			char_number--; ungetc(chr,yyin);
+			DEL_LINE(chr);
 			if ((val=is_reserved(yytext))) return val; /**@todo Update this to get clever */
 			else break;
 		}
 		yytext[++word_size]=chr;
+		char_number_old=char_number;
 	}
 	word_size--;
 	/* Else it's an alphanumeric variable or constant */
+	char_number_old=char_number;
 	while ((chr=get_next_char())!=EOF){		
 		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
-			char_number--; ungetc(chr,yyin);
+			DEL_LINE(chr);
 			yytext[++word_size]=0; word_size--;
 			/*for(i=0;i<word_size;i++)*/ if(!isdigit(yytext[0])) return SIDENT;
 			return SNUMERAL;
 		}
-		yytext[++word_size]=chr;
+		yytext[++word_size]=chr; char_number_old=char_number;
 	}
 	
 	return 0;

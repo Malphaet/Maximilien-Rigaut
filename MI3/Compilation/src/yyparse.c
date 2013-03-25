@@ -38,18 +38,14 @@ int ident_level=0;
 n_prog *Programme(){
 	n_prog*prog;
 	
-	PLCC_IFNOT(SPROGRAM,"program")
-	markupOpen("program"); PLCC_NEW; 
-	
-	PLCC_IFNOT(SIDENT,"identifier") 
-	markupLeaf("identifier",yytext); PLCC_NEW; 
+	PLCC_IFNOT(SPROGRAM,"program");PLCC_NEW; 
+	PLCC_IFNOT(SIDENT,"identifier");PLCC_NEW; 
+	/*yytext: program name*/
 	
 	PLCC_IFNOT(';',"';'");
 	PLCC_NEW; prog=Corps(); 
-	
 	PLCC_IFNOT('.',"'.'");
-	markupClose("program");
-	//cree_n_prog(
+	
 	return prog;
 }
 
@@ -146,7 +142,7 @@ n_fun_dec*DeclProcedure(){
 	char *nom;
 	n_type *t=NULL;
 	n_l_dec *param=NULL,*variables=NULL;
-	n_instr *corps=NULL;
+	n_prog*corps;
 	
 	PLCC_IFNOT(SPROCEDURE,"procedure");
 	markupOpen("procedure");
@@ -160,7 +156,7 @@ n_fun_dec*DeclProcedure(){
 	}
 	
 	PLCC_NEW; PLCC_IFNOT(';',"';'");
-	Corps();
+	corps=Corps();
 	
 	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
@@ -169,7 +165,7 @@ n_fun_dec*DeclProcedure(){
 n_fun_dec*DeclFunction(){
 	char *nom;	n_type *t=NULL;
 	n_l_dec *param=NULL,*variables=NULL;
-	n_instr *corps=NULL;
+	n_prog *corps;
 	
 	PLCC_IFNOT(SFUNCTION,"function");
 	
@@ -184,7 +180,7 @@ n_fun_dec*DeclFunction(){
 	PLCC_NEW; PLCC_IFNOT(':',"':'");
 	PLCC_NEW; t=Type();
 	PLCC_IFNOT(';',"';'");
-	PLCC_NEW; Corps();
+	PLCC_NEW; corps=Corps();
 	
 	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
@@ -439,7 +435,9 @@ operation RelationUnaire(){
 void markupOpen(char *s){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
-	printf("\033[1;30m<%s>\033[0m\n",s);
+	
+
+	printf("%s<%s>%s\n",C_GREY,s,C_CLEAR);
 	
 	ident_level+=2;
 }
@@ -449,12 +447,12 @@ void markupClose(char *s){
 	ident_level-=2;
 	
 	for(i=0;i<ident_level;i++) printf(" ");
-	printf("\033[1;30m</%s>\033[0m\n",s);
+	printf("%s</%s>%s\n",C_GREY,s,C_CLEAR);
 }
 
 void markupLeaf(char *s, char *val){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
 	
-	printf("\033[1;31m<%s>\033[32m%s\033[1;31m</%s>\033[0m\n",s , val, s);
+	printf("%s<%s>%s%s%s</%s>%s\n",C_RED,s,C_GREEN,val,C_RED,s,C_CLEAR);
 }

@@ -1,40 +1,33 @@
-/* Definit la table des symboles.
- */
+/* Definit la table des symboles.*/
 #ifndef __DICO__
 #define __DICO__
 
-#include "syntabs.h"
+#include "arbre.h"
+#include "utils.h"
+#include <stdlib.h>
+#include <string.h>
 
-/* taille max de la table */
+
+/*---------- Defines -----------*/
 #define MAX_DICO 100
 
-/* modes d'écriture de la table */
 #define GLOBAL 0
 #define LOCAL 1
 #define FONCTION 2
 
-/* variable */
+/*-------- Variables -----------*/
+extern int context_var;
+extern unsigned int adresseGlobaleCourante,adresseLocaleCourante;
+
+
+/*---------- Typedef -----------*/
 typedef struct {
   char *nom;
-  n_type *type;   /* type (de retour pour les fonctions) */
-  n_l_dec *param; /* paramètres pour les fonctions, NULL sinon */
-  int adresse;    /* en memoire */
+  n_type *type;   /* Type (de retour pour les fonctions) */
+  n_l_dec *param; /* Paramètres pour les fonctions, NULL sinon */
+  int adresse;    /* En memoire */
   int mode;       /* GLOBAL, LOCAL, FONCTION */
 } variable;
-
-/* dico :
-                <- MAX_DICO
-  -----------
-  |         |
-  | (vide)  |   <- sommet
-  -----------
-  |variables|
-  |locales  |   <- base
-  -----------
-  |variables|
-  |globales |   <- 0
-  -----------
-*/
 
 struct {
   variable tab[MAX_DICO];
@@ -42,19 +35,17 @@ struct {
   int sommet;
 } dico;
 
-/* ajoute des noms dans la table */
+
+/*-------- Prototype -----------*/
+
 int ajoutevariable(char *nom, n_type *type);
 int ajoutefonction(char *nom, n_type *type, n_l_dec *param);
-/* cherche une variable; renvoie 
-    - l'indice de la table
-    - (-1) s'il n'est pas dedans */
+
 int cherchelocale(char *nom);
 int cherche(char *nom);
-/* renvoie l'adresse (locale ou globale) de la variable */
 int adresse(int v);
-/* passe en contexte local / global */
+
 void entreefonction(void);
 void sortiefonction(void);
 
 #endif
-
