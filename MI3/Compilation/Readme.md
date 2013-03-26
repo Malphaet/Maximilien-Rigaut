@@ -1,19 +1,53 @@
+plcc - PascaL C Compiler  {#mainpage}
+====================
+## Installation
+
++ `make init`
++ `make`
++ `make doc`
++ `make test`
+
 ## Introduction
 
-##
+## Modules
+
+## Usage
+
+## Completeness
 
 ## TODO
-+ Do the readme
-+ Fill this todo
-+ Add symtable completion
- void sem foncDec(n dec *n)
- void sem varDec(n dec *n)
- void sem tabDec(n dec *n)
 
- void sem varExp(n exp *n)
- void sem var simple(n var *n)
- void sem var indicee(n var *n)
+### Important 
++ Complete the readme
++ Write the tests
++ Automaticaly complete the symbol table
+ + `void sem foncDec(n dec *n)`
+ + `void sem varDec(n dec *n)`
+ + `void sem tabDec(n dec *n)`
+ + `void sem varExp(n exp *n)`
+ + `void sem var simple(n var *n)`
+ + `void sem var indicee(n var *n)`
+ + `void sem appel(n appel *n)`
+ + `void sem instr affect(n instr *n)`
 
- void sem appel(n appel *n)
+### Cosmetic
++ Write the docs
+ + convert
+ + dico
+ + identifiers
+ + lexeme
+ + plcc
+ + utils
+ + yylex
+ + yyparse
+### Tests
 
- void sem instr affect(n instr *n)
++ arbre : TODO
++ convert : 
++ dico :
++ identifiers :
++ lexeme :
++ plcc :
++ utils :
++ yylex :
++ yyparse :

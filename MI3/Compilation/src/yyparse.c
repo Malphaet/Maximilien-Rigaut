@@ -89,12 +89,13 @@ n_l_dec* ListeDeclVar(){
 //! DeclVar -> ID { ',' ID } ':' Type
 n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
-	n_type*ty,*tt=malloc(sizeof(n_type));
+	char*var; n_type*ty,*tt=malloc(sizeof(n_type));
 	tete=queue=cree_n_l_dec(NULL,NULL);
 	
 	while (1){
 		PLCC_IFNOT(SIDENT,"identifier");
-		queue->tete=cree_n_dec_var(yytext,tt);
+		var=malloc(sizeof(char)*(word_size+2)); strcpy(var,yytext);
+		queue->tete=cree_n_dec_var(var,tt);
 		PLCC_NEW; PLCC_IF(':') break;
 		else PLCC_IFNOT(',',"','");
 		queue->queue=cree_n_l_dec(NULL,NULL);

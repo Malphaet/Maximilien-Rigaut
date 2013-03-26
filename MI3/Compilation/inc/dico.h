@@ -2,6 +2,7 @@
 #ifndef __DICO__
 #define __DICO__
 
+/*---------- Inculdes -----------*/
 #include "arbre.h"
 #include "utils.h"
 #include <stdlib.h>
@@ -21,12 +22,13 @@ extern unsigned int adresseGlobaleCourante,adresseLocaleCourante;
 
 
 /*---------- Typedef -----------*/
+/** A variable used in the program */
 typedef struct {
-  char *nom;
-  n_type *type;   /* Type (de retour pour les fonctions) */
-  n_l_dec *param; /* Paramètres pour les fonctions, NULL sinon */
-  int adresse;    /* En memoire */
-  int mode;       /* GLOBAL, LOCAL, FONCTION */
+  char *nom;      /**< Le nom de la variable */
+  n_type *type;   /**< Type (de retour pour les fonctions) */
+  n_l_dec *param; /**< Paramètres pour les fonctions, NULL sinon */
+  int adresse;    /**< En memoire */
+  int mode;       /**< GLOBAL, LOCAL, FONCTION */
 } variable;
 
 struct {
@@ -45,6 +47,7 @@ int cherchelocale(char *nom);
 int cherche(char *nom);
 int adresse(int v);
 
+void afficherDico();
 void entreefonction(void);
 void sortiefonction(void);
 

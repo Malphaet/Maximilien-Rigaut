@@ -26,7 +26,7 @@
 char yytext[SIZE_TEXT],*file_in_progress;
 FILE *yyin;
 unsigned int line_number=1,char_number=0,word_size=0,adresseGlobaleCourante=0,adresseLocaleCourante=0;
-int context_var;
+int context_var=GLOBAL;
 
 int main(int argc, char **argv) {
 	if (argc<2) OUT("plcc error : Not enough arguments");

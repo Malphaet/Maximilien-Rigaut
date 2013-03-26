@@ -16,6 +16,7 @@
  * 
  */
 
+/** @file convert.c Convert the lexemes into defined symbols */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@
 #include <string.h>
 #include "lexeme.h"
 
+/** Convert a lexeme to it's uppercase pendant */
 char*convertToUpperCase(const char *sPtr){
 	int i,len=strlen(sPtr);
 	char*new=malloc(sizeof(char*)*(len+1));
@@ -47,6 +49,10 @@ char*translateStrange(const char *txt){
 }
 */
 
+/** Convert all lexemes to defined values to be included by other files (identifiers.h)
+ * @param argv must contain the path of the output generated (inc/identifiers.h) 
+ * @param argc 
+ * @return 0 in case of sucess -1 otherwise */
 int main(int argc, char **argv){
 	FILE*f;
 	int i;

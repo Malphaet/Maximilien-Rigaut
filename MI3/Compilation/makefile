@@ -10,9 +10,9 @@ DOC = doc
 TMP = tmp
 
 NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) 
+		 -std=c99 -Wshadow -O2 -I$(INC) -D COLORS
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG
+		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG -D COLORS
 CFLAGS = $(DFLAGS)
 LDFLAGS = 
 
