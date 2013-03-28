@@ -18,12 +18,6 @@
 
 #ifndef THE_PLCC
 #define THE_PLCC
-/* ========= Includes =========*/
 
-/* ========= Defines ==========*/
-
-
-/* ========= Typedef ==========*/
-/* ======== Prototype =========*/
 
 #endif

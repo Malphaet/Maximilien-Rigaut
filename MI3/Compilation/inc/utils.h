@@ -76,7 +76,8 @@ extern unsigned int line_number,char_number,word_size;
 						fprintf(stdout," plcc info: ");\
 						fprintf(stdout,__VA_ARGS__);\
                                     fprintf(stdout,"\n");}
-#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+#define OUT(msg)		{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+#define CHECK_PTR(ptr)	/*do {if (ptr==NULL) OUT("Allocation error, exiting");} while (0); */
 
 #ifdef DEBUG
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)

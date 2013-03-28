@@ -10,8 +10,16 @@ plcc - PascaL C Compiler  {#mainpage}
 ## Introduction
 
 ## Modules
++ arbre
++ code3
++ convert
++ dico
++ plcc
++ yylex
++ yyparse
 
 ## Usage
+`plcc program.pas`
 
 ## Completeness
 
@@ -19,11 +27,12 @@ plcc - PascaL C Compiler  {#mainpage}
 
 ### Important 
 + Complete the readme
-+ Write the tests
++ Write the sections
++ Malloc auto detect.
++ Automaticaly test the symbols
 + Automaticaly complete the symbol table
- + `void sem foncDec(n dec *n)`
- + `void sem varDec(n dec *n)`
- + `void sem tabDec(n dec *n)`
+> + `void sem foncDec(n dec *n)`
+> + `void sem tabDec(n dec *n)`
  + `void sem varExp(n exp *n)`
  + `void sem var simple(n var *n)`
  + `void sem var indicee(n var *n)`
@@ -40,8 +49,8 @@ plcc - PascaL C Compiler  {#mainpage}
  + utils
  + yylex
  + yyparse
+ 
 ### Tests
-
 + arbre : TODO
 + convert : 
 + dico :

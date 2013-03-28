@@ -22,11 +22,12 @@
 #include "yylex.h"
 #include "yyparse.h"
 #include "utils.h"
+#include "dico.h"
 
 /************* Rules */
 int ident_level=0;
 
-#define PLCC_SYNTAX_ERROR(expected) {WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
+#define PLCC_SYNTAX_ERROR(expected){WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
 #define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
 #define PLCC_UNTESTED				{WHERE; PLCC_WARNING("The current section is untested/untrusted\n");}
 #define PLCC_ILL_IMPLEMENED		{WHERE; PLCC_WARNING("The current section isn't fully implemented yet\n");}
@@ -89,12 +90,13 @@ n_l_dec* ListeDeclVar(){
 //! DeclVar -> ID { ',' ID } ':' Type
 n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
-	char*var; n_type*ty,*tt=malloc(sizeof(n_type));
+	char*var; n_type*ty,*tt=malloc(sizeof(n_type)); CHECK_PTR(tt);
 	tete=queue=cree_n_l_dec(NULL,NULL);
 	
 	while (1){
 		PLCC_IFNOT(SIDENT,"identifier");
-		var=malloc(sizeof(char)*(word_size+2)); strcpy(var,yytext);
+		var=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(var);
+		strcpy(var,yytext);
 		queue->tete=cree_n_dec_var(var,tt);
 		PLCC_NEW; PLCC_IF(':') break;
 		else PLCC_IFNOT(',',"','");
@@ -132,10 +134,12 @@ n_type*Type(){
 //! DeclProcFun -> DeclProcedure | DeclFunction
 n_fun_dec *DeclProcFun(){
 	n_fun_dec*decl=NULL;
+	//entreefonction();
 	if (uc==SPROCEDURE) decl=DeclProcedure();
 	else if (uc==SFUNCTION) decl=DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
 	return decl;
+	//sortiefonction();
 }
 
 //! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
@@ -172,7 +176,7 @@ n_fun_dec*DeclFunction(){
 	
 	PLCC_NEW; PLCC_IFNOT(SIDENT,"id");
 
-	nom=malloc((1+word_size)*sizeof(char));
+	nom=malloc((3+word_size)*sizeof(char)); CHECK_PTR(nom);
 	strcpy(nom,yytext);
 	PLCC_NEW; PLCC_IFNOT('(',"'('");
 	PLCC_NEW; variables=ListeDeclVar();
@@ -207,11 +211,11 @@ n_instr *BlocInstr(){
 //! Instruction -> AffectInstr | AppelProcedure | IfInstr | WhileInstr | BlocInstr | Empty 
 //! All options will be treated without subroutine call
 n_instr*Instruction(int next_id){
-	char*inst_name=malloc(sizeof(char)*(word_size+2));
 	n_instr*instr,*instr2=NULL;
 	n_var*var; n_exp*exp;
 	n_l_exp*param;
-
+	char*inst_name=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(inst_name);
+	
 	PLCC_IF(next_id) return cree_n_instr_vide(); 	// Empty instruction
 	PLCC_IF(';') return cree_n_instr_vide(); 		// Empty also
 	
@@ -323,8 +327,8 @@ n_exp*Facteur(){
 
 //! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
 n_exp*Predicat(){
-	char*inst_name=malloc(sizeof(char)*(word_size+2));
 	n_exp*exp; n_l_exp*args;
+	char*inst_name=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(inst_name);
 	
 	PLCC_IF(SNUMERAL) {
 		exp=cree_n_exp_entier(atoi(yytext));

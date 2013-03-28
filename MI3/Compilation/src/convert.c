@@ -28,26 +28,12 @@
 /** Convert a lexeme to it's uppercase pendant */
 char*convertToUpperCase(const char *sPtr){
 	int i,len=strlen(sPtr);
-	char*new=malloc(sizeof(char*)*(len+1));
-	if (!new) OUT("Malloc error");
+	char*new=malloc(sizeof(char*)*(len+1)); CHECK_PTR(new);
 	
 	for(i=0;i<len;i++) new[i]=toupper(sPtr[i]);
 	
 	return new;
 }
-
-/*
-char*translateStrange(const char *txt){
-	int i,len=strlen(sPtr);
-	char*new=malloc(sizeof(char*)*(len*4+1));
-	if (!new) OUT("Malloc error");
-	
-	for(i=0;i<len;i++) {
-		new[i]=toupper(sPtr[i]);
-	
-	return new;
-}
-*/
 
 /** Convert all lexemes to defined values to be included by other files (identifiers.h)
  * @param argv must contain the path of the output generated (inc/identifiers.h) 
@@ -61,21 +47,21 @@ int main(int argc, char **argv){
 	f=fopen(argv[1],"w+");
 	if (f==NULL) {	printf("Error : can't open %s\n",argv[1]);return -1;}
 	
-	fprintf(f,"#ifndef SYMBOL_TABLE_H\n");
-	fprintf(f,"#define SYMBOL_TABLE_H\n");
+	fprintf(f,"#ifndef __SYMBOL_TABLE_H__\n");
+	fprintf(f,"#define __SYMBOL_TABLE_H__\n");
 	fprintf(f,"\n");
 	
 	i=0;
-	fprintf(f,"#define SDOT_DOT %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SDOT_EQL %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SINF_EQL %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SDIF_THN %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SSUP_EQL %d\n",VAL_SYMBOLS(i++));
-	fprintf(f,"#define SIDENT   %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
-	fprintf(f,"#define SNUMERAL %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+2));
+	fprintf(f,"#define SDOT_DOT   %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SDOT_EQL   %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SINF_EQL   %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SDIF_THN   %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SSUP_EQL   %d\n",VAL_SYMBOLS(i++));
+	fprintf(f,"#define SIDENT     %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
+	fprintf(f,"#define SNUMERAL   %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+2));
 	for(i=0;i<SIZE_KEYWORDS;i++) {	
 		new=convertToUpperCase(KEYWORDS[i]);
-		fprintf(f,"#define S%s %d\n",new,VAL_KEYWORDS(i));
+		fprintf(f,"#define S%-9s %d\n",new,VAL_KEYWORDS(i));
 		free(new);
 	}
 

@@ -18,7 +18,7 @@ LDFLAGS =
 
 
 EXEC=plcc
-EXEC_O=yylex yyparse arbre dico
+EXEC_O=yylex yyparse arbre dico code3
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
@@ -37,7 +37,7 @@ $(EXEC): $(OBJ)/$(EXEC).o $(EXEC_O:%=$(OBJ)/%.o)
 	$(QUIET)echo "LINK" $^ "=>" $@
 	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@
 
-$(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h
+$(OBJ)/%.o: $(SRC)/%.c $(INC)/%.h $(INC)/utils.h
 	$(QUIET)echo "MAKE" $^ "=>" $@
 	$(QUIET)$(CC) -c $(CFLAGS) $< -o $@
 
