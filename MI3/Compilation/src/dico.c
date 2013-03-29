@@ -62,7 +62,7 @@ int cherchelocale(char *nom){
 /** Lookup for a variable in the dictionary, return it's index or -1 if not found */
 int cherche(char *nom){
 	int i;
-	for(i=0;i<dico.sommet;i++) if (strcmp(dico.tab[i].nom,nom)==0) return i;
+	for(i=dico.sommet-1;i>=0;i--) if (strcmp(dico.tab[i].nom,nom)==0) return i;
 	return -1;
 }
 

@@ -191,7 +191,7 @@ n_instr *cree_n_instr_affect(n_var *var, n_exp *exp){
     n->u.affecte_.var = var;
     n->u.affecte_.exp = exp;
     //! @todo check types, existence
-    if (cherche(var->nom)<0) PLCC_WARNING("%s doesn't exist",var->nom);
+    //if (cherche(var->nom)<0) PLCC_WARNING("%s doesn't exist",var->nom);
     DPRINT;return n;
 }
 
@@ -220,7 +220,7 @@ n_instr *cree_n_instr_appel(n_appel *app){
     n->type = appelInst;
     n->u.appel = app;
     //! @todo check existence
-    if (cherche(app->fonction)<0) PLCC_WARNING("%s doesn't exist",app->fonction);
+    //if (cherche(app->fonction)<0) PLCC_WARNING("%s doesn't exist",app->fonction);
     DPRINT;return n;
 }
 

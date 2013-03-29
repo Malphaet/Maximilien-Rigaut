@@ -261,6 +261,11 @@ n_instr*Instruction(int next_id){
 		instr=cree_n_instr_tantque(exp,instr);
 	} else PLCC_IF(SBEGIN){ //!< BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
 		instr=BlocInstr();
+	} else PLCC_IF(SWRITE){
+		PLCC_NEW; PLCC_IFNOT('(',"'('");
+		PLCC_NEW; exp=Expression();
+		instr=cree_n_instr_ecrire(exp);
+		PLCC_NEW;
 	} else PLCC_SYNTAX_ERROR("instruction");
 	
 	return instr;
@@ -325,7 +330,7 @@ n_exp*Facteur(){
 	return exp1;
 }
 
-//! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
+//! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' | read()
 n_exp*Predicat(){
 	n_exp*exp; n_l_exp*args;
 	char*inst_name=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(inst_name);
@@ -345,14 +350,16 @@ n_exp*Predicat(){
 		} else {				//!< Variable -> ID
 			return cree_n_exp_var(cree_n_var_simple(inst_name));;
 		}
-		
 	} else PLCC_IF('('){		//< '(' Expression ')'
-			PLCC_NEW; exp=Expression();
-			PLCC_IFNOT(')',"')'");
+		PLCC_NEW; exp=Expression();
+		PLCC_IFNOT(')',"')'");
+	} else PLCC_IF(SREAD) {
+		exp=cree_n_exp_lire();
+		PLCC_NEW; PLCC_IFNOT('(',"'('");
+		PLCC_NEW; PLCC_IFNOT(')',"')'");
 	} else PLCC_SYNTAX_ERROR("identifier, numeral or '('");
 	
 	PLCC_NEW;
-	
 	return exp;
 }
 
@@ -431,7 +438,7 @@ operation RelationUnaire(){
 	+ Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
 	+ RelationUnaire -> '-' | NOT
 	+ OpMult -> '*' | DIV | MOD | AND
-	+ Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' 
+	+ Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' | read()
 	X Variable -> ID [ '[' Expression ']' ] 
 */
 
@@ -440,17 +447,13 @@ operation RelationUnaire(){
 void markupOpen(char *s){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
-	
-
 	printf("%s<%s>%s\n",C_GREY,s,C_CLEAR);
-	
 	ident_level+=2;
 }
 
 void markupClose(char *s){
 	int i;
 	ident_level-=2;
-	
 	for(i=0;i<ident_level;i++) printf(" ");
 	printf("%s</%s>%s\n",C_GREY,s,C_CLEAR);
 }
@@ -458,6 +461,5 @@ void markupClose(char *s){
 void markupLeaf(char *s, char *val){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
-	
 	printf("%s<%s>%s%s%s</%s>%s\n",C_RED,s,C_GREEN,val,C_RED,s,C_CLEAR);
 }

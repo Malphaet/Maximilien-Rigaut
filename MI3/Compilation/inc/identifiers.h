@@ -6,8 +6,8 @@
 #define SINF_EQL   259
 #define SDIF_THN   260
 #define SSUP_EQL   261
-#define SIDENT     285
-#define SNUMERAL   286
+#define SIDENT     287
+#define SNUMERAL   288
 #define SAND       263
 #define SARRAY     264
 #define SBEGIN     265
@@ -25,8 +25,10 @@
 #define SOR        277
 #define SPROCEDURE 278
 #define SPROGRAM   279
-#define STHEN      280
-#define STRUE      281
-#define SVAR       282
-#define SWHILE     283
+#define SREAD      280
+#define STHEN      281
+#define STRUE      282
+#define SVAR       283
+#define SWHILE     284
+#define SWRITE     285
 #endif

@@ -22,6 +22,7 @@
 #include "yylex.h"
 #include "yyparse.h"
 #include "dico.h"
+#include "code3.h"
 
 char yytext[SIZE_TEXT],*file_in_progress;
 FILE *yyin;
@@ -29,20 +30,19 @@ unsigned int line_number=1,char_number=0,word_size=0,adresseGlobaleCourante=0,ad
 int context_var=GLOBAL;
 
 int main(int argc, char **argv) {
+	n_prog*p;
+	FILE*yyout=NULL;
 	if (argc<2) OUT("plcc error : Not enough arguments");
 	
-	yyin = fopen(argv[1], "r");
-	file_in_progress=argv[1];
-	if(yyin == NULL) ERROR("plcc error : File not found");
+	
+	if ((yyin=fopen(file_in_progress=argv[1],"r")) == NULL) ERROR("plcc error");
+	if (argc>2) if ((yyout=fopen(argv[2], "w+"))==NULL) ERROR("plcc error");
 	
 	uc = yylex();
-	//#ifdef DEBUG
-	//while (uc != 0) {
-		//printf("%2d:%2d  -  %3d:%s\n",line_number,char_number,uc ,yytext);
-		//uc = yylex();
-	//}
-	//#else
-	Programme(); 
-	//#endif
+	p=Programme();
+	walk_code(p);
+	show_code(yyout);
+	fclose(yyin);
+	if (argc>2) fclose(yyout);
 	return 0;
 }

@@ -25,9 +25,9 @@
 #define __CODE3_H__
 
 /* List of code3 operations */
-typedef enum {c3a_add, c3a_sub, c3a_times, c3a_div, c3a_mod, 
-	      c3a_eql, c3a_dif, c3a_inf, c3a_sup, c3a_infeq, c3a_supeq, 
-	      c3a_or, c3a_and, c3a_no, c3a_neg, 	      
+typedef enum {c3_add, c3_sub, c3_times, c3_div, c3_mod, 
+	      c3_eql, c3_dif, c3_inf, c3_sup, c3_infeq, c3_supeq, 
+	      c3_or, c3_and, c3_no, c3_neg, 	      
 	      read, write, load, store, ltab, stab, loadimm,
 	      addimm, jump, jumpif0, param, call, entering, exiting} 
   c3_op;
@@ -48,7 +48,7 @@ int line_code3; /**< Ligne courante du tableau */
 void add_line(c3_op op, int arg1, int arg2, char *var);
 void init_code();
 void walk_code(n_prog *n);
-void show_code();
+void show_code(FILE*);
 void walk_inst();
 void walk_exp();
 #endif

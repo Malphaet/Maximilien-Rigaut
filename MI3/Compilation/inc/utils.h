@@ -60,7 +60,7 @@ extern unsigned int line_number,char_number,word_size;
 /* ========= Defines ==========*/
 
 #define PLCC_WHERE(out) fprintf(out,"%s%s:%s%d:%d:%s",C_YELLOW,file_in_progress,C_YELLOW,line_number,char_number,C_CLEAR)
-#define ERROR(msg)	{WHERE; perror(msg);printf("\n");exit(EXIT_FAILURE);}
+#define ERROR(msg)	{WHERE; perror(msg);exit(EXIT_FAILURE);}
 #define PLCC_ERROR(...)       {PLCC_WHERE(stderr);\
                                     fprintf(stderr,"%s plcc error: %s",C_ORANGE,C_CLEAR);\
 						fprintf(stderr,__VA_ARGS__);\
@@ -77,7 +77,8 @@ extern unsigned int line_number,char_number,word_size;
 						fprintf(stdout,__VA_ARGS__);\
                                     fprintf(stdout,"\n");}
 #define OUT(msg)		{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
-#define CHECK_PTR(ptr)	/*do {if (ptr==NULL) OUT("Allocation error, exiting");} while (0); */
+#define CHECK_PTR(ptr)	do {if (ptr==NULL) OUT("Allocation error, exiting");} while (0);
+#define CHECK_VAR(var) do {if (cherche(var)<0) PLCC_ERROR("%s doesn't exist",var);} while (0);
 
 #ifdef DEBUG
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)

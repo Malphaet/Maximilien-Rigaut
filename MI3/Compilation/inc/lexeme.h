@@ -32,7 +32,7 @@ const char *KEYWORDS[]={
 	"and", "array", "begin", "boolean", "do", "else", 
 	"end", "false", "function", "if", "integer",
 	"mod", "not", "of", "or", "procedure", "program", 
-	"then", "true", "var", "while"
+	"read","then", "true", "var", "while","write"
 };
 
 #define SIZE_CHAR 256
