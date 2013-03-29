@@ -402,7 +402,8 @@ operation Relation(){
 //! RelationUnaire -> '-' | NOT
 operation RelationUnaire(){
 	operation op;
-	PLCC_IF('-') op=moins;
+	//PLCC_INFO("Weee");
+	PLCC_IF('-') op=negatif;
 	else PLCC_IF(SNOT) op=non;
 	else PLCC_SYNTAX_ERROR("relation");
 	

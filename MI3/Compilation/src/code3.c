@@ -43,8 +43,8 @@ void walk_prog(n_prog *n){
 #define TODO	OUT("Section is to be done ARrrrrrrrRR !");
 void walk_inst(n_instr *i){
 	n_l_instr*nxt;char*nom;
-	n_l_exp*vars;int arg1,arg2,*jumpto=0;
-	if (!i) PLCC_ERROR("plcc fatal error: Unexpected null pointer");
+	n_l_exp*vars;int arg1,arg2,*jumpto,*jumpto2;
+	if (!i) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (i->type){
 		case videInst:
@@ -61,7 +61,18 @@ void walk_inst(n_instr *i){
 			}
 			break;
 		case siInst:
-			TODO;
+			walk_exp(i->u.si_.test); arg1=line_code3-1; add_line(jumpif0,arg1,0,NULL);
+			jumpto=&code[line_code3-1].arg2; // The line to jump if false (still unknown)
+			
+			walk_inst(i->u.si_.alors); add_line(jump,0,0,NULL);
+			jumpto2=&code[line_code3-1].arg2; // The line to exit (still unknown)
+			
+			if (i->u.si_.sinon!=NULL) {
+				*jumpto=line_code3;
+				walk_inst(i->u.si_.sinon);
+				*jumpto2=line_code3;
+			} else *jumpto=*jumpto2=line_code3;
+			break;
 		case tantqueInst:
 			arg2=line_code3; // Jump back to here while true
 			walk_exp(i->u.tantque_.test); arg1=line_code3-1; add_line(jumpif0,arg1,0,NULL); 
@@ -78,7 +89,7 @@ void walk_inst(n_instr *i){
 			break;
 		case ecrireInst:
 			//! @todo test
-			walk_exp(i->u.ecrire_);
+			walk_exp(i->u.ecrire_.expression);
 			add_line(write,line_code3-1,0,NULL);
 			break;
 		case blocInst:
@@ -110,8 +121,8 @@ struct n_instr_ {
 
 
 void walk_exp(n_exp *e){
-	c3_op op=0; int arg1,arg2;
-	if (!e) PLCC_ERROR("plcc fatal error: Unexpected null pointer");
+	c3_op op=0; int arg1,arg2=0,unaire=0;
+	if (!e) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (e->type){
 		case varExp:
@@ -141,12 +152,13 @@ void walk_exp(n_exp *e){
 				case supeg:		op=c3_supeq; break;
 				case ou:		op=c3_or; break;
 				case et:		op=c3_and; break;
-				case non:		op=c3_no; break;
-				case negatif:	op=c3_neg; break;
+				
+				case non:		op=c3_no; unaire=1;break;
+				case negatif:	op=c3_neg; unaire=1; break;
+				default: OUT("plcc fatal error: Unhandled mode in switch");
 			}
 			walk_exp(e->u.opExp_.op1); arg1=line_code3-1;
-			walk_exp(e->u.opExp_.op2); arg2=line_code3-1;
-			
+			if (!unaire) {walk_exp(e->u.opExp_.op2); arg2=line_code3-1;}
 			add_line(op,arg1,arg2,NULL);
 			break;
 		case trueExp:

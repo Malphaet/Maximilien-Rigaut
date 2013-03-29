@@ -49,6 +49,6 @@ void add_line(c3_op op, int arg1, int arg2, char *var);
 void init_code();
 void walk_code(n_prog *n);
 void show_code(FILE*);
-void walk_inst();
-void walk_exp();
+void walk_inst(n_instr*);
+void walk_exp(n_exp*);
 #endif
