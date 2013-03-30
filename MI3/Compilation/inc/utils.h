@@ -63,9 +63,9 @@ extern unsigned int line_number,char_number,word_size;
 #define ERROR(msg)	{WHERE; perror(msg);exit(EXIT_FAILURE);}
 #define PLCC_ERROR(...)       {PLCC_WHERE(stderr);\
                                     fprintf(stderr,"%s plcc error: %s",C_ORANGE,C_CLEAR);\
-						fprintf(stderr,__VA_ARGS__);\
-						fprintf(stderr,"%s\n",C_CLEAR);\
-						exit(EXIT_FAILURE);}
+									fprintf(stderr,__VA_ARGS__);\
+									fprintf(stderr,"%s\n",C_CLEAR);\
+									exit(EXIT_FAILURE);}
 
 #define PLCC_WARNING(...)	{WHERE;PLCC_WHERE(stderr);\
 						fprintf(stderr,"%s plcc warning: %s",C_YELLOW,C_CLEAR);\

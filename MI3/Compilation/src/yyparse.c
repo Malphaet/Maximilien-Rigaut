@@ -134,12 +134,12 @@ n_type*Type(){
 //! DeclProcFun -> DeclProcedure | DeclFunction
 n_fun_dec *DeclProcFun(){
 	n_fun_dec*decl=NULL;
-	//entreefonction();
+	
 	if (uc==SPROCEDURE) decl=DeclProcedure();
 	else if (uc==SFUNCTION) decl=DeclFunction();
 	else PLCC_SYNTAX_ERROR("procedure or function");
 	return decl;
-	//sortiefonction();
+	
 }
 
 //! DeclProcedure -> PROCEDURE ID [ '(' ListeDeclVar ')' ] ; Corps
@@ -150,8 +150,8 @@ n_fun_dec*DeclProcedure(){
 	n_prog*corps;
 	
 	PLCC_IFNOT(SPROCEDURE,"procedure");
-	markupOpen("procedure");
 	
+	entreefonction();	
 	PLCC_NEW; PLCC_IFNOT(SIDENT,"identifier");
 	markupLeaf("id",yytext);
 	nom=NULL;
@@ -162,7 +162,7 @@ n_fun_dec*DeclProcedure(){
 	
 	PLCC_NEW; PLCC_IFNOT(';',"';'");
 	corps=Corps();
-	
+	sortiefonction();
 	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
 
@@ -173,9 +173,9 @@ n_fun_dec*DeclFunction(){
 	n_prog *corps;
 	
 	PLCC_IFNOT(SFUNCTION,"function");
-	
 	PLCC_NEW; PLCC_IFNOT(SIDENT,"id");
-
+	
+	entreefonction();
 	nom=malloc((3+word_size)*sizeof(char)); CHECK_PTR(nom);
 	strcpy(nom,yytext);
 	PLCC_NEW; PLCC_IFNOT('(',"'('");
@@ -187,6 +187,7 @@ n_fun_dec*DeclFunction(){
 	PLCC_IFNOT(';',"';'");
 	PLCC_NEW; corps=Corps();
 	
+	sortiefonction();
 	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }
 

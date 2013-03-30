@@ -30,11 +30,9 @@ unsigned int line_number=1,char_number=0,word_size=0,adresseGlobaleCourante=0,ad
 int context_var=GLOBAL;
 
 int main(int argc, char **argv) {
-	n_prog*p;
-	FILE*yyout=NULL;
+	n_prog*p; FILE*yyout=NULL;
+	
 	if (argc<2) OUT("plcc error : Not enough arguments");
-	
-	
 	if ((yyin=fopen(file_in_progress=argv[1],"r")) == NULL) ERROR("plcc error");
 	if (argc>2) if ((yyout=fopen(argv[2], "w+"))==NULL) ERROR("plcc error");
 	
@@ -42,7 +40,7 @@ int main(int argc, char **argv) {
 	p=Programme();
 	walk_code(p);
 	show_code(yyout);
-	fclose(yyin);
-	if (argc>2) fclose(yyout);
+	
+	fclose(yyin); if (argc>2) fclose(yyout);
 	return 0;
 }

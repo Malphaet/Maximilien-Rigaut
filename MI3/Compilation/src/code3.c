@@ -34,16 +34,48 @@
 /** Walk down the prog tree, and convert it to code3 */
 void walk_code(n_prog*n){
 	init_code();
+	walk_prog(n);
+}
+//struct n_fun_dec_{
+    //char *nom;              /**< The name of the said function */
+    //n_type *type;           /**< The return type of the said function */
+    //n_l_dec *variables;     /**< The variables of the said function */
+    //n_l_dec *param;         /**< The parameters of the said function */
+    //n_prog *corps;          /**< The body of the said function */
+//};
+
+#define ADD_APPEL(appel) CHECK_VAR(appel->fonction); vars=appel->args; do {walk_exp(vars->tete);\
+							add_line(param,line_code3-1,0,NULL);} while ((vars=vars->queue)!=NULL);\
+							add_line(call,0,0,appel->fonction);
+
+void walk_prog(n_prog *n){
+	n_l_fun_dec*l=n->fonctions; int*jumpto;
+	n_l_dec*prms;
+	if (l!=NULL) {add_line(jump,0,0,NULL);jumpto=&code[line_code3-1].arg2;}
+	while (l!=NULL) {
+		entreefonction();
+		add_line(entering,0,0,l->tete->nom);
+		prms=l->tete->variables; 
+		
+		while (prms!=NULL){ 
+			PLCC_INFO("NOT loading params");
+			ajoutevariable(prms->tete->nom,prms->tete->type);
+			//add_line(param,line_code3-1,0,NULL); // We should definitely load the params & vars somehow
+			prms=prms->queue;
+		}
+		
+		walk_prog(l->tete->corps);
+		add_line(exiting,0,0,l->tete->nom);
+		*jumpto=line_code3;
+		l=l->queue;
+		sortiefonction();
+	}
 	walk_inst(n->corps);
 }
-/*
-void walk_prog(n_prog *n){
-}*/
 
-#define TODO	OUT("Section is to be done ARrrrrrrrRR !");
 void walk_inst(n_instr *i){
-	n_l_instr*nxt;char*nom;
-	n_l_exp*vars;int arg1,arg2,*jumpto,*jumpto2;
+	n_l_instr*nxt;n_l_exp*vars;
+	int arg1,arg2,*jumpto,*jumpto2;
 	if (!i) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (i->type){
@@ -82,10 +114,7 @@ void walk_inst(n_instr *i){
 			*jumpto=line_code3;
 			break;
 		case appelInst:
-			vars=i->u.appel->args;
-			do {walk_exp(vars->tete);} while ((vars=vars->queue)!=NULL);
-			nom=i->u.appel->fonction;
-			add_line(call,0,0,nom);
+			ADD_APPEL(i->u.appel);
 			break;
 		case ecrireInst:
 			//! @todo test
@@ -119,9 +148,8 @@ struct n_instr_ {
     }u;
 };*/
 
-
 void walk_exp(n_exp *e){
-	c3_op op=0; int arg1,arg2=0,unaire=0;
+	c3_op op=0; int arg1,arg2=0,unaire=0; n_l_exp*vars;
 	if (!e) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (e->type){
@@ -168,8 +196,7 @@ void walk_exp(n_exp *e){
 			add_line(loadimm,0,0,NULL);
 			break;
 		case appelExp:
-			CHECK_VAR(e->u.appel->fonction);
-			add_line(call,0,0,e->u.appel->fonction);
+			ADD_APPEL(e->u.appel);
 			break;
 		case lireExp:
 			add_line(read,0,0,NULL);
@@ -179,19 +206,6 @@ void walk_exp(n_exp *e){
 			OUT("plcc fatal error: Unhandled mode in switch");
 			break;
 	}
-	//entreefonction();
-	//sortiefonction();
-	//add_line(entering,0,0,nom);
-	//add_line(exiting,0,0,nom);
-	/*struct n_exp_ {
-		enum{varExp, intExp, opExp, trueExp, falseExp, appelExp, lireExp} type; 
-		union{
-			struct{operation op; struct n_exp_ *op1; struct n_exp_ *op2;} opExp_;
-			n_var *var;     
-			int entier;     
-			n_appel *appel; 
-		}u;  
-	};*/
 }
 
 /** Utilities */
@@ -213,16 +227,14 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
     code[line_code3++].var = var;
 }
 
-/* Print the code to stdout, with prettiness is available */
+/** Print the code to stdout, with prettiness is available */
 void show_code(FILE*f){
 	int l=0,s=1;
     char format[51];
-    char *op2string[] = {"add", "sub", "time", "div", "mod", 
-		             "eql", "dif", "inf", "sup", "infeq", "supeq", 
-		             "or", "and", "no", "neg", 	            
-		             "read", "write", "load", "store", "ltab", "stab", "loadimm",
-		             "addimm", "jump", "jumpif0", 
-		             "param", "call", "entering", "exiting"};    
+    char *op2string[] = {"add", "sub", "time", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
+		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
+		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};    
+		             
 	while (line_code3>s) {s*=10; l++;}
 	if (f==NULL) {
 		f=stdout; sprintf(format,"%s%%0%ii %s|%s %%-8s %s|%s ",C_YELLOW,l,C_GREY,C_GREEN,C_GREY,C_BLUE);

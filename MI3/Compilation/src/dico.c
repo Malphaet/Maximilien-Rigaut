@@ -31,15 +31,19 @@ int ajoutevariable(char *nom, n_type *type){
 	PLCC_INFO("Adding variable %s %s(%d)",v.nom,ind>=0?dico.tab[ind].nom:"",ind);
 	
 	if (context_var==GLOBAL) {
-		if (ind>=0) return 0;
-		v.adresse=adresseGlobaleCourante++;
+		if (ind>=0) {PLCC_WARNING("%s already exists",nom);return 0;}
+		if (dico.base>=MAX_DICO) PLCC_ERROR("symbol table full");
+		
+		v.adresse=adresseGlobaleCourante++; //! @todo Add typewise
 		dico.tab[dico.base++]=v; dico.sommet=dico.base;
 	} else {
-		if (ind<dico.base) {PLCC_WARNING("declaration of %s shadowing global variable",nom);}
-		else if (ind>0) return 0;
-		if (dico.sommet++>MAX_DICO) PLCC_ERROR("symbol table full");
-		v.adresse=adresseLocaleCourante++;
-		dico.tab[dico.sommet]=v;
+		
+		if (ind>0&&ind<dico.base) PLCC_WARNING("declaration of %s shadowing global variable",nom)
+		else if (ind>dico.sommet) {PLCC_WARNING("%s already exists",nom); return 0;}
+		if (dico.sommet>=MAX_DICO) PLCC_ERROR("symbol table full");
+		
+		v.adresse=adresseLocaleCourante++; //! @todo Add typewise
+		dico.tab[dico.sommet++]=v;
 	}
 	return 1;
 }
@@ -55,7 +59,7 @@ int ajoutefonction(char *nom, n_type *type, n_l_dec *param){
 /** Lookup for a local variable in the dictionary, return it's index or -1 if not found */
 int cherchelocale(char *nom){
 	int i;
-	for(i=0;i<dico.base;i++) if (strcmp(dico.tab[i].nom,nom)==0) return i;
+	for(i=dico.sommet;i<dico.base;i++) if (strcmp(dico.tab[i].nom,nom)==0) return i;
 	return -1;
 }
 

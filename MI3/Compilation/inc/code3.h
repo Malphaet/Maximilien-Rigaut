@@ -51,4 +51,5 @@ void walk_code(n_prog *n);
 void show_code(FILE*);
 void walk_inst(n_instr*);
 void walk_exp(n_exp*);
+void walk_prog(n_prog*);
 #endif
