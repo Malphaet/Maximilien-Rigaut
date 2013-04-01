@@ -1,0 +1,21 @@
+0:	loadimm	1
+1:	store	0, i
+2:	load	i
+3:	loadimm	5
+4:	infeg	2, 3
+5:	jsifaux	4, 14
+6:	load	i
+7:	load	i
+8:	stab	6, tab[7]
+9:	load	i
+10:	loadimm	1
+11:	plus	9, 10
+12:	store	11, i
+13:	jump	2
+14:	loadimm	1
+15:	loadimm	1
+16:	loadimm	1
+17:	plus	15, 16
+18:	plus	14, 17
+19:	ltab	tab[18]
+20:	ecrire	19

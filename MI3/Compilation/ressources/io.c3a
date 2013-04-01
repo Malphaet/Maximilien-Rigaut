@@ -1,0 +1,6 @@
+0:	lire	
+1:	store	0, a
+2:	load	a
+3:	loadimm	2
+4:	plus	2, 3
+5:	ecrire	4

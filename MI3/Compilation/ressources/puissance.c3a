@@ -1,0 +1,45 @@
+0:	jump	39
+1:	entree	pow
+2:	load	n
+3:	loadimm	0
+4:	egal	2, 3
+5:	jsifaux	4, 9
+6:	loadimm	1
+7:	store	6, pow
+8:	jump	38
+9:	load	n
+10:	loadimm	2
+11:	modulo	9, 10
+12:	loadimm	0
+13:	egal	11, 12
+14:	jsifaux	13, 28
+15:	load	a
+16:	param	15
+17:	load	n
+18:	loadimm	2
+19:	divise	17, 18
+20:	param	19
+21:	call	pow
+22:	store	21, c
+23:	load	c
+24:	load	c
+25:	fois	23, 24
+26:	store	25, pow
+27:	jump	38
+28:	load	a
+29:	load	a
+30:	param	29
+31:	load	n
+32:	loadimm	1
+33:	moins	31, 32
+34:	param	33
+35:	call	pow
+36:	fois	28, 35
+37:	store	36, pow
+38:	sortie	pow
+39:	loadimm	2
+40:	param	39
+41:	loadimm	3
+42:	param	41
+43:	call	pow
+44:	ecrire	43

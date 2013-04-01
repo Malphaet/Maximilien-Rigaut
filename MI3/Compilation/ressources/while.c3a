@@ -1,0 +1,13 @@
+0:	loadimm	1
+1:	store	0, a
+2:	load	a
+3:	loadimm	10
+4:	inf	2, 3
+5:	jsifaux	4, 13
+6:	load	a
+7:	loadimm	2
+8:	fois	6, 7
+9:	store	8, a
+10:	load	a
+11:	ecrire	10
+12:	jump	2

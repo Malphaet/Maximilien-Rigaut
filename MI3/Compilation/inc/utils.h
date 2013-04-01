@@ -82,8 +82,9 @@ extern unsigned int line_number,char_number,word_size;
 
 #ifdef DEBUG
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define DPRINT {printf("%sAt %s%3d (%02d:%02d)%s of %s:%s %s%s\n",\
-                  C_GREY,C_ORANGE,__LINE__,line_number,char_number,C_GREY,__FILE__,C_GREEN,__func__,C_CLEAR);}
+#define DPRINT 
+/*#define DPRINT {printf("%sAt %s%3d (%02d:%02d)%s of %s:%s %s%s\n",\
+                  C_GREY,C_ORANGE,__LINE__,line_number,char_number,C_GREY,__FILE__,C_GREEN,__func__,C_CLEAR);}*/
 #else
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
 #define DPRINT 

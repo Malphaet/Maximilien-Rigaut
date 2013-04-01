@@ -48,22 +48,22 @@ void walk_code(n_prog*n){
 							add_line(param,line_code3-1,0,NULL);} while ((vars=vars->queue)!=NULL);\
 							add_line(call,0,0,appel->fonction);
 
+#define LOAD_VARS(vars)	while (vars!=NULL){PLCC_INFO("NOT loading vars");\
+								ajoutevariable(vars->tete->nom,vars->tete->type);vars=vars->queue;}
+								
 void walk_prog(n_prog *n){
 	n_l_fun_dec*l=n->fonctions; int*jumpto;
-	n_l_dec*prms;
+	n_l_dec/**prms,*/*vars=n->variables;
+	
+	if (context_var==LOCAL) LOAD_VARS(vars);
+	
 	if (l!=NULL) {add_line(jump,0,0,NULL);jumpto=&code[line_code3-1].arg2;}
 	while (l!=NULL) {
 		entreefonction();
 		add_line(entering,0,0,l->tete->nom);
-		prms=l->tete->variables; 
+		vars=l->tete->variables; LOAD_VARS(vars);
 		
-		while (prms!=NULL){ 
-			PLCC_INFO("NOT loading params");
-			ajoutevariable(prms->tete->nom,prms->tete->type);
-			//add_line(param,line_code3-1,0,NULL); // We should definitely load the params & vars somehow
-			prms=prms->queue;
-		}
-		
+		//prms=l->tete->param;//LOAD_VARS(prms);
 		walk_prog(l->tete->corps);
 		add_line(exiting,0,0,l->tete->nom);
 		*jumpto=line_code3;
@@ -219,7 +219,7 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
     if (line_code3 >= size_code3){
         size_code3 *= 2;
         code = realloc (code, size_code3 * sizeof(struct three_tuple));
-        PLCC_INFO("Realloc taking place weeee !"); 
+        CHECK_PTR(code);
     }
     code[line_code3].op = op;
     code[line_code3].arg1 = arg1;

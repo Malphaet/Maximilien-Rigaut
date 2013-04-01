@@ -1,0 +1,2 @@
+0:	loadimm	2
+1:	store	0, a

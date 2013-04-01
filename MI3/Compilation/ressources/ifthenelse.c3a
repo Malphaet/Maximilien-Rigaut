@@ -1,0 +1,16 @@
+0:	lire	
+1:	store	0, a
+2:	load	a
+3:	loadimm	0
+4:	egal	2, 3
+5:	jsifaux	4, 9
+6:	loadimm	2
+7:	ecrire	6
+8:	jump	16
+9:	load	a
+10:	loadimm	7
+11:	plus	9, 10
+12:	negatif	11
+13:	store	12, b
+14:	load	b
+15:	ecrire	14

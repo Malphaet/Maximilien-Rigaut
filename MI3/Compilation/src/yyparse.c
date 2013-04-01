@@ -156,12 +156,13 @@ n_fun_dec*DeclProcedure(){
 	markupLeaf("id",yytext);
 	nom=NULL;
 	PLCC_NEW; PLCC_IF('(') {
-		variables=ListeDeclVar();
+		param=ListeDeclVar();
 		PLCC_NEW; PLCC_IFNOT(')',"')'");
 	}
 	
 	PLCC_NEW; PLCC_IFNOT(';',"';'");
 	corps=Corps();
+	variables=corps->variables;
 	sortiefonction();
 	return cree_n_dec_fonc(nom,t,param,variables,corps);
 }

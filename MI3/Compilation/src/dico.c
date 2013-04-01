@@ -28,7 +28,7 @@
 int ajoutevariable(char *nom, n_type *type){
 	variable v;	int ind=cherche(nom);
 	v.type=type; v.nom=nom; v.mode=context_var;
-	PLCC_INFO("Adding variable %s %s(%d)",v.nom,ind>=0?dico.tab[ind].nom:"",ind);
+	PLCC_INFO("Adding variable %s %s(%d:%s)",v.nom,ind>=0?dico.tab[ind].nom:"",ind,context_var?"local":"global");
 	
 	if (context_var==GLOBAL) {
 		if (ind>=0) {PLCC_WARNING("%s already exists",nom);return 0;}

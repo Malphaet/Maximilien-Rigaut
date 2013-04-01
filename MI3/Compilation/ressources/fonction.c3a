@@ -1,0 +1,11 @@
+0:	jump	7
+1:	entree	f
+2:	load	c
+3:	load	c
+4:	fois	2, 3
+5:	store	4, f
+6:	sortie	f
+7:	loadimm	2
+8:	param	7
+9:	call	f
+10:	ecrire	9
