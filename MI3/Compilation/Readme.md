@@ -28,7 +28,6 @@ plcc - PascaL C Compiler  {#mainpage}
 ### Important 
 + Complete the readme
 + Write the sections
-+ Malloc auto detect.
 + Automaticaly test the symbols
 + Automaticaly complete the symbol table
 > + `void sem foncDec(n dec *n)`
@@ -41,22 +40,18 @@ plcc - PascaL C Compiler  {#mainpage}
 
 ### Cosmetic
 + Write the docs
- + convert
- + dico
- + identifiers
- + lexeme
+ + code3
+ + identifiers : DON'T
  + plcc
  + utils
  + yylex
  + yyparse
  
 ### Tests
-+ arbre : TODO
-+ convert : 
-+ dico :
-+ identifiers :
-+ lexeme :
-+ plcc :
-+ utils :
-+ yylex :
-+ yyparse :
++ arbre : 
++ convert : DONE
++ dico : 
++ code3 : 
++ plcc : DONE
++ yylex : DONE
++ yyparse : DONE

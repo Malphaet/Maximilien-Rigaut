@@ -15,6 +15,7 @@
  * 
  */
 
+/** @file plcc.c The compiler itself */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,11 +25,19 @@
 #include "dico.h"
 #include "code3.h"
 
-char yytext[SIZE_TEXT],*file_in_progress;
-FILE *yyin;
+
+char yytext[SIZE_TEXT], /**< The analysed lexeme */
+	 *file_in_progress;  /**< The name of the file currently analysed */
+FILE *yyin;				 /**< The file currently analysed */
+
 unsigned int line_number=1,char_number=0,word_size=0,adresseGlobaleCourante=0,adresseLocaleCourante=0;
 int context_var=GLOBAL;
 
+/** Main function of the compiler, not much of a parser, just load the necessary, and process
+ * @param argc Number of arguments
+ * @param argv The arguments
+ * @return 1 in case of sucess, 0 otherwise
+ */
 int main(int argc, char **argv) {
 	n_prog*p; FILE*yyout=NULL;
 	

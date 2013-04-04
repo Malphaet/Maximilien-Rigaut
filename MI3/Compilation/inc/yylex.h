@@ -16,10 +16,10 @@
  * 
  */
 
+/** @file yylex.h The lexical analyser */
 
 #ifndef YYLEX_H
 #define YYLEX_H
-
 
 /* ======== Prototype =========*/
 

@@ -1,4 +1,4 @@
-/* Definit la table des symboles.*/
+/** @file dico.h Table des symboles */
 #ifndef __DICO__
 #define __DICO__
 
@@ -10,15 +10,16 @@
 
 
 /*---------- Defines -----------*/
-#define MAX_DICO 100
+#define MAX_DICO 100    /**< The max number of definitions */
 
-#define GLOBAL 0
-#define LOCAL 1
-#define FONCTION 2
+#define GLOBAL 0        /**< Context global */
+#define LOCAL 1         /**< Context local */
+#define FONCTION 2      /**< Inside Function */
 
 /*-------- Variables -----------*/
-extern int context_var;
-extern unsigned int adresseGlobaleCourante,adresseLocaleCourante;
+extern int context_var; /**< The current context of variables (GLOBAL or LOCAL) */
+extern unsigned int adresseGlobaleCourante, /**< The current global variable index */
+  adresseLocaleCourante;    /**< The current local variable index */
 
 
 /*---------- Typedef -----------*/
@@ -31,11 +32,12 @@ typedef struct {
   int mode;       /**< GLOBAL, LOCAL, FONCTION */
 } variable;
 
+
 struct {
-  variable tab[MAX_DICO];
-  int base;
-  int sommet;
-} dico;
+  variable tab[MAX_DICO]; /**< The list of variables */
+  int base;               /**< The last global variable */
+  int sommet;             /**< The last local variable */
+} dico; /**< The variable dictionnary itself */
 
 
 /*-------- Prototype -----------*/

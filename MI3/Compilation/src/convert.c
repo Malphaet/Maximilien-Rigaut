@@ -25,7 +25,9 @@
 #include <string.h>
 #include "lexeme.h"
 
-/** Convert a lexeme to it's uppercase pendant */
+/** Convert a lexeme to it's uppercase pendant 
+ * @param sPtr The lexeme to put to uppercase
+ * @return The converted lexeme */
 char*convertToUpperCase(const char *sPtr){
 	int i,len=strlen(sPtr);
 	char*new=malloc(sizeof(char*)*(len+1)); CHECK_PTR(new);

@@ -21,8 +21,11 @@ n_type *cree_n_type_bool(void){
     DPRINT;return n;
 }
 
-/** Create a type object (array) holding variables of type @param t beginning at @param debut ending at @param fin
- * @return The aforementionned object*/
+/** Create a type object (array)
+ * @param t The type of the array
+ * @param debut The beggining of the array
+ * @param fin The end of the array
+ * @return The aforementionned object */
 n_type *cree_n_type_array(n_type *t, int debut, int fin){
     n_type *n = malloc(sizeof(n_type)); CHECK_PTR(n);
     n->type = t_array;
@@ -32,7 +35,9 @@ n_type *cree_n_type_array(n_type *t, int debut, int fin){
     DPRINT;return n;
 }
 
-/** Create a function call named @param fonction with the argument @param args
+/** Create a function call 
+ * @param fonction Name of the called function
+ * @param args Argument of the function
  * @return The aforementionned object*/
 n_appel *cree_n_appel(char *fonction, n_l_exp *args){
     n_appel *n = malloc(sizeof(n_appel)); CHECK_PTR(n);
@@ -43,7 +48,10 @@ n_appel *cree_n_appel(char *fonction, n_l_exp *args){
     DPRINT;return n;
 }
 
-/** Create a program with the functions @param fonctions the variables @param variables and the instructions @param corps
+/** Create a program 
+ * @param fonctions List of the functions declared in the program
+ * @param variables List of the variables declared in the program
+ * @param corps Instruction of the program (usually a block of instructions)
  * @return The aforementionned object*/
 n_prog *cree_n_prog(n_l_dec *variables, n_l_fun_dec *fonctions, n_instr *corps){
     n_prog *n = malloc(sizeof(n_prog)); CHECK_PTR(n);
@@ -53,7 +61,8 @@ n_prog *cree_n_prog(n_l_dec *variables, n_l_fun_dec *fonctions, n_instr *corps){
     DPRINT;return n;
 }
 
-/** Create a variable named @param nom
+/** Create a variable 
+ * @param nom Name of the variable
  * @return The aforementionned object*/
 n_var *cree_n_var_simple(char *nom){
     n_var *n = malloc(sizeof(n_var)); CHECK_PTR(n);
@@ -64,7 +73,9 @@ n_var *cree_n_var_simple(char *nom){
     DPRINT;return n;
 }
 
-/** Create an indexed variable (an array cell) named @param nom with the index @param indice
+/** Create an indexed variable (an array cell)
+ * @param nom Name of the variable (table)
+ * @param indice The indix of the var (position in the table)
  * @return The aforementionned object*/
 n_var *cree_n_var_indicee(char *nom, n_exp *indice){
     n_var *n = malloc(sizeof(n_var)); CHECK_PTR(n);
@@ -76,7 +87,10 @@ n_var *cree_n_var_indicee(char *nom, n_exp *indice){
     DPRINT;return n;
 }
 
-/** Create an expression (operation) with @param op as operation betweed @param op1 and @param op2
+/** Create an expression (operation) 
+ * @param op The operation
+ * @param op1 The first operand
+ * @param op2 The second operand (if needed)
  * @return The aforementionned object*/
 n_exp *cree_n_exp_op(operation op, n_exp *op1, n_exp *op2){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
@@ -88,7 +102,8 @@ n_exp *cree_n_exp_op(operation op, n_exp *op1, n_exp *op2){
     DPRINT;return n;
 }
 
-/** Create an expression (call) with @param app as called object
+/** Create an expression (call) 
+ * @param app The called object
  * @return The aforementionned object*/
 n_exp *cree_n_exp_appel(n_appel *app){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
@@ -99,7 +114,8 @@ n_exp *cree_n_exp_appel(n_appel *app){
     DPRINT;return n;
 }
 
-/** Create an expression (variable) with @param var as variable object
+/** Create an expression (variable) 
+ * @param var The variable object
  * @return The aforementionned object*/
 n_exp *cree_n_exp_var(n_var *var){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
@@ -108,7 +124,8 @@ n_exp *cree_n_exp_var(n_var *var){
     DPRINT;return n;
 }
 
-/** Create an expression (entier) with @param entier as integer object
+/** Create an expression (entier)
+ * @param entier The integer object
  * @return The aforementionned object*/
 n_exp *cree_n_exp_entier(int entier){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
@@ -150,7 +167,8 @@ n_l_exp *cree_n_l_exp(n_exp *tete, n_l_exp *queue){
     DPRINT;return n;
 }
 
-/** Create an instruction (increment) with @param incr as incremented expresion
+/** Create an instruction (increment) 
+ * @param incr The incremented expresion
  * @return The aforementionned object*/
 n_instr *cree_n_instr_incr(n_exp *incr){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -160,7 +178,10 @@ n_instr *cree_n_instr_incr(n_exp *incr){
     DPRINT;return n;
 }
 
-/** Create an instruction (if) with @param test as test and @param alors as true expression and @param sinon as false expression
+/** Create an instruction (if) 
+ * @param test The test 
+ * @param alors The expression if true
+ * @param sinon The expression if false
  * @return The aforementionned object*/
 n_instr *cree_n_instr_si(n_exp *test, n_instr *alors, n_instr *sinon){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -172,7 +193,9 @@ n_instr *cree_n_instr_si(n_exp *test, n_instr *alors, n_instr *sinon){
     DPRINT;return n;
 }
 
-/** Create an instruction (while) with @param test as test and @param faire as expression to do as long as the expression is true
+/** Create an instruction (while)
+ * @param test The test
+ * @param faire The expression to do as long as the expression is true
  * @return The aforementionned object*/
 n_instr *cree_n_instr_tantque(n_exp *test, n_instr *faire){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -183,7 +206,9 @@ n_instr *cree_n_instr_tantque(n_exp *test, n_instr *faire){
     DPRINT;return n;
 }
 
-/** Create an instruction (affect) with @param var as variable to affect to and @param exp as expression to affect
+/** Create an instruction (affect)
+ * @param var The variable to affect to 
+ * @param exp The expression to affect
  * @return The aforementionned object*/
 n_instr *cree_n_instr_affect(n_var *var, n_exp *exp){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -195,7 +220,9 @@ n_instr *cree_n_instr_affect(n_var *var, n_exp *exp){
     DPRINT;return n;
 }
 
-/** Create a list of instructions with @param tete as fist element and @param queue as pointer to the next element
+/** Create a list of instructions 
+ * @param tete The fist element 
+ * @param queue The pointer to the next element
  * @return The aforementionned object*/
 n_l_instr *cree_n_l_instr(n_instr *tete, n_l_instr *queue){
     n_l_instr *n = malloc(sizeof(n_l_instr)); CHECK_PTR(n);
@@ -204,7 +231,8 @@ n_l_instr *cree_n_l_instr(n_instr *tete, n_l_instr *queue){
     DPRINT;return n;
 }
 
-/** Create an instruction (block) with @param liste as a list of expressions
+/** Create an instruction (block)
+ * @param liste The a list of expressions
  * @return The aforementionned object*/
 n_instr *cree_n_instr_bloc(n_l_instr *liste){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -213,7 +241,8 @@ n_instr *cree_n_instr_bloc(n_l_instr *liste){
     DPRINT;return n;
 }
 
-/** Create an instruction (call) with @param app as callable
+/** Create an instruction (call) 
+ * @param app The function
  * @return The aforementionned object*/
 n_instr *cree_n_instr_appel(n_appel *app){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -224,7 +253,8 @@ n_instr *cree_n_instr_appel(n_appel *app){
     DPRINT;return n;
 }
 
-/** Create an instruction (write) with @param expression as writable
+/** Create an instruction (write)
+ * @param expression The expression to write
  * @return The aforementionned object*/
 n_instr *cree_n_instr_ecrire(n_exp *expression){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
@@ -241,7 +271,9 @@ n_instr *cree_n_instr_vide(void){
     DPRINT;return n;
 }
 
-/** Create a variable declaration with @param nom as name and @param t as type
+/** Create a variable declaration
+ * @param nom The variable name 
+ * @param t The type
  * @return The aforementionned object*/
 n_dec *cree_n_dec_var(char *nom, n_type *t){
     n_dec *n = malloc(sizeof(n_dec)); CHECK_PTR(n);
@@ -250,8 +282,12 @@ n_dec *cree_n_dec_var(char *nom, n_type *t){
     ajoutevariable(nom,t);
     DPRINT;return n;
 }
-/** Create a function declaration with @param nom as name, @param t as return type, 
- * @param param as parameters, @param variables as vars and @param corps as body
+/** Create a function declaration
+ * @param nom The function name
+ * @param t The return type, 
+ * @param param The parameters
+ * @param variables The var
+ * @param corps The function body
  * @return The aforementionned object*/
 n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, n_l_dec *param, n_l_dec *variables, n_prog *corps){
     n_fun_dec *n = malloc(sizeof(n_fun_dec)); CHECK_PTR(n);
@@ -264,7 +300,9 @@ n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, n_l_dec *param, n_l_dec *variab
     DPRINT;return n;
 }
 
-/** Create a list of variables declarations with @param tete as fist element and @param queue as pointer to the next element
+/** Create a list of variables declarations 
+ * @param tete The fist element 
+ * @param queue The pointer to the next element
  * @return The aforementionned object*/
 n_l_dec *cree_n_l_dec(n_dec *tete, n_l_dec *queue){
     n_l_dec *n = malloc(sizeof(n_l_dec)); CHECK_PTR(n);
@@ -273,7 +311,9 @@ n_l_dec *cree_n_l_dec(n_dec *tete, n_l_dec *queue){
     DPRINT;return n;
 }
 
-/** Create a list of function declarations with @param tete as fist element and @param queue as pointer to the next element
+/** Create a list of function declarations
+ * @param tete The fist element
+ * @param queue The pointer to the next element
  * @return The aforementionned object*/
 n_l_fun_dec *cree_n_l_fun_dec(n_fun_dec *tete, n_l_fun_dec *queue){
     n_l_fun_dec *n = malloc(sizeof(n_l_fun_dec)); CHECK_PTR(n);

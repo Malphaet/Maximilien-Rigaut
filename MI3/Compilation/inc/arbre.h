@@ -1,4 +1,4 @@
-
+/** @file arbre.h The syntax tree */
 #ifndef __ARBRE__
 #define __ARBRE__
 /*---------- Includes -----------*/

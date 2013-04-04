@@ -16,6 +16,8 @@
  * 
  */
 
+/** @file yylex.c The lexical analyser */
+
 /* ========= Includes =========*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +43,9 @@ int commenting=0;
 
 /* =========== Functions ===========*/
 
+/** Check if the given char is a single symbol
+ * @param chr A char to check
+ * @return The char index if it is, 0 if not */
 int is_single_symbol(const char chr){
 	int i,char_number_old=char_number;
 	char nc;
@@ -61,6 +66,9 @@ int is_single_symbol(const char chr){
 	return VAL_ONESYMS(chr);
 }
 
+/** Check if the symbols match a two symbol lexeme
+ * @param str The string to check
+ * @return The symbol id if found, 0 otherwise */ 
 int is_symbol(const char*str){
 	int i,j;
 	for(i=0;i<SIZE_SYMBOLS;i++){
@@ -71,6 +79,9 @@ int is_symbol(const char*str){
 	return 0;
 }
 
+/** Check if the sting match a reserved keyword
+ * @param str The string to check
+ * @return The keyword index if found, 0 otherwise */
 int is_reserved(const char*str){
 	int i,j;
 	for(i=0;i<SIZE_KEYWORDS;i++){
@@ -81,6 +92,8 @@ int is_reserved(const char*str){
 	return 0;
 }
 
+/** Get the next non-comment character 
+ * @return The character*/
 char get_next_char(){
 	char chr;
 	if ((chr=getc(yyin))!='{') {
@@ -95,7 +108,9 @@ char get_next_char(){
 	
 	return get_next_char();
 }
-	
+
+/** Find the next lexeme, and fills the yytext string with it's value
+ * @return The lexeme id */
 int yylex(){
 	int val=0,char_number_old;
 	char chr;

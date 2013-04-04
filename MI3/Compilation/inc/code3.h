@@ -24,7 +24,7 @@
 #ifndef __CODE3_H__
 #define __CODE3_H__
 
-/* List of code3 operations */
+/** List of code3 operations */
 typedef enum {c3_add, c3_sub, c3_times, c3_div, c3_mod, 
 	      c3_eql, c3_dif, c3_inf, c3_sup, c3_infeq, c3_supeq, 
 	      c3_or, c3_and, c3_no, c3_neg, 	      
@@ -33,12 +33,12 @@ typedef enum {c3_add, c3_sub, c3_times, c3_div, c3_mod,
   c3_op;
 
 
-/* The code is a list of 3-tuples*/
+/** The code is a list of 3-tuples*/
 struct three_tuple {
-  c3_op op;
-  int arg1;
-  int arg2;
-  char *var;
+  c3_op op;	/**< The operation performed */
+  int arg1;	/**< The first parameter */
+  int arg2;	/**< The second parameter */
+  char *var;	/**< If the operation implies a variable */
 } *code; 
 
 int size_code3; /**< Total size of code3 */

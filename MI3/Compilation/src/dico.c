@@ -24,7 +24,10 @@
 /** @file dico.c The table of symbols */
 #include "dico.h"
 
-/** Add a variable to the table */
+/** Add a variable to the table 
+ * @param nom The variable name
+ * @param type The variable type
+ * @return 1 in case of sucess 0 otherwise*/
 int ajoutevariable(char *nom, n_type *type){
 	variable v;	int ind=cherche(nom);
 	v.type=type; v.nom=nom; v.mode=context_var;
@@ -48,7 +51,11 @@ int ajoutevariable(char *nom, n_type *type){
 	return 1;
 }
 
-/** Add a function to the table */
+/** Add a function to the table 
+ * @param nom The function name
+ * @param type The function type
+ * @param param The list of parameters taken by the function
+ * @return 1 in case of sucess 0 etherwise*/
 int ajoutefonction(char *nom, n_type *type, n_l_dec *param){
 	if (ajoutevariable(nom,type)==0) return 0;
 	if (context_var==GLOBAL) dico.tab[dico.base-1].param=param;
@@ -56,25 +63,33 @@ int ajoutefonction(char *nom, n_type *type, n_l_dec *param){
 	return 1;
 }
 
-/** Lookup for a local variable in the dictionary, return it's index or -1 if not found */
+/** Lookup for a local variable in the dictionary
+ * @param nom The variable name
+ * @return it's index or -1 if not found */
 int cherchelocale(char *nom){
 	int i;
 	for(i=dico.sommet;i<dico.base;i++) if (strcmp(dico.tab[i].nom,nom)==0) return i;
 	return -1;
 }
 
-/** Lookup for a variable in the dictionary, return it's index or -1 if not found */
+/** Lookup for a variable in the dictionary
+ * @param nom The variable name
+ * @return it's index or -1 if not found */
 int cherche(char *nom){
 	int i;
 	for(i=dico.sommet-1;i>=0;i--) if (strcmp(dico.tab[i].nom,nom)==0) return i;
 	return -1;
 }
 
+/** Print the dictionnary to the stdout */
 void afficherDico(){
 	int i;
 	for(i=0;i<dico.sommet;i++) printf("%d %s\n",i,dico.tab[i].nom);
 }
-/** Return the adress of the variable */
+
+/** Return the adress of the variable 
+ * @param v The variable index
+ * @return The adress */
 int adresse(int v){
 	return dico.tab[v].adresse;
 }

@@ -27,31 +27,23 @@
 
 #include "arbre.h"
 
-/* ========= Typedef ==========*/
+/* ========= Defines  ==========*/
+#define PLCC_SYNTAX_ERROR(expected){WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
+#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
+#define PLCC_UNTESTED				{WHERE; PLCC_WARNING("The current section is untested/untrusted\n");}
+#define PLCC_ILL_IMPLEMENED		{WHERE; PLCC_WARNING("The current section isn't fully implemented yet\n");}
+#define PLCC_IF(exp_id) if (uc==exp_id)
+#define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
+#define PLCC_NEW  (uc=yylex())
 /* ======== Prototype =========*/
 
-/* Processed lexeme */
-int uc; 
+
+int uc; /**< Processed lexeme */
 
 /* Xml tags */
 void markupClose(char *s);
 void markupOpen(char *s);
 void markupLeaf(char *s, char *val);
-
-/*
-typedef struct n_l_instr_ n_l_instr;
-typedef struct n_instr_ n_instr;
-typedef struct n_exp_ n_exp;
-typedef struct n_l_exp_ n_l_exp;
-typedef struct n_var_ n_var;
-typedef struct n_l_dec_ n_l_dec;
-typedef struct n_dec_ n_dec;
-typedef struct n_type_ n_type;
-typedef struct n_l_fun_dec_ n_l_fun_dec;
-typedef struct n_fun_dec_ n_fun_dec;
-typedef struct n_prog_ n_prog;
-typedef struct n_appel_ n_appel;
-*/
 
 /* Lexical analisys' functions */
 n_prog*		Programme();

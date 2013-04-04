@@ -16,33 +16,33 @@
  * 
  */
 
-
+/** @file lexeme.h List of all recognised lexemes */
 /* ======== Constants =========*/
 #ifndef LEXEME_H
 #define LEXEME_H
 
 const char *ONESYMS[]={
 	"(", ")", "*", "+",",", "-", ".", "/", ":", ";", "<", "=", ">", "[", "]"
-};
+}; /**< One character symbols */
 
 const char *SYMBOLS[]={
 	"..", ":=", "<=", "<>", ">="
-};
+}; /**< Two character symbols */
 const char *KEYWORDS[]={
 	"and", "array", "begin", "boolean", "do", "else", 
 	"end", "false", "function", "if", "integer",
 	"mod", "not", "of", "or", "procedure", "program", 
 	"read","then", "true", "var", "while","write"
-};
+};/**< All keywords recognised as lexemes */
 
-#define SIZE_CHAR 256
-const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);
-const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);
-const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);
+#define SIZE_CHAR 256										/**< The number of char symbols */
+const int SIZE_ONESYMS=sizeof(ONESYMS)/sizeof(char*);	/**< The size of the one-symbol table */
+const int SIZE_SYMBOLS=sizeof(SYMBOLS)/sizeof(char*);	/**< The size of the two-symbols table */
+const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);	/**< The size of the keyboard table */
 
-#define VAL_ONESYMS(index) index
-#define VAL_SYMBOLS(index) SIZE_CHAR+1+index
-#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_SYMBOLS+1+index
+#define VAL_ONESYMS(index) index							/**< The id of the one symbol at given index */
+#define VAL_SYMBOLS(index) SIZE_CHAR+1+index				/**< The id of the symbol at given index */
+#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_SYMBOLS+1+index /**< The id of the keyword at given index */
 
 /*
 #define VAL_CHAR(index) index

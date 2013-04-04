@@ -36,13 +36,6 @@ void walk_code(n_prog*n){
 	init_code();
 	walk_prog(n);
 }
-//struct n_fun_dec_{
-    //char *nom;              /**< The name of the said function */
-    //n_type *type;           /**< The return type of the said function */
-    //n_l_dec *variables;     /**< The variables of the said function */
-    //n_l_dec *param;         /**< The parameters of the said function */
-    //n_prog *corps;          /**< The body of the said function */
-//};
 
 #define ADD_APPEL(appel) CHECK_VAR(appel->fonction); vars=appel->args; do {walk_exp(vars->tete);\
 							add_line(param,line_code3-1,0,NULL);} while ((vars=vars->queue)!=NULL);\
@@ -132,21 +125,6 @@ void walk_inst(n_instr *i){
 	}
 		
 }
-	/*
-struct n_instr_ {
-    enum {incrInst,affecteInst,siInst,tantqueInst,appelInst,ecrireInst,videInst,blocInst} 
-        type; 
-    union{
-        n_exp *incr;
-        struct{n_exp *test; struct n_instr_ *alors; struct n_instr_ *sinon;} si_;
-        struct{n_exp *test; struct n_instr_ *faire;} tantque_;
-        n_appel *appel;
-        struct{n_var *var; n_exp *exp;} affecte_;
-        struct{n_exp *expression;} retour_;
-        struct{n_exp *expression;} ecrire_;
-        n_l_instr *liste;
-    }u;
-};*/
 
 void walk_exp(n_exp *e){
 	c3_op op=0; int arg1,arg2=0,unaire=0; n_l_exp*vars;

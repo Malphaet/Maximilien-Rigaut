@@ -16,3 +16,4 @@
  * 
  */
  
+/** @file convert.h Convert the lexemes into defined symbols */

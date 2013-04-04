@@ -27,13 +27,7 @@
 /************* Rules */
 int ident_level=0;
 
-#define PLCC_SYNTAX_ERROR(expected){WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
-#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
-#define PLCC_UNTESTED				{WHERE; PLCC_WARNING("The current section is untested/untrusted\n");}
-#define PLCC_ILL_IMPLEMENED		{WHERE; PLCC_WARNING("The current section isn't fully implemented yet\n");}
-#define PLCC_IF(exp_id) if (uc==exp_id)
-#define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
-#define PLCC_NEW  (uc=yylex())
+
 
 //! Program -> PROGRAM ID ';' Body '.'
 n_prog *Programme(){
