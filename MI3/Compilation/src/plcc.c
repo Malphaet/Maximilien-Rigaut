@@ -39,7 +39,7 @@ int context_var=GLOBAL;
  * @return 1 in case of sucess, 0 otherwise
  */
 int main(int argc, char **argv) {
-	n_prog*p; FILE*yyout=NULL;
+	n_prog*p=NULL; FILE*yyout=NULL;
 	
 	if (argc<2) OUT("plcc error : Not enough arguments");
 	if ((yyin=fopen(file_in_progress=argv[1],"r")) == NULL) ERROR("plcc error");
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 	
 	uc = yylex();
 	#ifdef MK_LEX
-		do {printf("%s%3d %s%s%s\n",C_GREEN,uc,C_ORANGE,yytext,C_CLEAR);} while ((uc=yylex())!=0);
+		do {printf("%s%3d %s%s%s\n",C_GREEN,uc,C_ORANGE,yytext,C_CLEAR);} while ((uc=yylex())!=0);p+=1;
 	#else
 		p=Programme();
 		#ifdef MK_C3

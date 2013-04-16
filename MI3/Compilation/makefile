@@ -75,6 +75,21 @@ doc: .PHONY
 	$(QUIET)doxygen Doxyfile
 	$(QUIET)echo "MAKE DOCS"
 
+help:
+	$(QUIET)echo ""
+	$(QUIET)echo "+ make init - Initialise the project (needed directories...)"
+	$(QUIET)echo "+ make clean - Clean the intermediate files and docs"
+	$(QUIET)echo "+ make cleaner - Also remove executables"
+	$(QUIET)echo "+ make doc - Générate doxygen docs"
+	$(QUIET)echo "+ make all - plcc pascal->assembly compiler"
+	$(QUIET)echo "+ make test_lex - plcc pascal->lexemes compiler"
+	$(QUIET)echo "+ make test_syntaxe - plcc pascal->syntax tree compiler"
+	$(QUIET)echo "+ make test_arbre - plcc pascal->simplified syntax tree compiler"
+	$(QUIET)echo "+ make test_c3a - plcc pascal->code 3 adresses compiler"
+	$(QUIET)echo "+ make test_asm - plcc pascal->assembly compiler"
+	$(QUIET)echo "+ The variables 'debug' and 'colors' can be set to true to force them to be included in the compiler"
+	$(QUIET)echo "  Example in 'make test_lex colors=true'"
+	$(QUIET)echo ""
 edit:
 	$(EDITOR) 2> /dev/null $(SRC)/* $(INC)/* makefile Readme.md Doxyfile &
 	
