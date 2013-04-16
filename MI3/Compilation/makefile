@@ -9,13 +9,28 @@ INC = inc
 DOC = doc
 TMP = tmp
 
-NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) -D COLORS
-DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG -D COLORS
-CFLAGS = $(DFLAGS)
-LDFLAGS = 
+type = MK_ASM
+colors=false
+debug=false
 
+options=
+
+ifeq ($(colors),true)
+	options+="-D COLORS"
+endif
+
+NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
+		 -std=c99 -Wshadow -O2 -I$(INC) $(options) -D $(type)
+DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
+		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG  $(options) -D $(type)
+
+ifeq ($(debug),true)
+	CFLAGS = $(DFLAGS)
+	LDFLAGS = 
+else
+	CFLAGS = $(NFLAGS)
+	LDFLAGS = 
+endif
 
 EXEC=plcc
 EXEC_O=yylex yyparse arbre dico code3
@@ -28,6 +43,21 @@ all: convert $(EXEC)
 init:
 	$(QUIET)echo "INIT" $(DIRS)
 	$(QUIET)mkdir -p $(DIRS)
+	
+test_lex: clean
+	$(QUIET)make all type="MK_LEX"
+
+test_syntaxe: clean
+	$(QUIET)make all type="MK_SYN"
+	
+test_arbre: clean
+	$(QUIET)make all type="MK_TREE"
+	
+test_c3a: clean
+	$(QUIET)make all type="MK_C3"
+	
+test_asm: clean
+	$(QUIET)make all type="MK_ASM"
 	
 convert: $(OBJ)/convert.o
 	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@

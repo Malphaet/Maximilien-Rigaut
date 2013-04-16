@@ -46,10 +46,16 @@ int main(int argc, char **argv) {
 	if (argc>2) if ((yyout=fopen(argv[2], "w+"))==NULL) ERROR("plcc error");
 	
 	uc = yylex();
-	p=Programme();
-	walk_code(p);
-	show_code(yyout);
-	
+	#ifdef MK_LEX
+		do {printf("%s%3d %s%s%s\n",C_GREEN,uc,C_ORANGE,yytext,C_CLEAR);} while ((uc=yylex())!=0);
+	#else
+		p=Programme();
+		#ifdef MK_C3
+			walk_code(p);
+			show_code(yyout);
+		#endif
+		free(p);
+	#endif
 	fclose(yyin); if (argc>2) fclose(yyout);
 	return 0;
 }

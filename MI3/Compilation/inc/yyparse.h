@@ -41,9 +41,18 @@
 int uc; /**< Processed lexeme */
 
 /* Xml tags */
-void markupClose(char *s);
-void markupOpen(char *s);
-void markupLeaf(char *s, char *val);
+#ifdef MK_SYN
+	void markupClose(char *s);
+	void markupOpen(char *s);
+	void markupLeaf(char *s, char *val);
+	#define mOpn 	markupOpen
+	#define mCls	markupClose
+	#define mLea	markupLeaf
+#else
+	#define markupLeaf(a,b)
+	#define markupClose(a)
+	#define markupOpen(a)
+#endif
 
 /* Lexical analisys' functions */
 n_prog*		Programme();
