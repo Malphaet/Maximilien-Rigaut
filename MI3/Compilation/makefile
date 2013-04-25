@@ -51,7 +51,7 @@ test_syntaxe: clean
 	$(QUIET)make all type="MK_SYN"
 	
 test_arbre: clean
-	$(QUIET)make all type="MK_TREE"
+	$(QUIET)make all type="MK_TREE -D MK_MARKUP"
 	
 test_c3a: clean
 	$(QUIET)make all type="MK_C3"

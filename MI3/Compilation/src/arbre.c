@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "arbre.h"
+#include "yyparse.h"
 #include "dico.h"
 #include "utils.h"
 
@@ -55,10 +56,13 @@ n_appel *cree_n_appel(char *fonction, n_l_exp *args){
  * @return The aforementionned object*/
 n_prog *cree_n_prog(n_l_dec *variables, n_l_fun_dec *fonctions, n_instr *corps){
     n_prog *n = malloc(sizeof(n_prog)); CHECK_PTR(n);
+    //tOpen("prog");
     n->variables = variables;
     n->fonctions = fonctions;
     n->corps = corps;
-    DPRINT;return n;
+    DPRINT;
+    //tClse("prog");
+    return n;
 }
 
 /** Create a variable 

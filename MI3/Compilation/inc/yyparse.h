@@ -28,10 +28,10 @@
 #include "arbre.h"
 
 /* ========= Defines  ==========*/
-#define PLCC_SYNTAX_ERROR(expected){WHERE; PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
-#define PLCC_NOT_IMPLEMENTED 		{WHERE; PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
-#define PLCC_UNTESTED				{WHERE; PLCC_WARNING("The current section is untested/untrusted\n");}
-#define PLCC_ILL_IMPLEMENED		{WHERE; PLCC_WARNING("The current section isn't fully implemented yet\n");}
+#define PLCC_SYNTAX_ERROR(expected){PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
+#define PLCC_NOT_IMPLEMENTED 		{PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
+#define PLCC_UNTESTED				{PLCC_WARNING("The current section is untested/untrusted\n");}
+#define PLCC_ILL_IMPLEMENED		{PLCC_WARNING("The current section isn't fully implemented yet\n");}
 #define PLCC_IF(exp_id) if (uc==exp_id)
 #define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
@@ -41,17 +41,37 @@
 int uc; /**< Processed lexeme */
 
 /* Xml tags */
-#ifdef MK_SYN
+#ifdef MK_MARKUP
 	void markupClose(char *s);
 	void markupOpen(char *s);
 	void markupLeaf(char *s, char *val);
-	#define mOpn 	markupOpen
-	#define mCls	markupClose
-	#define mLea	markupLeaf
+	void markupOne(char *s);
+	#define AOpen markupOpen
+	#define AClse markupClose
+	#define ALeaf markupLeaf
+	#define AOne  markupOne
+#endif
+
+#ifdef MK_SYN
+	#define pOpen markupOpen
+	#define pClse markupClose
+	#define pLeaf markupLeaf
 #else
-	#define markupLeaf(a,b)
-	#define markupClose(a)
-	#define markupOpen(a)
+	#define pOpen(a)
+	#define pClse(a)
+	#define pLeaf(a,b)
+#endif
+
+#ifdef MK_TREE
+	#define tOpen 	markupOpen
+	#define tClse	markupClose
+	#define tLeaf	markupLeaf
+	#define tOne	markupOne
+#else
+	#define tOpen(a)
+	#define tClse(a)
+	#define tLeaf(a,b)
+	#define tOne(a)
 #endif
 
 /* Lexical analisys' functions */
