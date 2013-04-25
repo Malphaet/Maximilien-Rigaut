@@ -9,7 +9,7 @@ INC = inc
 DOC = doc
 TMP = tmp
 
-type = MK_ASM
+tags = MK_ASM
 colors=false
 debug=false
 
@@ -20,9 +20,9 @@ ifeq ($(colors),true)
 endif
 
 NFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) $(options) -D $(type)
+		 -std=c99 -Wshadow -O2 -I$(INC) $(options) $(tags:%=-D %)
 DFLAGS = -Wextra -Wall -ansi -pedantic -Wdeclaration-after-statement -Wunsafe-loop-optimizations\
-		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG  $(options) -D $(type)
+		 -std=c99 -Wshadow -O2 -I$(INC) -g -D DEBUG  $(options) $(tags:%=-D %)
 
 ifeq ($(debug),true)
 	CFLAGS = $(DFLAGS)
@@ -45,19 +45,19 @@ init:
 	$(QUIET)mkdir -p $(DIRS)
 	
 test_lex: clean
-	$(QUIET)make all type="MK_LEX"
+	$(QUIET)make all tags="MK_LEX"
 
 test_syntaxe: clean
-	$(QUIET)make all type="MK_SYN"
+	$(QUIET)make all tags="MK_SYN MK_MARKUP"
 	
 test_arbre: clean
-	$(QUIET)make all type="MK_TREE -D MK_MARKUP"
+	$(QUIET)make all tags="MK_TREE MK_MARKUP"
 	
 test_c3a: clean
-	$(QUIET)make all type="MK_C3"
+	$(QUIET)make all tags="MK_C3"
 	
 test_asm: clean
-	$(QUIET)make all type="MK_ASM"
+	$(QUIET)make all tags="MK_ASM"
 	
 convert: $(OBJ)/convert.o
 	$(QUIET)$(CC) $(LDFLAGS) $^ -o $(BIN)/$@

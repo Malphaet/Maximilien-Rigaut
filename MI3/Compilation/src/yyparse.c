@@ -40,7 +40,7 @@ n_prog *Programme(){
 	n_prog*prog;
 	
 	PLCC_IFNOT(SPROGRAM,"program");
-	tOpen("prog");pOpen("program"); PLCC_NEW; 
+	AOpen("program"); PLCC_NEW; 
 	PLCC_IFNOT(SIDENT,"identifier");
 	pLeaf("identifier",yytext); PLCC_NEW; 
 	/*yytext: program name*/
@@ -49,7 +49,7 @@ n_prog *Programme(){
 	PLCC_NEW; prog=Corps(); 
 	PLCC_IFNOT('.',"'.'");
 	
-	tClse("prog");pClse("program");
+	AClse("program");
 	return prog;
 }
 
@@ -60,8 +60,8 @@ n_prog *Corps(){
 	
 	n_fun_dec*fun=NULL;
 	n_instr*inst=NULL;
-	tOpen("l_funct");
-	pOpen("body");
+	pOpen("body"); tOpen("l_funct");
+	
 	PLCC_IF(SVAR){
 		PLCC_NEW;
 		var=ListeDeclVar();
@@ -69,20 +69,15 @@ n_prog *Corps(){
 	if (uc==SPROCEDURE||uc==SFUNCTION) {
 		queue=tete=cree_n_l_fun_dec(NULL,NULL);
 		while (1){
-			//tOpen("l_funct");
 			fun=DeclProcFun(); queue->tete=fun;
 			PLCC_NEW;
-			
 			if (uc==SPROCEDURE||uc==SFUNCTION) {
 				queue->queue=cree_n_l_fun_dec(NULL,NULL);
 			} else break;
-			//tClse("l_funct");
 		}
-		
 	}
 	inst=BlocInstr();
-	pClse("body");
-	tClse("l_funct");
+	pClse("body"); tClse("l_funct");
 	return cree_n_prog(var,tete,inst);
 }
 
@@ -104,9 +99,8 @@ n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
 	char*var; n_type*ty,*tt=malloc(sizeof(n_type)); CHECK_PTR(tt);
 	tete=queue=cree_n_l_dec(NULL,NULL);
-	
+	tOpen("l_dec_var");
 	while (1){
-		tOpen("var");
 		PLCC_IFNOT(SIDENT,"identifier"); pLeaf("id",yytext);
 		var=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(var);
 		strcpy(var,yytext);
@@ -114,13 +108,14 @@ n_l_dec*DeclVar(n_l_dec*next){
 		tOne(var);
 		PLCC_NEW; PLCC_IF(':') break;
 		else PLCC_IFNOT(',',"','");
+		//tClse("l_dec_var");
+		//tOpen("l_dec_var");
 		queue->queue=cree_n_l_dec(NULL,NULL);
 		queue=queue->queue; PLCC_NEW;
-		tClse("var");
 	}
-	
 	queue->queue=next;
 	PLCC_NEW; ty=Type();*tt=*ty;
+	tClse("l_dec_var");
 	free(ty); return tete;
 }
 
@@ -226,20 +221,21 @@ n_fun_dec*DeclFunction(){
 n_instr *BlocInstr(){
 	n_l_instr*tete,*queue;n_instr*inst;
 	PLCC_IFNOT(SBEGIN,"begin");
-	pOpen("block_instr");
-	tOpen("l_instr");
-	PLCC_ILL_IMPLEMENED;									
+	pOpen("block_instr"); tOpen("l_instr");
+										
 	tete=queue=cree_n_l_instr(NULL,NULL);
 	while(1) {
 		PLCC_NEW; inst=Instruction(SEND);
 		queue->tete=inst;
+		tClse("l_instr");
 		PLCC_IF(';') {
+			tOpen("l_instr");
 			queue->queue=cree_n_l_instr(NULL,NULL);
 			queue=queue->queue;
 		} else break;
 	}
 	PLCC_IFNOT(SEND,"end"); PLCC_NEW;
-	tClse("l_instr");
+	
 	pClse("block_instr");
 	return cree_n_instr_bloc(tete);
 }
@@ -255,26 +251,20 @@ n_instr*Instruction(int next_id){
 	PLCC_IF(next_id) return cree_n_instr_vide(); 	// Empty instruction
 	PLCC_IF(';') return cree_n_instr_vide(); 		// Empty also
 	pOpen("instruction");
-	PLCC_WARNING("Incomplete");
 	PLCC_IF(SIDENT) {			// AppelProcedure | AffectInstr
 		strcpy(inst_name,yytext); PLCC_NEW;
 		PLCC_IF(';') {			//!< AppelProcedure -> ID @todo Upgrade for lame pascal specification
-			pOpen("procedure"); 
+			pOpen("procedure"); tOpen("appel");
 			pLeaf("id",inst_name); PLCC_NEW;
-			pClse("procedure");
-			
-			tOpen("appel");
+			tOne(inst_name);
 			instr=cree_n_instr_appel(cree_n_appel(inst_name,cree_n_l_exp(NULL,NULL)));
-			tClse("appel");
+			pClse("procedure"); tClse("appel");
 		} else PLCC_IF('('){	//!< AppelProcedure -> ID '(' ListeParam ')'
-			pOpen("procedure");
+			pOpen("procedure"); tOpen("appel");
 			pLeaf("id",inst_name); PLCC_NEW; param=ListeParam();
 			PLCC_IFNOT(')',"')'"); PLCC_NEW;
-			pClse("procedure");
-			tOpen("appel");
-			PLCC_WARNING("Incomplete");
 			instr=cree_n_instr_appel(cree_n_appel(inst_name,param));
-			tClse("appel");
+			pClse("procedure"); tClse("appel");
 		} else PLCC_IF('['){	//!	AffectInstr -> Variable AFFECT Expression
 			//!< Variable -> ID '[' Expression ']'
 			tOpen("indicee");
@@ -376,8 +366,8 @@ n_l_exp*ListeParam(){
 		PLCC_IF(',') PLCC_NEW;
 		else goto listeparamEnd;
 	}
-	tClse("l_exp");
 	listeparamEnd: 
+		tClse("l_exp");
 		pClse("liste_params");
 		return tete;
 }
