@@ -211,7 +211,7 @@ void show_code(FILE*f){
     char format[51];
     char *op2string[] = {"add", "sub", "time", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
 		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
-		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};    
+		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};
 		             
 	while (line_code3>s) {s*=10; l++;}
 	if (f==NULL) {

@@ -27,20 +27,12 @@
 /************* Rules */
 int ident_level=0;
 
-//#define PLCC_SYNTAX_ERROR(expected){PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
-//#define PLCC_NOT_IMPLEMENTED 		{PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
-//#define PLCC_UNTESTED				{PLCC_WARNING("The current section is untested/untrusted\n");}
-//#define PLCC_ILL_IMPLEMENED		{PLCC_WARNING("The current section isn't fully implemented yet\n");}
-//#define PLCC_IF(exp_id) if (uc==exp_id)
-//#define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
-//#define PLCC_NEW  (uc=yylex())
-
 //! Program -> PROGRAM ID ';' Body '.'
 n_prog *Programme(){
 	n_prog*prog;
 	
 	PLCC_IFNOT(SPROGRAM,"program");
-	AOpen("program"); PLCC_NEW; 
+	pOpen("program"); PLCC_NEW; 
 	PLCC_IFNOT(SIDENT,"identifier");
 	pLeaf("identifier",yytext); PLCC_NEW; 
 	/*yytext: program name*/
@@ -49,7 +41,7 @@ n_prog *Programme(){
 	PLCC_NEW; prog=Corps(); 
 	PLCC_IFNOT('.',"'.'");
 	
-	AClse("program");
+	pClse("program");
 	return prog;
 }
 
@@ -60,7 +52,7 @@ n_prog *Corps(){
 	
 	n_fun_dec*fun=NULL;
 	n_instr*inst=NULL;
-	pOpen("body"); tOpen("l_funct");
+	pOpen("body"); //tOpen("l_funct");
 	
 	PLCC_IF(SVAR){
 		PLCC_NEW;
@@ -77,7 +69,7 @@ n_prog *Corps(){
 		}
 	}
 	inst=BlocInstr();
-	pClse("body"); tClse("l_funct");
+	pClse("body"); ////tClse("l_funct");
 	return cree_n_prog(var,tete,inst);
 }
 
@@ -99,23 +91,23 @@ n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
 	char*var; n_type*ty,*tt=malloc(sizeof(n_type)); CHECK_PTR(tt);
 	tete=queue=cree_n_l_dec(NULL,NULL);
-	tOpen("l_dec_var");
+	//tOpen("l_dec_var");
 	while (1){
 		PLCC_IFNOT(SIDENT,"identifier"); pLeaf("id",yytext);
 		var=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(var);
 		strcpy(var,yytext);
 		queue->tete=cree_n_dec_var(var,tt);
-		tOne(var);
+		//tOne(var);
 		PLCC_NEW; PLCC_IF(':') break;
 		else PLCC_IFNOT(',',"','");
-		//tClse("l_dec_var");
+		////tClse("l_dec_var");
 		//tOpen("l_dec_var");
 		queue->queue=cree_n_l_dec(NULL,NULL);
 		queue=queue->queue; PLCC_NEW;
 	}
 	queue->queue=next;
 	PLCC_NEW; ty=Type();*tt=*ty;
-	tClse("l_dec_var");
+	////tClse("l_dec_var");
 	free(ty); return tete;
 }
 
@@ -124,9 +116,9 @@ n_type*Type(){
 	n_type*t=NULL; int d,f;
 	
 	PLCC_IF(SINTEGER) {
-		t=cree_n_type_int(); pLeaf("type",yytext);tOne("t_int");
+		t=cree_n_type_int(); pLeaf("type",yytext);//tOne("t_int");
 	} else PLCC_IF(SBOOLEAN) {
-		t=cree_n_type_bool(); pLeaf("type",yytext);tOne("t_bool");
+		t=cree_n_type_bool(); pLeaf("type",yytext);//tOne("t_bool");
 	}  else PLCC_IF(SARRAY){
 		PLCC_NEW; PLCC_IFNOT('[',"'['");
 		pOpen("array");
@@ -144,7 +136,7 @@ n_type*Type(){
 		PLCC_NEW; t=Type();
 		pClse("of");
 		pClse("array");
-		t=cree_n_type_array(t,d,f); tOne("t_array");
+		t=cree_n_type_array(t,d,f); //tOne("t_array");
 	} else PLCC_SYNTAX_ERROR("type");
 	
 	PLCC_NEW; return t;
@@ -221,15 +213,15 @@ n_fun_dec*DeclFunction(){
 n_instr *BlocInstr(){
 	n_l_instr*tete,*queue;n_instr*inst;
 	PLCC_IFNOT(SBEGIN,"begin");
-	pOpen("block_instr"); tOpen("l_instr");
+	pOpen("block_instr"); //tOpen("l_instr");
 										
 	tete=queue=cree_n_l_instr(NULL,NULL);
 	while(1) {
 		PLCC_NEW; inst=Instruction(SEND);
 		queue->tete=inst;
-		tClse("l_instr");
+		//tClse("l_instr");
 		PLCC_IF(';') {
-			tOpen("l_instr");
+			//tOpen("l_instr");
 			queue->queue=cree_n_l_instr(NULL,NULL);
 			queue=queue->queue;
 		} else break;
@@ -254,20 +246,20 @@ n_instr*Instruction(int next_id){
 	PLCC_IF(SIDENT) {			// AppelProcedure | AffectInstr
 		strcpy(inst_name,yytext); PLCC_NEW;
 		PLCC_IF(';') {			//!< AppelProcedure -> ID @todo Upgrade for lame pascal specification
-			pOpen("procedure"); tOpen("appel");
+			pOpen("procedure"); //tOpen("appel");
 			pLeaf("id",inst_name); PLCC_NEW;
-			tOne(inst_name);
+			//tOne(inst_name);
 			instr=cree_n_instr_appel(cree_n_appel(inst_name,cree_n_l_exp(NULL,NULL)));
-			pClse("procedure"); tClse("appel");
+			pClse("procedure"); //tClse("appel");
 		} else PLCC_IF('('){	//!< AppelProcedure -> ID '(' ListeParam ')'
-			pOpen("procedure"); tOpen("appel");
+			pOpen("procedure"); //tOpen("appel");
 			pLeaf("id",inst_name); PLCC_NEW; param=ListeParam();
 			PLCC_IFNOT(')',"')'"); PLCC_NEW;
 			instr=cree_n_instr_appel(cree_n_appel(inst_name,param));
-			pClse("procedure"); tClse("appel");
+			pClse("procedure"); //tClse("appel");
 		} else PLCC_IF('['){	//!	AffectInstr -> Variable AFFECT Expression
 			//!< Variable -> ID '[' Expression ']'
-			tOpen("indicee");
+			//tOpen("indicee");
 			pOpen("affect");
 			pOpen("table");
 				pLeaf("id",inst_name);
@@ -275,35 +267,35 @@ n_instr*Instruction(int next_id){
 				PLCC_NEW; exp=Expression();
 			pClse("at");
 			pClse("table");
-			tOpen("indicee");
-				tOne(inst_name);
+			//tOpen("indicee");
+				//tOne(inst_name);
 				var=cree_n_var_indicee(inst_name,exp);
-			tClse("indicee");
+			//tClse("indicee");
 			PLCC_IFNOT(']',"']'"); PLCC_NEW;
 			PLCC_IFNOT(SDOT_EQL,"':='");
 			pOpen("value");
 				PLCC_NEW; exp=Expression();
 			pClse("value");
 			pClse("affect");
-			tClse("indicee");
+			//tClse("indicee");
 			instr=cree_n_instr_affect(var,exp);
 		} else PLCC_IF(SDOT_EQL){ //!	AffectInstr -> Variable AFFECT Expression
 			//!< Variable -> ID
-			tOpen("affect");
+			//tOpen("affect");
 			pOpen("affect");
 			pLeaf("var",inst_name);
-			tOne(inst_name);
+			//tOne(inst_name);
 			var=cree_n_var_simple(inst_name);
 			PLCC_IFNOT(SDOT_EQL,"':='");
 			pOpen("value");
 				PLCC_NEW; exp=Expression();
 			pClse("value");
 			pClse("affect");
-			tClse("affect");
+			//tClse("affect");
 			instr=cree_n_instr_affect(var,exp);
 		} else PLCC_SYNTAX_ERROR("procedure or affect");
 	} else PLCC_IF(SIF){ //!< IfInstr -> IF Expression THEN Instruction [ ELSE Instruction ] 
-		AOpen("if_instr");
+		pOpen("if_instr");
 			pOpen("if");
 			PLCC_IFNOT(SIF,"if"); PLCC_NEW;
 				exp=Expression();
@@ -319,9 +311,9 @@ n_instr*Instruction(int next_id){
 				pClse("else");
 			}
 			instr=cree_n_instr_si(exp,instr,instr2);
-		AClse("if_instr");
+		pClse("if_instr");
 	} else PLCC_IF(SWHILE){ //!< WhileInstr -> WHILE Expression DO Instruction
-		AOpen("while_instr");
+		pOpen("while_instr");
 			pOpen("while");
 				PLCC_IFNOT(SWHILE,"while"); PLCC_NEW;
 				exp=Expression();
@@ -331,15 +323,15 @@ n_instr*Instruction(int next_id){
 				instr=Instruction(SEND);
 				instr=cree_n_instr_tantque(exp,instr);
 			pClse("do");
-		AClse("while_instr");
+		pClse("while_instr");
 	} else PLCC_IF(SBEGIN){ //!< BlocInstr -> BEGIN Instruction { ';' Instruction } ';' END 
 		instr=BlocInstr();
 	} else PLCC_IF(SWRITE){
 		PLCC_NEW; PLCC_IFNOT('(',"'('");
 		PLCC_NEW; exp=Expression();
-		AOpen("write");
+		pOpen("write");
 		instr=cree_n_instr_ecrire(exp);
-		AClse("write");
+		pClse("write");
 		PLCC_NEW;
 	} else PLCC_SYNTAX_ERROR("instruction");
 	pClse("instruction");
@@ -353,21 +345,21 @@ n_l_exp*ListeParam(){
 	PLCC_IF(')') return NULL;
 	pOpen("liste_params");
 	curr=tete=cree_n_l_exp(Expression(),NULL);
-	tOpen("l_exp");
+	//tOpen("l_exp");
 	PLCC_IF(',') PLCC_NEW;
 	else goto listeparamEnd;
 	while (1){
 		pOpen("value");
-		tOpen("l_exp");
+		//tOpen("l_exp");
 		queue=cree_n_l_exp(Expression(),NULL);
-		tClse("l_exp");
+		//tClse("l_exp");
 		curr->queue=queue;
 		pClse("value");
 		PLCC_IF(',') PLCC_NEW;
 		else goto listeparamEnd;
 	}
 	listeparamEnd: 
-		tClse("l_exp");
+		//tClse("l_exp");
 		pClse("liste_params");
 		return tete;
 }
@@ -376,13 +368,10 @@ n_l_exp*ListeParam(){
 n_exp*Expression(){
 	n_exp*exp1,*exp2;operation op;
 	pOpen("expression");
-	PLCC_ILL_IMPLEMENED;
 	exp1=SimpleExpression();
 	if(uc=='<'||uc=='='||uc=='>'||uc==SINF_EQL||uc==SSUP_EQL||uc==SDIF_THN) {
-		tOpen("op_expr");
 		op=Relation(); exp2=SimpleExpression();
 		exp1=cree_n_exp_op(op,exp1,exp2);
-		tClse("op_expr");
 	}
 	pClse("expression");
 	return exp1;
@@ -392,14 +381,14 @@ n_exp*Expression(){
 n_exp*SimpleExpression(){
 	n_exp*exp1,*exp2; operation op;
 	pOpen("simple_expression");
-	PLCC_ILL_IMPLEMENED;
+	//PLCC_ILL_IMPLEMENED;
 	exp1=Facteur(); 
 	if (uc=='+' || uc=='-' || uc==SOR) {
-		tOpen("op_expr");
+		//tOpen("op_expr");
 		op=OpAdd();
 		exp2=SimpleExpression();
 		exp1=cree_n_exp_op(op,exp1,exp2);
-		tClse("op_expr");
+		//tClse("op_expr");
 	}
 	pClse("simple_expression");
 	return exp1;
@@ -408,22 +397,22 @@ n_exp*SimpleExpression(){
 //! Facteur -> [ RelationUnaire ] Predicat [ OpMult Facteur ] 
 n_exp*Facteur(){
 	n_exp *exp1,*exp2;operation op;
-	PLCC_ILL_IMPLEMENED;
+	//PLCC_ILL_IMPLEMENED;
 	pOpen("factor");
 	if (uc=='-'||uc==SNOT)	{
-		tOpen("op_expr");
+		//tOpen("op_expr");
 		op=RelationUnaire();
 		exp1=Predicat();
 		exp1=cree_n_exp_op(op,exp1,NULL);
-		tClse("op_expr");
+		//tClse("op_expr");
 	} else exp1=Predicat();
 	
 	if (uc=='*'||uc==SMOD||uc==SAND||uc=='/') {
-		tOpen("op_expr");
+		//tOpen("op_expr");
 		op=OpMult();
 		exp2=Facteur();
 		exp1=cree_n_exp_op(op,exp1,exp2);
-		tClse("op_expr");
+		//tClse("op_expr");
 	}
 	pClse("factor");
 	return exp1;
@@ -436,29 +425,29 @@ n_exp*Predicat(){
 	
 	pOpen("predicat");
 	PLCC_IF(SNUMERAL) {
-		pLeaf("numeral",yytext); tOne(yytext);
+		pLeaf("numeral",yytext); //tOne(yytext);
 		exp=cree_n_exp_entier(atoi(yytext));
 	} else PLCC_IF(SIDENT){
 		strcpy(inst_name,yytext); PLCC_NEW;
 		PLCC_IF('('){			//!< AppelFunction -> ID '(' ListeParam ')'
-			tOpen("appel");
-			tOne(inst_name);
+			//tOpen("appel");
+			//tOne(inst_name);
 			pLeaf("function",inst_name);
 			PLCC_NEW; args=ListeParam();
 			PLCC_IFNOT(')',"')'");
 			exp=cree_n_exp_appel(cree_n_appel(inst_name,args));
-			tClse("appel");
+			//tClse("appel");
 		} else PLCC_IF('['){ 	//!< Variable -> ID '[' Expression ']'
-			AOpen("table");
+			pOpen("table");
 			pLeaf("id",inst_name);
 			pOpen("at");
 			PLCC_NEW; exp=Expression();
 			PLCC_IFNOT(']',"']'");
-			AClse("table");
+			pClse("table");
 			pClse("at");
 			exp=cree_n_exp_var(cree_n_var_indicee(inst_name,exp));
 		} else {				//!< Variable -> ID
-			pLeaf("variable",inst_name); tOne(inst_name);
+			pLeaf("variable",inst_name); //tOne(inst_name);
 			pClse("predicat");
 			return cree_n_exp_var(cree_n_var_simple(inst_name));;
 		}
@@ -479,10 +468,14 @@ n_exp*Predicat(){
 //! OpMult -> '*' | DIV | MOD | AND
 operation OpMult(){
 	operation op;
-	PLCC_IF('*') {pLeaf("operation","*");tOne("*");op=fois;}
-	else PLCC_IF('/') {pLeaf("operation","/");tOne("/");op=divise;}
-	else PLCC_IF(SMOD) {pLeaf("operation","mod");tOne("%");op=modulo;}
-	else PLCC_IF(SAND) {pLeaf("operation","and");tOne("&");op=et;}
+	PLCC_IF('*') {pLeaf("operation","*");//tOne("*");
+	op=fois;}
+	else PLCC_IF('/') {pLeaf("operation","/");//tOne("/");
+	op=divise;}
+	else PLCC_IF(SMOD) {pLeaf("operation","mod");//tOne("%");
+	op=modulo;}
+	else PLCC_IF(SAND) {pLeaf("operation","and");//tOne("&");
+	op=et;}
 	else PLCC_SYNTAX_ERROR("'*','/', 'mod' or 'and'");
 	PLCC_NEW; return op;
 }
@@ -490,9 +483,12 @@ operation OpMult(){
 //! OpAdd -> '+' | '-' | OR
 operation OpAdd(){
 	operation op;
-	PLCC_IF('+') {pLeaf("operation","+");tOne("+");op=plus;}
-	else PLCC_IF('-') {pLeaf("operation","-");tOne("-");op=moins;}
-	else PLCC_IF(SOR) {pLeaf("operation","or");tOne("|");op=ou;}
+	PLCC_IF('+') {pLeaf("operation","+");//tOne("+");
+	op=plus;}
+	else PLCC_IF('-') {pLeaf("operation","-");//tOne("-");
+	op=moins;}
+	else PLCC_IF(SOR) {pLeaf("operation","or");//tOne("|");
+	op=ou;}
 	else PLCC_SYNTAX_ERROR("'+','-' or 'or'");
 	
 	PLCC_NEW; return op;
@@ -502,12 +498,18 @@ operation OpAdd(){
 operation Relation(){
 	operation op=0;
 
-	PLCC_IF('<') {pLeaf("relation","'<'");tOne("<");op=inf;}
-	else PLCC_IF('=') {pLeaf("relation","'='");tOne("=");op=egal;}
-	else PLCC_IF('>')	{pLeaf("relation","'>'");tOne(">");op=sup;}
-	else PLCC_IF(SINF_EQL)	{pLeaf("relation","'<='");tOne("<=");op=infeg;}
-	else PLCC_IF(SSUP_EQL)	{pLeaf("relation","'>='");tOne(">=");op=supeg;}
-	else PLCC_IF(SDIF_THN)	{pLeaf("relation","'!='");tOne("!=");op=diff;}
+	PLCC_IF('<') {pLeaf("relation","'<'");//tOne("<");
+	op=inf;}
+	else PLCC_IF('=') {pLeaf("relation","'='");//tOne("=");
+	op=egal;}
+	else PLCC_IF('>')	{pLeaf("relation","'>'");//tOne(">");
+	op=sup;}
+	else PLCC_IF(SINF_EQL)	{pLeaf("relation","'<='");//tOne("<=");
+	op=infeg;}
+	else PLCC_IF(SSUP_EQL)	{pLeaf("relation","'>='");//tOne(">=");
+	op=supeg;}
+	else PLCC_IF(SDIF_THN)	{pLeaf("relation","'!='");//tOne("!=");
+	op=diff;}
 	else PLCC_SYNTAX_ERROR("relation");
 	
 	PLCC_NEW; return op;
@@ -516,8 +518,10 @@ operation Relation(){
 //! RelationUnaire -> '-' | NOT
 operation RelationUnaire(){
 	operation op;
-	PLCC_IF('-') {pLeaf("relation_unaire","'-'");tOne("-");op=negatif;}
-	else PLCC_IF(SNOT) {pLeaf("relation_unaire","'non'");tOne("!");op=non;}
+	PLCC_IF('-') {pLeaf("relation_unaire","'-'");//tOne("-");
+	op=negatif;}
+	else PLCC_IF(SNOT) {pLeaf("relation_unaire","'non'");//tOne("!");
+	op=non;}
 	else PLCC_SYNTAX_ERROR("relation");
 	
 	PLCC_NEW; return op;
@@ -559,26 +563,26 @@ operation RelationUnaire(){
 /********** Affichage */
 
 #ifdef MK_MARKUP
-void markupOpen(char *s){
+void markupOpen(const char *s){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
 	printf("%s<%s>%s\n",C_GREY,s,C_CLEAR);
 	ident_level+=2;
 }
 
-void markupClose(char *s){
+void markupClose(const char *s){
 	int i;
 	ident_level-=2;
 	for(i=0;i<ident_level;i++) printf(" ");
 	printf("%s</%s>%s\n",C_GREY,s,C_CLEAR);
 }
 
-void markupLeaf(char *s, char *val){
+void markupLeaf(const char *s, const char *val){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
 	printf("%s<%s>%s%s%s</%s>%s\n",C_ORANGE,s,C_GREEN,val,C_ORANGE,s,C_CLEAR);
 }
-void markupOne(char *s){
+void markupOne(const char *s){
 	int i;
 	for(i=0;i<ident_level;i++) printf(" ");
 	printf("%s<%s />%s\n",C_ORANGE,s,C_CLEAR);

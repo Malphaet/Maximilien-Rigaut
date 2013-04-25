@@ -24,7 +24,9 @@
 #include "yyparse.h"
 #include "dico.h"
 #include "code3.h"
-
+#ifdef MK_TREE
+#include "show_arbre.h"
+#endif
 
 char yytext[SIZE_TEXT], /**< The analysed lexeme */
 	 *file_in_progress;  /**< The name of the file currently analysed */
@@ -50,6 +52,9 @@ int main(int argc, char **argv) {
 		do {printf("%s%3d %s%s%s\n",C_GREEN,uc,C_ORANGE,yytext,C_CLEAR);} while ((uc=yylex())!=0);p+=1;
 	#else
 		p=Programme();
+		#ifdef MK_TREE
+		show_n_prog(p);
+		#endif
 		#ifdef MK_C3
 			walk_code(p);
 			show_code(yyout);

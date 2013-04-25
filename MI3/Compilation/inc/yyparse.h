@@ -42,10 +42,10 @@ int uc; /**< Processed lexeme */
 
 /* Xml tags */
 #ifdef MK_MARKUP
-	void markupClose(char *s);
-	void markupOpen(char *s);
-	void markupLeaf(char *s, char *val);
-	void markupOne(char *s);
+	void markupClose(const char *s);
+	void markupOpen(const char *s);
+	void markupLeaf(const char *s,const char *val);
+	void markupOne(const char *s);
 	#define AOpen markupOpen
 	#define AClse markupClose
 	#define ALeaf markupLeaf

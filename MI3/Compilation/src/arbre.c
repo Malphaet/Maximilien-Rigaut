@@ -11,7 +11,7 @@
 n_type *cree_n_type_int(void){
     n_type *n = malloc(sizeof(n_type)); CHECK_PTR(n);
     n->type = t_int;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a type object (bool)
@@ -19,7 +19,7 @@ n_type *cree_n_type_int(void){
 n_type *cree_n_type_bool(void){
     n_type *n = malloc(sizeof(n_type)); CHECK_PTR(n);
     n->type = t_bool;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a type object (array)
@@ -33,7 +33,7 @@ n_type *cree_n_type_array(n_type *t, int debut, int fin){
     n->debut = debut;
     n->fin = fin;
     n->arrayof = t;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a function call 
@@ -46,7 +46,7 @@ n_appel *cree_n_appel(char *fonction, n_l_exp *args){
     n->args = args;
     //! @todo update
     //if (cherche(fonction)<0) PLCC_WARNING("%s doesn't exist",fonction)
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a program 
@@ -60,7 +60,7 @@ n_prog *cree_n_prog(n_l_dec *variables, n_l_fun_dec *fonctions, n_instr *corps){
     n->variables = variables;
     n->fonctions = fonctions;
     n->corps = corps;
-    DPRINT;
+    
     //tClse("prog");
     return n;
 }
@@ -74,7 +74,7 @@ n_var *cree_n_var_simple(char *nom){
     n->nom = nom;
     //! @todo update
     //if (cherche(nom)<0) PLCC_WARNING("%s doesn't exist",nom); // Maybe you create it for declaration
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an indexed variable (an array cell)
@@ -88,7 +88,7 @@ n_var *cree_n_var_indicee(char *nom, n_exp *indice){
     n->indice = indice;
     //! @todo check existence
     //if (cherche(nom)<0) PLCC_WARNING("%s doesn't exist",nom);
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (operation) 
@@ -103,7 +103,7 @@ n_exp *cree_n_exp_op(operation op, n_exp *op1, n_exp *op2){
     n->u.opExp_.op1 = op1;
     n->u.opExp_.op2 = op2;
     //! @todo check types
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (call) 
@@ -115,7 +115,7 @@ n_exp *cree_n_exp_appel(n_appel *app){
     n->u.appel = app;
     //! @todo check
     //if (cherche(app)<0) PLCC_WARNING("%s doesn't exist",app);
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (variable) 
@@ -125,7 +125,7 @@ n_exp *cree_n_exp_var(n_var *var){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = varExp;
     n->u.var = var;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (entier)
@@ -135,7 +135,7 @@ n_exp *cree_n_exp_entier(int entier){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = intExp;
     n->u.entier = entier;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (boolean) with true as value
@@ -143,7 +143,7 @@ n_exp *cree_n_exp_entier(int entier){
 n_exp *cree_n_exp_true(){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = trueExp;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (boolean) with false as value
@@ -151,7 +151,7 @@ n_exp *cree_n_exp_true(){
 n_exp *cree_n_exp_false(){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = falseExp;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an expression (read) from input
@@ -159,7 +159,7 @@ n_exp *cree_n_exp_false(){
 n_exp *cree_n_exp_lire(){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = lireExp;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a list of expression with @param tete as fist element and @param queue as pointer to the next element
@@ -168,7 +168,7 @@ n_l_exp *cree_n_l_exp(n_exp *tete, n_l_exp *queue){
     n_l_exp *n = malloc(sizeof(n_l_exp)); CHECK_PTR(n);
     n->tete = tete;
     n->queue = queue;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (increment) 
@@ -179,7 +179,7 @@ n_instr *cree_n_instr_incr(n_exp *incr){
     n->type = incrInst;
     n->u.incr = incr;
     //! @todo check type
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (if) 
@@ -194,7 +194,7 @@ n_instr *cree_n_instr_si(n_exp *test, n_instr *alors, n_instr *sinon){
     n->u.si_.alors = alors;
     n->u.si_.sinon = sinon;
     //! @todo check type
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (while)
@@ -207,7 +207,7 @@ n_instr *cree_n_instr_tantque(n_exp *test, n_instr *faire){
     n->u.tantque_.test = test;
     n->u.tantque_.faire = faire;
     //! @todo check type
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (affect)
@@ -221,7 +221,7 @@ n_instr *cree_n_instr_affect(n_var *var, n_exp *exp){
     n->u.affecte_.exp = exp;
     //! @todo check types, existence
     //if (cherche(var->nom)<0) PLCC_WARNING("%s doesn't exist",var->nom);
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a list of instructions 
@@ -232,7 +232,7 @@ n_l_instr *cree_n_l_instr(n_instr *tete, n_l_instr *queue){
     n_l_instr *n = malloc(sizeof(n_l_instr)); CHECK_PTR(n);
     n->tete = tete;
     n->queue = queue;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (block)
@@ -242,7 +242,7 @@ n_instr *cree_n_instr_bloc(n_l_instr *liste){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
     n->type = blocInst;
     n->u.liste = liste;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (call) 
@@ -254,7 +254,7 @@ n_instr *cree_n_instr_appel(n_appel *app){
     n->u.appel = app;
     //! @todo check existence
     //if (cherche(app->fonction)<0) PLCC_WARNING("%s doesn't exist",app->fonction);
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (write)
@@ -264,7 +264,7 @@ n_instr *cree_n_instr_ecrire(n_exp *expression){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
     n->type = ecrireInst;
     n->u.ecrire_.expression = expression;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create an instruction (void)
@@ -272,7 +272,7 @@ n_instr *cree_n_instr_ecrire(n_exp *expression){
 n_instr *cree_n_instr_vide(void){
     n_instr *n = malloc(sizeof(n_instr)); CHECK_PTR(n);
     n->type = videInst;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a variable declaration
@@ -284,7 +284,7 @@ n_dec *cree_n_dec_var(char *nom, n_type *t){
     n->type = t;
     n->nom = nom;
     ajoutevariable(nom,t);
-    DPRINT;return n;
+    return n;
 }
 /** Create a function declaration
  * @param nom The function name
@@ -301,7 +301,7 @@ n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, n_l_dec *param, n_l_dec *variab
     n->variables = variables;
     n->corps = corps;
     ajoutefonction(nom,t,param);
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a list of variables declarations 
@@ -312,7 +312,7 @@ n_l_dec *cree_n_l_dec(n_dec *tete, n_l_dec *queue){
     n_l_dec *n = malloc(sizeof(n_l_dec)); CHECK_PTR(n);
     n->tete = tete;
     n->queue = queue;
-    DPRINT;return n;
+    return n;
 }
 
 /** Create a list of function declarations
@@ -323,5 +323,9 @@ n_l_fun_dec *cree_n_l_fun_dec(n_fun_dec *tete, n_l_fun_dec *queue){
     n_l_fun_dec *n = malloc(sizeof(n_l_fun_dec)); CHECK_PTR(n);
     n->tete = tete;
     n->queue = queue;
-    DPRINT;return n;
+    return n;
 }
+
+#ifdef MK_TREE
+#include "./show_arbre.c"
+#endif
