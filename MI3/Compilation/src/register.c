@@ -49,7 +49,8 @@ int*dernier_appel;
 #define ADD_IF(a) if (i>(a)) (a)=i;
 void trouve_dernier_appel(){
 	int i;
-	dernier_appel=malloc(line_code3*sizeof(int));
+	dernier_appel=malloc(line_code3*sizeof(int)); CHECK_PTR(dernier_appel);
+	jump_targets=calloc(size_code3, sizeof(char)); CHECK_PTR(jump_targets);
 	for(i=0;i<line_code3;i++) dernier_appel[i]=-1;
 	
 	for(i=0;i<line_code3;i++) 
@@ -62,21 +63,40 @@ void trouve_dernier_appel(){
 				// Only the first argument is used
 				ADD_IF(dernier_appel[code[i].arg1]);
 			}
-	}
+		} else if ((code[i].op==jump)||(code[i].op==jumpif0)){
+			jump_targets[i]=1;
+		}
+	
 	//for(i=0;i<line_code3;i++) printf("%i | %i\n",i,dernier_appel[i]);
 }
 #undef NOT_OP
 #undef ADD_IF
 
+/** Initalize the registers */
+void init_registers(){
+	int i;
+	for(i=0;i<SIZE_REGISTER;i++)registre[i]=-1;
+}
+
+/** Free the register associated to the ligne if that line was used for the last time */
+void free_register(int ligne,int curr_ligne){
+	int r;
+	r=registre_associe(ligne);
+	if (r<0) return;
+	if (dernier_appel[r]<=curr_ligne) registre[r]=-1;
+}
+/** Find the first free register */
 int registre_libre(int ligne){
 	int i;
 	//if ((i=registre_associe(ligne))>0) return i; // The line already is in the register
-	for(i=0;i<SIZE_REGISTER;i++) if (registre[i]!=-1) {
-		registre[i]=ligne; return i;
+	for(i=0;i<SIZE_REGISTER;i++) if (registre[i]==-1) {
+		registre[i]=ligne; 
+		return i;
 	}
 	return -1;
 }
 
+/** Find the register associated with the register */
 int registre_associe(int ligne){
 	int i;
 	for(i=0;i<SIZE_REGISTER;i++) if (registre[i]==ligne){

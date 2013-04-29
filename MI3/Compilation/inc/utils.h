@@ -52,32 +52,46 @@
 #endif
 
 /* ====== Definitions =======*/
-#define SIZE_TEXT 521
+#define SIZE_TEXT 	521
+#define SIZE_REGISTER 	10
+#define SIZE_CODE_INIT 20
+#define MAX_DICO 	100 /**< The max number of definitions */
+#define SIZEOF_INT  	4   /**< Sizeof an int */
+#define SIZEOF_CHAR 	1   /**< Sizeof an char */
+#define SIZEOF_BOOL 	1   /**< Sizeof a boolean */
+
 extern char yytext[SIZE_TEXT],*file_in_progress;
 extern FILE *yyin;
 extern unsigned int line_number,char_number,word_size;
 extern int registre[];
+extern char *jump_targets;
+extern char *op2string[];
 
 /* ========= Defines ==========*/
 
 #define PLCC_WHERE(out) fprintf(out,"%s%s:%s%d:%d:%s",C_YELLOW,file_in_progress,C_YELLOW,line_number,char_number,C_CLEAR)
 #define ERROR(msg)	{WHERE; perror(msg);exit(EXIT_FAILURE);}
-#define PLCC_ERROR(...)       {PLCC_WHERE(stderr);\
+#define PLCC_ERROR(...) {WHERE;PLCC_WHERE(stderr);\
                                     fprintf(stderr,"%s plcc error: %s",C_ORANGE,C_CLEAR);\
 				    fprintf(stderr,__VA_ARGS__);\
 				    fprintf(stderr,"%s\n",C_CLEAR);\
 				    exit(EXIT_FAILURE);}
-
-#define PLCC_WARNING(...)	{WHERE;PLCC_WHERE(stderr);\
+				    
+#define PLCC_WARNING(...) {WHERE;PLCC_WHERE(stderr);\
 				    fprintf(stderr,"%s plcc warning: %s",C_YELLOW,C_CLEAR);\
 				    fprintf(stderr,__VA_ARGS__);\
                                     fprintf(stderr,"%s\n",C_CLEAR);}
                                     
-#define PLCC_INFO(...)	      {PLCC_WHERE(stdout);\
+#define PLCC_INFO(...)	    {PLCC_WHERE(stdout);\
 				    fprintf(stdout," plcc info: ");\
 				    fprintf(stdout,__VA_ARGS__);\
                                     fprintf(stdout,"\n");}
-				    
+				
+#define PLCC_SYNTAX_ERROR(expected)	{PLCC_ERROR("Syntax error : Expected %s found '%s' <%d>",expected,yytext,uc);}
+#define PLCC_NOT_IMPLEMENTED 		{PLCC_ERROR("Not implemented error: %s <%d>",yytext,uc);}
+#define PLCC_UNTESTED			{PLCC_WARNING("The current section is untested/untrusted\n");}
+#define PLCC_ILL_IMPLEMENED		{PLCC_WARNING("The current section isn't fully implemented yet\n");}
+    
 #define OUT(msg)		{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
 #define CHECK_PTR(ptr)	do {if (ptr==NULL) OUT("Allocation error, exiting");} while (0);
 #define CHECK_VAR(var) do {if (cherche(var)<0) PLCC_ERROR("%s doesn't exist",var);} while (0);
@@ -85,11 +99,8 @@ extern int registre[];
 
 #ifdef DEBUG
 #define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define DPRINT {printf("%sAt %s%3d (%02d:%02d)%s of %s:%s %s%s\n",\
-                  C_GREY,C_ORANGE,__LINE__,line_number,char_number,C_GREY,__FILE__,C_GREEN,__func__,C_CLEAR);}
 #else
-#define WHERE		printf("In %s line %d (%s)\n",__FILE__,__LINE__,__func__)
-#define DPRINT 
+#define WHERE
 #endif
 
 #endif

@@ -4,6 +4,7 @@
 #include "yyparse.h"
 #include "dico.h"
 #include "utils.h"
+#include "code3.h"
 
 /** @file arbre.c The syntax tree */
 /** Create a type object (int) 
@@ -293,14 +294,14 @@ n_dec *cree_n_dec_var(char *nom, n_type *t){
  * @param variables The var
  * @param corps The function body
  * @return The aforementionned object*/
-n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, n_l_dec *param, n_l_dec *variables, n_prog *corps){
+n_fun_dec *cree_n_dec_fonc(char *nom, n_type *t, n_l_dec *prms, n_l_dec *variables, n_prog *corps){
     n_fun_dec *n = malloc(sizeof(n_fun_dec)); CHECK_PTR(n);
     n->nom = nom;
     n->type = t;
-    n->param = param;
+    n->param = prms;
     n->variables = variables;
     n->corps = corps;
-    ajoutefonction(nom,t,param);
+    ajoutefonction(nom,t,prms);
     return n;
 }
 

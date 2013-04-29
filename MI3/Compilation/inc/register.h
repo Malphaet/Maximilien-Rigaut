@@ -19,13 +19,16 @@
 #define __REGISTER_H__
 
 /* ========= Defines  ==========*/
-#define SIZE_REGISTER 10
+#define nouveau_registre(d,ligne) registre_libre(ligne) //*< Create new register, switch if not available */
+#define trouve_registre(ligne)		registre_associe(ligne) /**< Find register, switch if needed */
 
 
 /* ======== Prototype =========*/
 void trouve_dernier_appel();
 int registre_libre(int ligne);
 int registre_associe(int ligne);
+void init_registers();
+void free_register(int,int);
 //int optimise_registres();
 
 #endif

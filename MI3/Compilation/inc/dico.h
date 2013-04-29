@@ -10,8 +10,6 @@
 
 
 /*---------- Defines -----------*/
-#define MAX_DICO 100    /**< The max number of definitions */
-
 #define GLOBAL 0        /**< Context global */
 #define LOCAL 1         /**< Context local */
 #define FONCTION 2      /**< Inside Function */
@@ -20,7 +18,6 @@
 extern int context_var; /**< The current context of variables (GLOBAL or LOCAL) */
 extern unsigned int adresseGlobaleCourante, /**< The current global variable index */
   adresseLocaleCourante;    /**< The current local variable index */
-
 
 /*---------- Typedef -----------*/
 /** A variable used in the program */
@@ -53,8 +50,8 @@ void afficherDico();
 void entreefonction(void);
 void sortiefonction(void);
 
-/* Registres */
-int *fill_last_calls();
-int free_register(int);
-int find_register(int);
+///* Registres */
+//int *fill_last_calls();
+//int free_register(int);
+//int find_register(int);
 #endif

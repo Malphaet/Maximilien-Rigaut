@@ -89,7 +89,7 @@ n_l_dec* ListeDeclVar(){
 //! DeclVar -> ID { ',' ID } ':' Type
 n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
-	char*var; n_type*ty,*tt=malloc(sizeof(n_type)); CHECK_PTR(tt);
+	char*var; n_type*ty,*tt=calloc(1,sizeof(n_type)); CHECK_PTR(tt);
 	tete=queue=cree_n_l_dec(NULL,NULL);
 	//tOpen("l_dec_var");
 	while (1){

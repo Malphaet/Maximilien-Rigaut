@@ -27,10 +27,21 @@
 #include "arbre.h"
 #include "dico.h"
 #include "code3.h"
+#include "register.h"
 #include "utils.h"
 
-#define SIZE_CODE_INIT 20
+char *op2string[] = {"add", "sub", "mul", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
+		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
+		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};
 
+//char *op2code[] = {"add", "sub", "mul", "div", "rem", 
+					//"eql", "dif", "inf", "sup", "infeq", "supeq", 
+		             //"or", "and", "not", "neg",
+		             //"read", "write", "load", "store", "ltab", "stab", 
+		             //"li","addi","j", "beqz",
+		             //"param", "call", "entering", "exiting"};
+
+char* jump_targets;
 /** Walk down the prog tree, and convert it to code3 */
 void walk_code(n_prog*n){
 	init_code();
@@ -94,7 +105,7 @@ void walk_inst(n_instr *i){
 			
 			walk_inst(i->u.si_.alors); add_line(jump,0,0,NULL);
 			jumpto2=&code[line_code3-1].arg2; // The line to exit (still unknown)
-			
+			//printf("%p %p \n",jumpto,jumpto2);
 			if (i->u.si_.sinon!=NULL) {
 				*jumpto=line_code3;
 				walk_inst(i->u.si_.sinon);
@@ -194,15 +205,16 @@ void walk_exp(n_exp *e){
 /** Utilities */
 void init_code(){
     size_code3 = SIZE_CODE_INIT;
-    code = (struct three_tuple *) malloc (size_code3 * sizeof(struct three_tuple)); CHECK_PTR(code);
+    code = (struct three_tuple*)malloc(size_code3*sizeof(struct three_tuple)); CHECK_PTR(code);
+    jump_targets=(char*) malloc(size_code3*sizeof(char)); CHECK_PTR(jump_targets);
     line_code3 = 0;
 }
 
 void add_line(c3_op op, int arg1, int arg2, char *var){
     if (line_code3 >= size_code3){
         size_code3 *= 2;
-        code = realloc (code, size_code3 * sizeof(struct three_tuple));
-        CHECK_PTR(code);
+        code = realloc(code,size_code3*sizeof(struct three_tuple)); CHECK_PTR(code);
+        //jump_targets=realloc(jump_targets, size_code3*sizeof(char)); CHECK_PTR(jump_targets);
     }
     code[line_code3].op = op;
     code[line_code3].arg1 = arg1;
@@ -220,9 +232,6 @@ void add_line_var(c3_op op, int arg1, int arg2, char *var,int addr, int mode){
 void show_code(FILE*f){
 	int l=0,s=1;
     char format[51];
-    char *op2string[] = {"add", "sub", "time", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
-		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
-		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};
 		             
 	while (line_code3>s) {s*=10; l++;}
 	if (f==NULL) {
@@ -260,13 +269,145 @@ void show_code(FILE*f){
 				fprintf(f,"%i, ", code[l].arg1);	
 			case jump:
 				fprintf(f,"%i", code[l].arg2);	
-			default: 
-				PLCC_ERROR("fatal");break;
+				break;
+			default:
+				fprintf(f,"\n%i: %i %i %i %s\n",l, code[l].op,code[l].arg1,code[l].arg2,code[l].var);	
+				PLCC_WARNING("Unhandled mode in switch");
+				break;
 			}
         fprintf(f,"\n");
     }
     printf("%s",C_CLEAR);
 }
 
+#define NEW_R		nouveau_registre(dernier, l)
+#define FIND_R1	r1=trouve_registre(code[l].arg1)
+#define FIND_R2	r2=trouve_registre(code[l].arg2)
+#define CHECK(a)	free_register(a,l);
+#define UNDEF		THR_REG("UDEF");
+//#define CMNT(a)	fprintf(f,"# %s",a);
 
-
+/** Show assembly code, with prettyness if stdout and available */
+void show_assembly(FILE*f){
+	int l=0,s=1,r1,r2; char format[51],line[20],reg[20]/*,label[10]*/;
+	while (line_code3>s) {s*=10; l++;}
+	if (f==NULL) {f=stdout;} 
+	sprintf(format,"j%%-%dd : %%-5s$t%%-2i, $t%%-2i, $t%%-2i",l);
+	sprintf(line,"j%%-%dd : %%-5s ",l); 
+	sprintf(reg,"$%%c%%d");
+	//sprintf(label,"%%s");
+	
+	#define LINE(n,s)	fprintf(f,line,n,s);
+	#define REG(t,n)	fprintf(f,reg,t,n);
+	#define LABEL(...)	fprintf(f,__VA_ARGS__);
+	#define SEP		fprintf(f,", ");
+	#define THR_REG(s)	LINE(l,s);REG('t',NEW_R);SEP;REG('t',FIND_R1);SEP;REG('t',FIND_R2);
+	//printf("%s",format);
+	
+	for(l=0;l<line_code3;l++){
+		switch (code[l].op){
+			case c3_add:
+				THR_REG("add"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_sub:
+				THR_REG("sub"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_times:
+				THR_REG("mul"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_div:
+				THR_REG("div"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_mod:
+				THR_REG("rem"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_eql:
+				UNDEF;
+				break;
+			case c3_dif:
+				break;
+			case c3_inf:
+				THR_REG("slt"); CHECK(r1); CHECK(r2);
+				break;
+			case c3_sup:
+				LINE(l,"slt");REG('t',NEW_R);SEP;REG('t',FIND_R2);SEP;REG('t',FIND_R1);
+				CHECK(r1); CHECK(r2);
+				break;
+			case c3_infeq:
+				UNDEF;
+				break;
+			case c3_supeq:
+				UNDEF;
+				break;
+			case c3_or:
+				THR_REG("or"); CHECK(r1); CHECK(r2);
+				//fprintf(f,format, l,"or",NEW_R,FIND_R2,FIND_R1);
+				break;
+			case c3_and:
+				THR_REG("and"); CHECK(r1); CHECK(r2);
+				//fprintf(f,format, l,"and",NEW_R,FIND_R2,FIND_R1);
+				break;
+			case c3_no:
+				THR_REG("not"); CHECK(r1); CHECK(r2);
+				//fprintf(f,format, l,"not",NEW_R,FIND_R2,FIND_R1);
+				break;
+			case c3_neg:
+				THR_REG("neg"); CHECK(r1); CHECK(r2);
+				//fprintf(f,format, l,"neg",NEW_R,FIND_R2,FIND_R1);
+				break;
+			case read:
+				UNDEF;
+				break;
+			case write:
+				UNDEF;
+				break;
+			case load:
+				UNDEF;
+				break;
+			case store:
+				UNDEF;
+				break;
+			case ltab:
+				UNDEF;
+				break;
+			case stab:
+				UNDEF;
+				break;
+			case loadimm:
+				LINE(l,"li");REG('t',NEW_R);SEP;LABEL("%d",code[l].arg1);
+				break;
+			case addimm:
+				LINE(l,"li");REG('t',FIND_R1);SEP;LABEL("%d",code[l].arg2);
+				//fprintf(f,format, l,"addi",NEW_R,FIND_R2,FIND_R1);
+				break;
+			case jump:
+				LINE(l,"j");LABEL("j%d",code[l].arg2);
+				//fprintf(f,format, l,"j",NEW_R,FIND_R1,FIND_R2);
+				break;
+			case jumpif0:
+				LINE(l,"beqz");REG('t',FIND_R1);SEP;LABEL("j%d",code[l].arg2);
+				//fprintf(f,format, l,"beqz",NEW_R,FIND_R1,FIND_R2);
+				break;
+			case param:
+				UNDEF;
+				break;
+			case call:
+				UNDEF;
+				break;
+			case entering:
+				UNDEF;
+				break;
+			case exiting:
+				UNDEF;
+				break;
+			default:
+				PLCC_WARNING("Unhandled mode in switch");
+		}
+		fprintf(f,"\n");
+	}
+	printf("%s",C_CLEAR);
+}
+#undef NEW_R
+#undef FIND_R1
+#undef FIND_R2
+#undef UNDEF

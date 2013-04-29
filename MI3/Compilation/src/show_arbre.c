@@ -85,9 +85,7 @@ void show_n_instr(n_instr*l){
 }
 
 /*------ EXPRESSIONS ------*/
- char *op2string[] = {"add", "sub", "time", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
-		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
-		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};
+
 void show_n_exp(n_exp*e){
 	char*str;
 	if (!e) return;
@@ -220,14 +218,5 @@ void show_n_type(n_type*t){
 	}
 }
 #undef MAX
-///*------ EXPRESSIONS ------*/
-//n_exp       *cree_n_exp_op          (operation type, n_exp *op1, n_exp *op2);
-//n_exp       *cree_n_exp_entier      (int entier);
-//n_exp       *cree_n_exp_var         (n_var *var);
-//n_exp       *cree_n_exp_appel       (n_appel *app);
-//n_exp       *cree_n_exp_lire        (void);
-//n_exp       *cree_n_exp_true        (void);
-//n_exp       *cree_n_exp_false       (void);
-
 #undef OPN
 #undef CLS
