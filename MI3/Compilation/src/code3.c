@@ -46,7 +46,7 @@ void walk_code(n_prog*n){
 								
 void walk_prog(n_prog *n){
 	n_l_fun_dec*l=n->fonctions; int*jumpto;
-	n_l_dec/**prms,*/*vars=n->variables;
+	n_l_dec /**prms,*/ *vars=n->variables;
 	
 	if (context_var==LOCAL) LOAD_VARS(vars);
 	
@@ -68,7 +68,7 @@ void walk_prog(n_prog *n){
 
 void walk_inst(n_instr *i){
 	n_l_instr*nxt;n_l_exp*vars;
-	int arg1,arg2,*jumpto,*jumpto2;
+	int arg1,arg2,addr,*jumpto,*jumpto2;
 	if (!i) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (i->type){
@@ -79,10 +79,13 @@ void walk_inst(n_instr *i){
 		case affecteInst:
 			walk_exp(i->u.affecte_.exp);
 			arg1=line_code3-1;
-			if (i->u.affecte_.var->type==simple) add_line(store,arg1,0,i->u.affecte_.var->nom);
+			
+			if ((addr=cherche(i->u.affecte_.var->nom))<0) PLCC_ERROR("%s doesn't exist",i->u.affecte_.var->nom);
+			if (i->u.affecte_.var->type==simple) add_line_var(store,arg1,0,i->u.affecte_.var->nom,addr,dico.tab[addr].mode);
 			else {
 				walk_exp(i->u.affecte_.var->indice); arg2=line_code3-1;
-				add_line(stab,arg1,arg2,i->u.affecte_.var->nom);
+				add_line(addimm,line_code3-1,1,NULL); //< @todo Add the first value of the table, is it always 1 ?
+				add_line_var(stab,arg1,arg2,i->u.affecte_.var->nom,addr,dico.tab[addr].mode);
 			}
 			break;
 		case siInst:
@@ -127,17 +130,18 @@ void walk_inst(n_instr *i){
 }
 
 void walk_exp(n_exp *e){
-	c3_op op=0; int arg1,arg2=0,unaire=0; n_l_exp*vars;
+	c3_op op=0; int arg1,arg2=0,addr,unaire=0; n_l_exp*vars;
 	if (!e) OUT("plcc fatal error: Unexpected null pointer");
 	
 	switch (e->type){
 		case varExp:
-			CHECK_VAR(e->u.var->nom);
-			if (e->u.var->type==simple) add_line(load,0,0,e->u.var->nom);
+			if ((addr=cherche(e->u.var->nom))<0) PLCC_ERROR("%s doesn't exist",e->u.var->nom);
+			if (e->u.var->type==simple) add_line_var(load,0,0,e->u.var->nom,addr,dico.tab[addr].mode);
 			else {
 				walk_exp(e->u.var->indice);
+				add_line(addimm,line_code3-1,1,NULL); //< @todo Add the first value of the table, is it always 1 ?
 				arg1=line_code3-1;
-				add_line(ltab,0,arg1,e->u.var->nom);
+				add_line_var(ltab,0,arg1,e->u.var->nom,addr,dico.tab[addr].mode);
 			}
 			break;
 		case intExp:
@@ -165,6 +169,7 @@ void walk_exp(n_exp *e){
 			}
 			walk_exp(e->u.opExp_.op1); arg1=line_code3-1;
 			if (!unaire) {walk_exp(e->u.opExp_.op2); arg2=line_code3-1;}
+			else arg2=-1;
 			add_line(op,arg1,arg2,NULL);
 			break;
 		case trueExp:
@@ -205,7 +210,13 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
     code[line_code3++].var = var;
 }
 
-/** Print the code to stdout, with prettiness is available */
+void add_line_var(c3_op op, int arg1, int arg2, char *var,int addr, int mode){
+	add_line(op,arg1,arg2,var);
+	code[line_code3-1].adresse=addr;
+	code[line_code3-1].mode=mode;
+}
+
+/** Print the code to stdout, with prettiness if available */
 void show_code(FILE*f){
 	int l=0,s=1;
     char format[51];
@@ -249,9 +260,13 @@ void show_code(FILE*f){
 				fprintf(f,"%i, ", code[l].arg1);	
 			case jump:
 				fprintf(f,"%i", code[l].arg2);	
-			default: break;
+			default: 
+				PLCC_ERROR("fatal");break;
 			}
         fprintf(f,"\n");
     }
     printf("%s",C_CLEAR);
 }
+
+
+

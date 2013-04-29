@@ -24,6 +24,13 @@
 #ifndef __CODE3_H__
 #define __CODE3_H__
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "arbre.h"
+#include "dico.h"
+#include "utils.h"
+
 /** List of code3 operations */
 typedef enum {c3_add, c3_sub, c3_times, c3_div, c3_mod, 
 	      c3_eql, c3_dif, c3_inf, c3_sup, c3_infeq, c3_supeq, 
@@ -39,6 +46,8 @@ struct three_tuple {
   int arg1;	/**< The first parameter */
   int arg2;	/**< The second parameter */
   char *var;	/**< If the operation implies a variable */
+  int adresse;	/**< The adress allowed to the variable */
+  int mode;	/**< The mode (local/global) of the variable */
 } *code; 
 
 int size_code3; /**< Total size of code3 */
@@ -52,4 +61,6 @@ void show_code(FILE*);
 void walk_inst(n_instr*);
 void walk_exp(n_exp*);
 void walk_prog(n_prog*);
+void add_line_var(c3_op op, int arg1, int arg2, char *var,int adresse, int mode);
+
 #endif

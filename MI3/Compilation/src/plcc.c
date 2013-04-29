@@ -24,15 +24,18 @@
 #include "yyparse.h"
 #include "dico.h"
 #include "code3.h"
+#include "register.h"
 #ifdef MK_TREE
 #include "show_arbre.h"
 #endif
 
 char yytext[SIZE_TEXT], /**< The analysed lexeme */
 	 *file_in_progress;  /**< The name of the file currently analysed */
+int registre[SIZE_REGISTER]; /**< The CPU Registers */
 FILE *yyin;				 /**< The file currently analysed */
 
 unsigned int line_number=1,char_number=0,word_size=0,adresseGlobaleCourante=0,adresseLocaleCourante=0;
+
 int context_var=GLOBAL;
 
 /** Main function of the compiler, not much of a parser, just load the necessary, and process
@@ -52,13 +55,21 @@ int main(int argc, char **argv) {
 		do {printf("%s%3d %s%s%s\n",C_GREEN,uc,C_ORANGE,yytext,C_CLEAR);} while ((uc=yylex())!=0);p+=1;
 	#else
 		p=Programme();
+		
 		#ifdef MK_TREE
-		show_n_prog(p);
+			show_n_prog(p);
 		#endif
+		
 		#ifdef MK_C3
 			walk_code(p);
 			show_code(yyout);
 		#endif
+		
+		#ifdef MK_ASM
+			walk_code(p);
+			trouve_dernier_appel();
+		#endif
+		
 		free(p);
 	#endif
 	fclose(yyin); if (argc>2) fclose(yyout);

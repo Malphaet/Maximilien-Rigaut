@@ -33,7 +33,7 @@ else
 endif
 
 EXEC=plcc
-EXEC_O=yylex yyparse arbre dico code3
+EXEC_O=yylex yyparse arbre dico code3 register
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
@@ -43,6 +43,13 @@ all: convert $(EXEC)
 init:
 	$(QUIET)echo "INIT" $(DIRS)
 	$(QUIET)mkdir -p $(DIRS)
+
+tar: cleaner
+	$(QUIET)mkdir -p maximilien_rigaut
+	$(QUIET)cp -r src/ inc/ makefile Doxyfile Readme.md maximilien_rigaut
+	$(QUIET)tar c maximilien_rigaut | gzip > maximilien_rigaut.tar.gz
+	$(QUIET)rm -rf maximilien_rigaut
+	$(QUIET)echo "TAR src/ inc/ makefile Doxyfile Readme.md"
 	
 test_lex: clean
 	$(QUIET)make all tags="MK_LEX"

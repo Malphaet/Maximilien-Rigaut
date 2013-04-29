@@ -35,8 +35,8 @@
 #define PLCC_IF(exp_id) if (uc==exp_id)
 #define PLCC_IFNOT(exp_id,exp) if (uc!=exp_id) PLCC_SYNTAX_ERROR(exp)
 #define PLCC_NEW  (uc=yylex())
-/* ======== Prototype =========*/
 
+/* ======== Prototype =========*/
 
 int uc; /**< Processed lexeme */
 
