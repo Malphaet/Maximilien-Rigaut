@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
 		
 		#ifdef MK_ASM
 			walk_code(p);
+			show_code(yyout);
 			trouve_dernier_appel();
 			init_registers();
 			show_assembly(yyout);

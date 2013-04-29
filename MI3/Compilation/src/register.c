@@ -53,7 +53,7 @@ void trouve_dernier_appel(){
 	jump_targets=calloc(size_code3, sizeof(char)); CHECK_PTR(jump_targets);
 	for(i=0;i<line_code3;i++) dernier_appel[i]=-1;
 	
-	for(i=0;i<line_code3;i++) 
+	for(i=0;i<=line_code3;i++) 
 		if (NOT_OP(jump)&NOT_OP(read)&NOT_OP(call)&NOT_OP(loadimm)&NOT_OP(entering)&NOT_OP(exiting)&NOT_OP(load)){
 			if (NOT_OP(c3_no)&NOT_OP(c3_neg)&NOT_OP(param)&NOT_OP(addimm)&NOT_OP(store)&NOT_OP(jumpif0)&NOT_OP(write)){
 				// The Two arguments are used
