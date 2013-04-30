@@ -1,7 +1,7 @@
 program addmult;
 
 var a, b, op : integer;
-   isadd     : boolean;
+   isadd     : integer;
 
 function add(a, b : integer) : integer;
 begin

@@ -155,6 +155,7 @@ int yylex(){
 			DEL_LINE(chr);
 			yytext[++word_size]=0; word_size--;
 			/*for(i=0;i<word_size;i++)*/ if(!isdigit(yytext[0])) return SIDENT;
+			
 			return SNUMERAL;
 		}
 		yytext[++word_size]=chr; char_number_old=char_number;

@@ -91,23 +91,20 @@ n_l_dec*DeclVar(n_l_dec*next){
 	n_l_dec*tete,*queue;
 	char*var; n_type*ty,*tt=calloc(1,sizeof(n_type)); CHECK_PTR(tt);
 	tete=queue=cree_n_l_dec(NULL,NULL);
-	//tOpen("l_dec_var");
+	
 	while (1){
 		PLCC_IFNOT(SIDENT,"identifier"); pLeaf("id",yytext);
 		var=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(var);
 		strcpy(var,yytext);
 		queue->tete=cree_n_dec_var(var,tt);
-		//tOne(var);
 		PLCC_NEW; PLCC_IF(':') break;
 		else PLCC_IFNOT(',',"','");
-		////tClse("l_dec_var");
-		//tOpen("l_dec_var");
 		queue->queue=cree_n_l_dec(NULL,NULL);
 		queue=queue->queue; PLCC_NEW;
 	}
 	queue->queue=next;
 	PLCC_NEW; ty=Type();*tt=*ty;
-	////tClse("l_dec_var");
+	
 	free(ty); return tete;
 }
 
@@ -420,7 +417,7 @@ n_exp*Facteur(){
 
 //! Predicat -> AppelFunction | NUMERAL | Variable | '(' Expression ')' | read()
 n_exp*Predicat(){
-	n_exp*exp; n_l_exp*args;
+	n_exp*exp=NULL; n_l_exp*args;
 	char*inst_name=malloc(sizeof(char)*(word_size+3)); CHECK_PTR(inst_name);
 	
 	pOpen("predicat");
@@ -451,6 +448,10 @@ n_exp*Predicat(){
 			pClse("predicat");
 			return cree_n_exp_var(cree_n_var_simple(inst_name));;
 		}
+	} else PLCC_IF(STRUE){
+		exp=cree_n_exp_true();
+	} else PLCC_IF(SFALSE){
+		exp=cree_n_exp_false();
 	} else PLCC_IF('('){		//< '(' Expression ')'
 		PLCC_NEW; exp=Expression();
 		PLCC_IFNOT(')',"')'");

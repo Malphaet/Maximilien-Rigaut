@@ -1,8 +1,8 @@
 program quicksort;
 
 var
-   tab : array [1..5] of integer;
    i   : integer;
+   tab : array [1..5] of integer;
 
 procedure switch(a, b : integer);
 var aux	: integer;   
