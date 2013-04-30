@@ -27,7 +27,7 @@ struct n_prog_ {
 
 /** A type object */
 struct n_type_ {
-    enum {t_int, t_bool, t_array} type; /**< The type so to speak */
+    enum {t_int, t_bool, t_array, t_real} type; /**< The type so to speak */
     struct n_type_ *arrayof;            /**< If it's an array: The type of the array's objects */
     int debut;                           /**< The begginning of the array */
     int fin;                             /**< The ending of the said array */
@@ -55,15 +55,16 @@ struct n_appel_{
 };
 
 /** Enumeration of all possibles operations */
-typedef enum {plus, moins, fois, divise, modulo, egal, diff, inf, sup, infeg, supeg, ou, et, non, negatif} operation;
+typedef enum {plus, moins, fois, divise, modulo, egal, diff, inf, sup, infeg, supeg, ou, et, non, negatif,c_int,c_bool,c_real} operation;
 
 /** An expression object */
 struct n_exp_ {
-    enum{varExp, intExp, opExp, trueExp, falseExp, appelExp, lireExp} type; /**< The type of the aforementioned expression */
+    enum{varExp, intExp,realExp, opExp, trueExp, falseExp, appelExp, lireExp} type; /**< The type of the aforementioned expression */
     union{
         struct{operation op; struct n_exp_ *op1; struct n_exp_ *op2;} opExp_;
         n_var *var;     /**< The variable contained by the said expression */
         int entier;     /**< The integer contained by the said expresion */
+        double real;    /**< The real contained by the said expresion */
         n_appel *appel; /**< The function call containned by the said expression */
     }u;  /**< The operation of the said expression */
 };
@@ -123,6 +124,7 @@ n_prog      *cree_n_prog            (n_l_dec *variables, n_l_fun_dec *fonctions,
 /*------ TYPES ------*/
 n_type      *cree_n_type_int        (void);
 n_type      *cree_n_type_bool       (void);
+n_type      *cree_n_type_real       (void);
 n_type      *cree_n_type_array      (n_type *t, int debut, int fin);
 
 /*------ DECLARATIONS ------*/
@@ -132,6 +134,7 @@ n_fun_dec   *cree_n_dec_fonc        (char *nom, n_type *t, n_l_dec *param, n_l_d
 /*------ EXPRESSIONS ------*/
 n_exp       *cree_n_exp_op          (operation type, n_exp *op1, n_exp *op2);
 n_exp       *cree_n_exp_entier      (int entier);
+n_exp       *cree_n_exp_real        (double real);
 n_exp       *cree_n_exp_var         (n_var *var);
 n_exp       *cree_n_exp_appel       (n_appel *app);
 n_exp       *cree_n_exp_lire        (void);

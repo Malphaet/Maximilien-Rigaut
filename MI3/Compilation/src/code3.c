@@ -31,7 +31,7 @@
 #include "utils.h"
 
 char *op2string[] = {"add", "sub", "mul", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
-		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
+		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm","loadfimm",
 		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"}; /**< Op 2 strings */
 
 char* jump_targets; /**< Lines target of being jumped to */
@@ -154,6 +154,9 @@ void walk_exp(n_exp *e){
 		case intExp:
 			add_line(loadimm,e->u.entier,0,NULL);
 			break;
+		case realExp:
+			add_line_real(loadfimm,0,0,e->u.real);
+			break;
 		case opExp:
 			switch(e->u.opExp_.op){
 				case plus: 		op=c3_add; break;
@@ -191,6 +194,15 @@ void walk_exp(n_exp *e){
 		case lireExp:
 			add_line(read,0,0,NULL);
 			break;
+		case c_int:
+			add_line(c_int,arg1,0,NULL);
+			break;
+		case c_bool:
+			add_line(c_bool,arg1,0,NULL);
+			break;
+		case c_real:
+			add_line(c_real,arg1,0,NULL);
+			break;
 		default:
 			show_code(NULL);
 			OUT("plcc fatal error: Unhandled mode in switch");
@@ -224,6 +236,11 @@ void add_line_var(c3_op op, int arg1, int arg2, char *var,int addr, int mode){
 	code[line_code3-1].adresse=addr;
 	code[line_code3-1].mode=mode;	
 }
+/** Add a line of 3code, give the information for the used variable */
+void add_line_real(c3_op op, int arg1, int arg2, double real){
+	add_line(op,arg1,arg2,NULL);
+	code[line_code3-1].real=real;
+}
 
 /** Print the code to stdout, with prettiness if available */
 void show_code(FILE*f){
@@ -253,6 +270,9 @@ void show_code(FILE*f){
 				fprintf(f,"%i, ", code[l].arg1);
 			case ltab: 
 				fprintf(f,"%s[%i]", code[l].var, code[l].arg2);
+				break;
+			case loadfimm:
+				fprintf(f,"%f", code[l].real);
 				break;
 			case loadimm:
 			case write:
@@ -426,6 +446,9 @@ void show_assembly(FILE*f){
 				break;
 			case loadimm:
 				LINE_N("li");REG('t',NEW_R);SEP;LABEL("%d",code[l].arg1);
+				break;
+			case loadfimm:
+				LINE_N("li.d");REG('t',NEW_R);SEP;LABEL("%f",code[l].real);
 				break;
 			case addimm:
 				LINE_N("addi");REG('t',NEW_R);SEP;REG('t',FIND_R1);SEP;LABEL("%d",code[l].arg2);

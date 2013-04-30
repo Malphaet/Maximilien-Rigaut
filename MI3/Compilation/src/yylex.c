@@ -151,11 +151,11 @@ int yylex(){
 	/* Else it's an alphanumeric variable or constant */
 	char_number_old=char_number;
 	while ((chr=get_next_char())!=EOF){		
-		if (isspace(chr)||((chr!='_')&&(ispunct(chr)))) {
+		if (isspace(chr)||((chr!='_')&&(chr!='.')&&(ispunct(chr)))) {
 			DEL_LINE(chr);
 			yytext[++word_size]=0; word_size--;
 			/*for(i=0;i<word_size;i++)*/ if(!isdigit(yytext[0])) return SIDENT;
-			
+			//for(i=0;i<word_size;i++) if (yytext[i]=='.') return SREAL;
 			return SNUMERAL;
 		}
 		yytext[++word_size]=chr; char_number_old=char_number;

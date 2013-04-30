@@ -116,7 +116,9 @@ n_type*Type(){
 		t=cree_n_type_int(); pLeaf("type",yytext);//tOne("t_int");
 	} else PLCC_IF(SBOOLEAN) {
 		t=cree_n_type_bool(); pLeaf("type",yytext);//tOne("t_bool");
-	}  else PLCC_IF(SARRAY){
+	} else PLCC_IF(SREAL) {
+		t=cree_n_type_real(); pLeaf("type",yytext);//tOne("t_bool");
+	} else PLCC_IF(SARRAY){
 		PLCC_NEW; PLCC_IFNOT('[',"'['");
 		pOpen("array");
 		
@@ -396,7 +398,7 @@ n_exp*Facteur(){
 	n_exp *exp1,*exp2;operation op;
 	//PLCC_ILL_IMPLEMENED;
 	pOpen("factor");
-	if (uc=='-'||uc==SNOT)	{
+	if (uc=='-'||uc==SNOT||uc==SINTEGER||uc==SREAL||uc==SBOOLEAN){
 		//tOpen("op_expr");
 		op=RelationUnaire();
 		exp1=Predicat();
@@ -424,6 +426,9 @@ n_exp*Predicat(){
 	PLCC_IF(SNUMERAL) {
 		pLeaf("numeral",yytext); //tOne(yytext);
 		exp=cree_n_exp_entier(atoi(yytext));
+	}PLCC_IF(SNUMEREAL) {
+		pLeaf("numeral",yytext); //tOne(yytext);
+		exp=cree_n_exp_real(atof(yytext));
 	} else PLCC_IF(SIDENT){
 		strcpy(inst_name,yytext); PLCC_NEW;
 		PLCC_IF('('){			//!< AppelFunction -> ID '(' ListeParam ')'
@@ -523,7 +528,13 @@ operation RelationUnaire(){
 	op=negatif;}
 	else PLCC_IF(SNOT) {pLeaf("relation_unaire","'non'");//tOne("!");
 	op=non;}
-	else PLCC_SYNTAX_ERROR("relation");
+	else PLCC_IF(SINTEGER){
+		pLeaf("relation_unaire","'int'");op=c_int;
+	}else PLCC_IF(SBOOLEAN){
+		pLeaf("relation_unaire","'bool'");op=c_bool;
+	}else PLCC_IF(SREAL){
+		pLeaf("relation_unaire","'real'");op=c_real;
+	}else PLCC_SYNTAX_ERROR("relation");
 	
 	PLCC_NEW; return op;
 }

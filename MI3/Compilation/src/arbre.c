@@ -22,6 +22,13 @@ n_type *cree_n_type_bool(void){
     n->type = t_bool;
     return n;
 }
+/** Create a type object (real)
+ * @return The aforementionned object*/
+n_type *cree_n_type_real(void){
+    n_type *n = malloc(sizeof(n_type)); CHECK_PTR(n);
+    n->type = t_real;
+    return n;
+}
 
 /** Create a type object (array)
  * @param t The type of the array
@@ -134,6 +141,16 @@ n_exp *cree_n_exp_entier(int entier){
     n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
     n->type = intExp;
     n->u.entier = entier;
+    return n;
+}
+
+/** Create an expression (real)
+ * @param real The real object
+ * @return The aforementionned object*/
+n_exp *cree_n_exp_real(double real){
+    n_exp *n = malloc(sizeof(n_exp)); CHECK_PTR(n);
+    n->type = realExp;
+    n->u.real = real;
     return n;
 }
 

@@ -35,7 +35,7 @@
 typedef enum {c3_add, c3_sub, c3_times, c3_div, c3_mod, 
 	      c3_eql, c3_dif, c3_inf, c3_sup, c3_infeq, c3_supeq, 
 	      c3_or, c3_and, c3_no, c3_neg, 	      
-	      read, write, load, store, ltab, stab, loadimm,
+	      read, write, load, store, ltab, stab, loadimm,loadfimm,
 	      addimm, jump, jumpif0, param, call, entering, exiting} 
   c3_op;
 
@@ -46,6 +46,7 @@ struct three_tuple {
   int arg1;	/**< The first parameter */
   int arg2;	/**< The second parameter */
   char *var;	/**< If the operation implies a variable */
+  double real;/**< If the operation implies a real */
   int adresse;	/**< The adress allowed to the variable */
   int mode;	/**< The mode (local/global) of the variable */
 } *code; 
@@ -63,5 +64,6 @@ void walk_inst(n_instr*);
 void walk_exp(n_exp*);
 void walk_prog(n_prog*);
 void add_line_var(c3_op op, int arg1, int arg2, char *var,int adresse, int mode);
+void add_line_real(c3_op op, int arg1, int arg2, double real);
 
 #endif

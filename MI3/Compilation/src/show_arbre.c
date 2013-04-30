@@ -101,6 +101,12 @@ void show_n_exp(n_exp*e){
 			sprintf(str,"%d",e->u.entier); tOne(str);
 			tClse("intExp");
 			break;
+		case realExp:
+			tOpen("realExp");
+			str=malloc(sizeof(char)*((int)(e->u.real/10+1)+3));CHECK_PTR(str);
+			sprintf(str,"%.2f",e->u.real); tOne(str);
+			tClse("realExp");
+			break;
 		case opExp:
 			tOpen("opExp");
 			tOne(op2string[e->u.opExp_.op]);

@@ -61,6 +61,7 @@ int main(int argc, char **argv){
 	fprintf(f,"#define SSUP_EQL   %d\n",VAL_SYMBOLS(i++));
 	fprintf(f,"#define SIDENT     %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+1));
 	fprintf(f,"#define SNUMERAL   %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+2));
+	fprintf(f,"#define SNUMEREAL  %d\n",VAL_KEYWORDS(SIZE_KEYWORDS+2));
 	for(i=0;i<SIZE_KEYWORDS;i++) {	
 		new=convertToUpperCase(KEYWORDS[i]);
 		fprintf(f,"#define S%-9s %d\n",new,VAL_KEYWORDS(i));

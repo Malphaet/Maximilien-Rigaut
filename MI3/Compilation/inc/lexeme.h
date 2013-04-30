@@ -32,7 +32,7 @@ const char *KEYWORDS[]={
 	"and", "array", "begin", "boolean", "do", "else", 
 	"end", "false", "function", "if", "integer",
 	"mod", "not", "of", "or", "procedure", "program", 
-	"read","then", "true", "var", "while","write"
+	"read","real","then", "true", "var", "while","write"
 };/**< All keywords recognised as lexemes */
 
 #define SIZE_CHAR 256										/**< The number of char symbols */
