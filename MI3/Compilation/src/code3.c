@@ -46,6 +46,7 @@ char* jump_targets;
 void walk_code(n_prog*n){
 	init_code();
 	walk_prog(n);
+	//line_code3--;
 }
 
 #define ADD_APPEL(appel) CHECK_VAR(appel->fonction); vars=appel->args; do {walk_exp(vars->tete);\
@@ -92,11 +93,11 @@ void walk_inst(n_instr *i){
 			arg1=line_code3-1;
 			
 			if ((addr=cherche(i->u.affecte_.var->nom))<0) PLCC_ERROR("%s doesn't exist",i->u.affecte_.var->nom);
-			if (i->u.affecte_.var->type==simple) add_line_var(store,arg1,0,i->u.affecte_.var->nom,addr,dico.tab[addr].mode);
+			if (i->u.affecte_.var->type==simple) add_line_var(store,arg1,0,i->u.affecte_.var->nom,dico.tab[addr].adresse,dico.tab[addr].mode);
 			else {
-				walk_exp(i->u.affecte_.var->indice); arg2=line_code3-1;
+				walk_exp(i->u.affecte_.var->indice); 
 				add_line(addimm,line_code3-1,1,NULL); //< @todo Add the first value of the table, is it always 1 ?
-				add_line_var(stab,arg1,arg2,i->u.affecte_.var->nom,addr,dico.tab[addr].mode);
+				add_line_var(stab,arg1,line_code3-1,i->u.affecte_.var->nom,dico.tab[addr].adresse,dico.tab[addr].mode);
 			}
 			break;
 		case siInst:
@@ -147,12 +148,12 @@ void walk_exp(n_exp *e){
 	switch (e->type){
 		case varExp:
 			if ((addr=cherche(e->u.var->nom))<0) PLCC_ERROR("%s doesn't exist",e->u.var->nom);
-			if (e->u.var->type==simple) add_line_var(load,0,0,e->u.var->nom,addr,dico.tab[addr].mode);
+			if (e->u.var->type==simple) add_line_var(load,0,0,e->u.var->nom,dico.tab[addr].adresse,dico.tab[addr].mode);
 			else {
 				walk_exp(e->u.var->indice);
 				add_line(addimm,line_code3-1,1,NULL); //< @todo Add the first value of the table, is it always 1 ?
 				arg1=line_code3-1;
-				add_line_var(ltab,0,arg1,e->u.var->nom,addr,dico.tab[addr].mode);
+				add_line_var(ltab,0,arg1,e->u.var->nom,dico.tab[addr].adresse,dico.tab[addr].mode);
 			}
 			break;
 		case intExp:
@@ -214,7 +215,6 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
     if (line_code3 >= size_code3){
         size_code3 *= 2;
         code = realloc(code,size_code3*sizeof(struct three_tuple)); CHECK_PTR(code);
-        //jump_targets=realloc(jump_targets, size_code3*sizeof(char)); CHECK_PTR(jump_targets);
     }
     code[line_code3].op = op;
     code[line_code3].arg1 = arg1;
@@ -224,8 +224,11 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
 
 void add_line_var(c3_op op, int arg1, int arg2, char *var,int addr, int mode){
 	add_line(op,arg1,arg2,var);
+	//PLCC_INFO("Var %s at 0x%04d",dico.tab[cherche(nom)].nom,dico.tab[cherche(nom)].adresse);
 	code[line_code3-1].adresse=addr;
 	code[line_code3-1].mode=mode;
+	
+	PLCC_INFO("Var %s at 0x%04d 0x%04d",dico.tab[cherche(var)].nom,dico.tab[cherche(var)].adresse,code[line_code3-1].adresse);
 }
 
 /** Print the code to stdout, with prettiness if available */
@@ -303,17 +306,32 @@ void show_assembly(FILE*f){
 	
 	#define REG(t,n)	fprintf(f,reg,t,n);
 	#define LABEL(...)	fprintf(f,__VA_ARGS__);
-	#define COMMENT(...)fprintf(f,__VA_ARGS__);
+	#define COMMENT(...)fprintf(f,"\t# ");fprintf(f,__VA_ARGS__);
 	#define SEP		fprintf(f,", ");
 	#define NL			fprintf(f,"\n");
 	#define THR_REG(s)	LINE_N(s);REG('t',NEW_R);SEP;REG('t',FIND_R1);SEP;REG('t',FIND_R2);
 	
-	#define LINE_N(s)	fprintf(f,line,/*(jump_targets[l])?l:-1*/l);fprintf(f,instr,s);
+	#ifndef DEBUG
+		#define LINE_N(s)	jump_targets[l]?fprintf(f,line,l):fprintf(f,"%s",vide);fprintf(f,instr,s);
+	#else
+		#define LINE_N(s)	fprintf(f,line,l);fprintf(f,instr,s);
+	#endif
 	#define LINE_V(s)	fprintf(f,"%s",vide);fprintf(f,instr,s);
 	
+	//for(l=0;l<line_code3;l++) printf("%3d ",l); NL;
+	//for(l=0;l<line_code3;l++) printf("%3d ",dernier_appel[l]); NL;
+	//for(l=0;l<line_code3;l++) printf("%3d ",(int)jump_targets[l]); NL;
 	LINE_V(".data");NL;
-	fprintf(f,"vars:");NL;
-	PLCC_WARNING("vars not implemented"); 
+	fprintf(f,"vars:");
+	
+	for(l=0;l<dico.base;l++) {
+		if (dico.tab[l].type->type==t_array) {
+			LABEL(".space %d",sizeof_type(dico.tab[l].type));
+			COMMENT("%s",dico.tab[l].nom);NL;fprintf(f,"%s",vide);
+		}else {LABEL(".word 0");COMMENT("%s",dico.tab[l].nom);NL;fprintf(f,"%s",vide);}
+	}
+	NL;
+	//PLCC_WARNING("vars not implemented"); 
 	LINE_V(".text");NL;
 	
 	for(l=0;l<line_code3;l++){
@@ -334,12 +352,18 @@ void show_assembly(FILE*f){
 				THR_REG("rem"); CHECK(r1); CHECK(r2);
 				break;
 			case c3_eql:
-				LINE_N("li"); REG('t',NEW_R); 		SEP; LABEL("1"); NL;
+				LINE_N("li"); 	REG('t',NEW_R); 	SEP; LABEL("1"); NL;
 				LINE_V("beq"); 	REG('t',FIND_R1); 	SEP; REG('t',FIND_R2); SEP; LABEL("j%d",l+1); NL;
-				LINE_V("li"); 	REG('t',r1); 		SEP; LABEL("1");
-				CHECK(r1); CHECK(r2);
+					jump_targets[l+1]=1;
+				LINE_V("li"); 	REG('t',r); 		SEP; LABEL("1");
+				CHECK(r1); CHECK(r1); CHECK(r2);
 				break;
 			case c3_dif:
+				LINE_N("li"); 	REG('t',NEW_R); 	SEP; LABEL("1"); NL;
+				LINE_V("bne"); 	REG('t',FIND_R1); 	SEP; REG('t',FIND_R2); SEP; LABEL("j%d",l+1); NL;
+					jump_targets[l+1]=1;
+				LINE_V("li"); 	REG('t',r); 		SEP; LABEL("1");
+				CHECK(r1); CHECK(r1); CHECK(r2);
 				break;
 			case c3_inf:
 				THR_REG("slt"); CHECK(r1); CHECK(r2);
@@ -349,12 +373,18 @@ void show_assembly(FILE*f){
 				CHECK(r1); CHECK(r2);
 				break;
 			case c3_infeq:
-				LINE_N("li"); REG('t',NEW_R); 		SEP; LABEL("1"); NL;
-				LINE_V("ble"); 	REG('t',FIND_R1); 	SEP; REG('t',FIND_R2); SEP; LABEL("j%d",l+1); NL;
-				LINE_V("li"); 	REG('t',r1); 		SEP; LABEL("1");
+				LINE_N("li"); 	REG('t',NEW_R); 	SEP; LABEL("1"); NL;
+				LINE_V("ble"); 	REG('t',FIND_R1);	SEP; REG('t',FIND_R2); SEP; LABEL("j%d",l+1); NL;
+					jump_targets[l+1]=1;
+				LINE_V("li"); 	REG('t',r); 		SEP; LABEL("1");
+				CHECK(r1); CHECK(r1); CHECK(r2);
 				break;
 			case c3_supeq:
-				UNDEF;
+				LINE_N("li"); 	REG('t',NEW_R); 	SEP; LABEL("1"); NL;
+				LINE_V("bge"); 	REG('t',FIND_R1);	SEP; REG('t',FIND_R2); SEP; LABEL("j%d",l+1); NL;
+					jump_targets[l+1]=1;
+				LINE_V("li"); 	REG('t',r); 		SEP; LABEL("1");
+				CHECK(r1); CHECK(r1); CHECK(r2);
 				break;
 			case c3_or:
 				THR_REG("or"); CHECK(r1); CHECK(r2);
@@ -379,26 +409,35 @@ void show_assembly(FILE*f){
 				LINE_V("syscall"); CHECK(r1);
 				break;
 			case load:
-				LINE_N("la"); REG('t',FIND_R1); SEP; LABEL("vars");NL;
-				LINE_V("lw"); REG('t',r1); SEP; LABEL("%d($t%d)",0,r1); 		COMMENT("\t# %s",code[l].var);
-				CHECK(r1);
+				LINE_N("la"); REG('t',NEW_R); SEP; LABEL("vars");NL;
+				LINE_V("lw"); REG('t',r); SEP; LABEL("%d($t%d)",code[l].adresse,r); 		
+				COMMENT("load %s<-$t%d",code[l].var,r1);
+				//CHECK(r);
 				break;
 			case store:
-				LINE_N("la"); REG('t',NEW_R); 	 SEP; LABEL("%s",code[l].var); NL;
-				LINE_V("sw"); REG('t',FIND_R1); SEP; LABEL("%d($t%d)",0,r);  	COMMENT("\t# %s",code[l].var);
-				CHECK(r1); CHECK(r);
+				LINE_N("la"); REG('t',NEW_R); 	 SEP; LABEL("%s","vars"); NL;
+				LINE_V("sw"); REG('t',FIND_R1); SEP; LABEL("%d($t%d)",code[l].adresse,r);  	
+				COMMENT("save $t%d->%s",r1,code[l].var);
+				CHECK(r); CHECK(r1);
 				break;
 			case ltab:
 				UNDEF;
 				break;
 			case stab:
-				UNDEF;
+				LINE_N("sll"); 	REG('t',NEW_R); SEP; REG('t',FIND_R2);SEP; LABEL("%d",2);NL; r2=r;
+				LINE_V("la"); 	REG('t',NEW_R); SEP; LABEL("vars");NL;
+				LINE_V("addi");REG('t',r); 	SEP; REG('t',r); SEP; LABEL("%d",code[l].adresse);NL;
+				LINE_V("add");	REG('t',r); 	SEP; REG('t',r); SEP; REG('t',r2); NL; 
+				LINE_V("sw"); 	REG('t',FIND_R1); SEP; LABEL("0($t%d)",r); 	
+				COMMENT("save $t%d->%s",r1,code[l].var);
+				CHECK(r);CHECK(r1);CHECK(r2);
 				break;
 			case loadimm:
 				LINE_N("li");REG('t',NEW_R);SEP;LABEL("%d",code[l].arg1);
 				break;
 			case addimm:
-				LINE_N("li");REG('t',FIND_R1);SEP;LABEL("%d",code[l].arg2);
+				LINE_N("addi");REG('t',NEW_R);SEP;REG('t',FIND_R1);SEP;LABEL("%d",code[l].arg2);
+				CHECK(r1);
 				break;
 			case jump:
 				LINE_N("j");LABEL("j%d",code[l].arg2);
@@ -408,16 +447,16 @@ void show_assembly(FILE*f){
 				CHECK(r1);
 				break;
 			case param:
-				UNDEF;
+				//UNDEF;
 				break;
 			case call:
-				UNDEF;
+				//UNDEF;
 				break;
 			case entering:
-				UNDEF;
+				//UNDEF;
 				break;
 			case exiting:
-				UNDEF;
+				//UNDEF;
 				break;
 			default:
 				PLCC_WARNING("Unhandled mode in switch");
@@ -425,7 +464,7 @@ void show_assembly(FILE*f){
 		fprintf(f,"\n");
 	}
 	
-	LINE_N("li"); REG('v',0); SEP; LABEL("%d",0); NL;
+	LINE_N("li"); REG('v',0); SEP; LABEL("%d",10); NL;
 	LINE_V("syscall"); NL;
 	
 	printf("%s",C_CLEAR);

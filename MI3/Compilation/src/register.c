@@ -52,9 +52,10 @@ void trouve_dernier_appel(){
 	dernier_appel=malloc(line_code3*sizeof(int)); CHECK_PTR(dernier_appel);
 	jump_targets=calloc(size_code3, sizeof(char)); CHECK_PTR(jump_targets);
 	for(i=0;i<line_code3;i++) dernier_appel[i]=-1;
-	
-	for(i=0;i<=line_code3;i++) 
-		if (NOT_OP(jump)&NOT_OP(read)&NOT_OP(call)&NOT_OP(loadimm)&NOT_OP(entering)&NOT_OP(exiting)&NOT_OP(load)){
+	for(i=0;i<line_code3;i++) 
+		if (code[i].op==ltab) {
+			ADD_IF(dernier_appel[code[i].arg2]);
+		} else if (NOT_OP(jump)&NOT_OP(read)&NOT_OP(call)&NOT_OP(loadimm)&NOT_OP(entering)&NOT_OP(exiting)&NOT_OP(load)){
 			if (NOT_OP(c3_no)&NOT_OP(c3_neg)&NOT_OP(param)&NOT_OP(addimm)&NOT_OP(store)&NOT_OP(jumpif0)&NOT_OP(write)){
 				// The Two arguments are used
 				ADD_IF(dernier_appel[code[i].arg1]);
@@ -62,12 +63,11 @@ void trouve_dernier_appel(){
 			} else {
 				// Only the first argument is used
 				ADD_IF(dernier_appel[code[i].arg1]);
+				if (code[i].op==jumpif0) jump_targets[code[i].arg2]=1;
 			}
-		} else if ((code[i].op==jump)||(code[i].op==jumpif0)){
-			jump_targets[i]=1;
+		} else if (code[i].op==jump){
+			jump_targets[code[i].arg2]=1;
 		}
-	
-	//for(i=0;i<line_code3;i++) printf("%i | %i\n",i,dernier_appel[i]);
 }
 #undef NOT_OP
 #undef ADD_IF
@@ -80,11 +80,13 @@ void init_registers(){
 
 /** Free the register associated to the ligne if that line was used for the last time */
 void free_register(int ligne,int curr_ligne){
-	int r;
-	r=registre_associe(ligne);
+	int r=ligne;
+	//r=registre_associe(ligne);
+	//printf("\nRegister $t%d (->line %d) is last used line %d (%s)",r,registre[r],dernier_appel[registre[r]],dernier_appel[registre[r]]<=curr_ligne?"freeing":"staying");
 	if (r<0) return;
-	if (dernier_appel[r]<=curr_ligne) registre[r]=-1;
+	if (dernier_appel[registre[r]]<=curr_ligne) registre[r]=-1;
 }
+
 /** Find the first free register */
 int registre_libre(int ligne){
 	int i;
@@ -96,7 +98,7 @@ int registre_libre(int ligne){
 	return -1;
 }
 
-/** Find the register associated with the register */
+/** Find the register associated with the line */
 int registre_associe(int ligne){
 	int i;
 	for(i=0;i<SIZE_REGISTER;i++) if (registre[i]==ligne){

@@ -42,6 +42,7 @@ struct {
 int ajoutevariable(char *nom, n_type *type);
 int ajoutefonction(char *nom, n_type *type, n_l_dec *param);
 
+int sizeof_type(n_type*type);
 int cherchelocale(char *nom);
 int cherche(char *nom);
 int adresse(int v);

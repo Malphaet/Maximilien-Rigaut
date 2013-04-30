@@ -24,7 +24,13 @@
 /** @file dico.c The table of symbols */
 #include "dico.h"
 
-
+/** Calculate sizeof the type of a variable */
+int sizeof_type(n_type*type){
+	if (type->type==t_int) return SIZEOF_INT;
+	if (type->type==t_bool) return SIZEOF_BOOL;
+	if (type->type==t_array) return (type->fin-type->debut)*sizeof_type(type->arrayof);
+	return 1;
+}
 /** Add a variable to the table 
  * @param nom The variable name
  * @param type The variable type
@@ -32,24 +38,26 @@
 int ajoutevariable(char *nom, n_type *type){
 	variable v;	int ind=cherche(nom),offset=1;
 	v.type=type; v.nom=nom; v.mode=context_var;
-	PLCC_INFO("Adding variable %s (%d:%s)",v.nom,ind,context_var?"local":"global");
-	if (type->type==t_int) offset=SIZEOF_INT;
-	else if (type->type==t_bool) offset=SIZEOF_BOOL;
-	else if (type->type==t_array)
-		offset=(type->arrayof->fin-type->arrayof->debut)*((type->arrayof->type==t_int)?SIZEOF_INT:SIZEOF_BOOL);
+	PLCC_INFO("Adding variable %s at 0x%04d (%d:%s)",
+		v.nom,context_var==GLOBAL?adresseGlobaleCourante:adresseLocaleCourante,
+		ind,context_var?"local":"global");
 	
+	offset=sizeof_type(type);
 	if (context_var==GLOBAL) {
 		if (ind>=0) {PLCC_ERROR("%s already exists",nom);return 0;}
 		if (dico.base>=MAX_DICO) PLCC_ERROR("symbol table full");
 		
-		v.adresse=(adresseGlobaleCourante+=offset);
+		v.adresse=adresseGlobaleCourante;
+		adresseGlobaleCourante+=offset;
 		dico.tab[dico.base++]=v; dico.sommet=dico.base;
+		//PLCC_INFO("Var %s at 0x%04d",dico.tab[cherche(nom)].nom,dico.tab[cherche(nom)].adresse);
 	} else {
 		if (ind>0&&ind<=dico.base) PLCC_WARNING("declaration of %s shadowing global variable",nom)
 		else if (ind>dico.sommet) {PLCC_WARNING("%s already exists",nom); return 0;}
 		if (dico.sommet>=MAX_DICO) PLCC_ERROR("symbol table full");
 		
-		v.adresse=(adresseLocaleCourante+=offset);
+		v.adresse=adresseLocaleCourante;
+		adresseLocaleCourante+=offset;
 		dico.tab[dico.sommet++]=v;
 	}
 	

@@ -63,7 +63,7 @@
 extern char yytext[SIZE_TEXT],*file_in_progress;
 extern FILE *yyin;
 extern unsigned int line_number,char_number,word_size;
-extern int registre[];
+extern int registre[],*dernier_appel;
 extern char *jump_targets;
 extern char *op2string[];
 
