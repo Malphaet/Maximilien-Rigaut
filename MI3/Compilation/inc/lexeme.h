@@ -44,11 +44,4 @@ const int SIZE_KEYWORDS=sizeof(KEYWORDS)/sizeof(char*);	/**< The size of the key
 #define VAL_SYMBOLS(index) SIZE_CHAR+1+index				/**< The id of the symbol at given index */
 #define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_SYMBOLS+1+index /**< The id of the keyword at given index */
 
-/*
-#define VAL_CHAR(index) index
-#define VAL_ONESYMS(index) SIZE_CHAR+1+index
-#define VAL_SYMBOLS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+index
-#define VAL_KEYWORDS(index) SIZE_CHAR+1+SIZE_ONESYMS+1+SIZE_SYMBOLS+1+index
-*/
-
 #endif

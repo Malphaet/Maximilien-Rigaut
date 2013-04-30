@@ -92,7 +92,7 @@ extern char *op2string[];
 #define PLCC_UNTESTED			{PLCC_WARNING("The current section is untested/untrusted\n");}
 #define PLCC_ILL_IMPLEMENED		{PLCC_WARNING("The current section isn't fully implemented yet\n");}
     
-#define OUT(msg)		{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
+#define OUT(msg)	{WHERE; fprintf(stderr,msg);fprintf(stderr,"\n");exit(EXIT_FAILURE);}
 #define CHECK_PTR(ptr)	do {if (ptr==NULL) OUT("Allocation error, exiting");} while (0);
 #define CHECK_VAR(var) do {if (cherche(var)<0) PLCC_ERROR("%s doesn't exist",var);} while (0);
 

@@ -7,6 +7,6 @@ begin
    while a < 10 do
    begin
       a := a * 2;
-      write(a);
+   write(a);
    end;
 end.

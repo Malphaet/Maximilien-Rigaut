@@ -32,14 +32,14 @@
 
 char *op2string[] = {"add", "sub", "mul", "div", "mod", "eql", "dif", "inf", "sup", "infeq", "supeq", 
 		             "or", "and", "no", "neg","read", "write", "load", "store", "ltab", "stab", "loadimm",
-		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"};
+		             "addimm", "jump", "jumpif0","param", "call", "entering", "exiting"}; /**< Op 2 strings */
 
-char* jump_targets;
+char* jump_targets; /**< Lines target of being jumped to */
+
 /** Walk down the prog tree, and convert it to code3 */
 void walk_code(n_prog*n){
 	init_code();
 	walk_prog(n);
-	//line_code3--;
 }
 
 #define ADD_APPEL(appel) CHECK_VAR(appel->fonction); vars=appel->args; do {walk_exp(vars->tete);\
@@ -48,7 +48,8 @@ void walk_code(n_prog*n){
 
 #define LOAD_VARS(vars)	while (vars!=NULL){PLCC_INFO("NOT loading vars");\
 								ajoutevariable(vars->tete->nom,vars->tete->type);vars=vars->queue;}
-								
+
+/** Analyse a program block and create the tree out of it */
 void walk_prog(n_prog *n){
 	n_l_fun_dec*l=n->fonctions; int jumpto;
 	n_l_dec /**prms,*/ *vars=n->variables;
@@ -71,6 +72,7 @@ void walk_prog(n_prog *n){
 	walk_inst(n->corps);
 }
 
+/** Analyse an instruction block and create the tree out of it */
 void walk_inst(n_instr *i){
 	n_l_instr*nxt;n_l_exp*vars;
 	int arg1,arg2,addr,jumpto,jumpto2;
@@ -133,6 +135,7 @@ void walk_inst(n_instr *i){
 		
 }
 
+/** Analyse an expression block and create the tree out of it */
 void walk_exp(n_exp *e){
 	c3_op op=0; int arg1,arg2=0,addr,unaire=0; n_l_exp*vars;
 	if (!e) OUT("plcc fatal error: Unexpected null pointer");
@@ -203,6 +206,7 @@ void init_code(){
     line_code3 = 0;
 }
 
+/** Add a line of 3code */
 void add_line(c3_op op, int arg1, int arg2, char *var){
     if (line_code3 >= size_code3){
         size_code3 *= 2;
@@ -214,6 +218,7 @@ void add_line(c3_op op, int arg1, int arg2, char *var){
     code[line_code3++].var = var;
 }
 
+/** Add a line of 3code, give the information for the used variable */
 void add_line_var(c3_op op, int arg1, int arg2, char *var,int addr, int mode){
 	add_line(op,arg1,arg2,var);
 	code[line_code3-1].adresse=addr;
@@ -279,11 +284,16 @@ void show_code(FILE*f){
 #define FIND_R2	r2=trouve_registre(code[l].arg2)
 #define CHECK(a)	free_register(a,l);
 #define THR_REG(s)	LINE_N(s);REG('t',NEW_R);SEP;REG('t',FIND_R1);SEP;REG('t',FIND_R2);
+#define LINE_V(s)	fprintf(f,"%s",vide);fprintf(f,instr,s);
+#ifndef DEBUG
+	#define LINE_N(s)	jump_targets[l]?fprintf(f,line,l):fprintf(f,"%s",vide);fprintf(f,instr,s);
+#else
+	#define LINE_N(s)	fprintf(f,line,l);fprintf(f,instr,s);
+#endif
 
-/** Show assembly code, with prettyness if stdout and available */
+/** Show assembly code, with colors if output is stdout (and compiled with color support available) */
 void show_assembly(FILE*f){
-	int l=0,s=1,r,r1,r2; char instr[40],line[40],reg[20],*vide;
-	char *c0,*c1,*c2,*c3,*c4;
+	int l=0,s=1,r,r1,r2; char instr[40],line[40],reg[20],*vide,*c0,*c1,*c2,*c3,*c4;
 	while (line_code3>s) {s*=10; l++;}
 	vide=malloc(sizeof(char)*(l+4)); CHECK_PTR(vide); for(s=0;s<l+4;s++) vide[s]=' '; vide[l+4]=0;
 	if (f==NULL) {f=stdout;c0=C_CLEAR;c1=C_GREY;c2=C_YELLOW;c3=C_GREEN;c4=C_BLUE;}
@@ -299,16 +309,9 @@ void show_assembly(FILE*f){
 	#define SEP		fprintf(f,"%s, %s",c1,c0);
 	#define NL			fprintf(f,"%s\n",c0);
 	
-	#ifndef DEBUG
-		#define LINE_N(s)	jump_targets[l]?fprintf(f,line,l):fprintf(f,"%s",vide);fprintf(f,instr,s);
-	#else
-		#define LINE_N(s)	fprintf(f,line,l);fprintf(f,instr,s);
-	#endif
-	#define LINE_V(s)	fprintf(f,"%s",vide);fprintf(f,instr,s);
-	
+	// Load Variables
 	LINE_V(".data");NL;
 	fprintf(f,"%svars%s: %s",c2,c1,c0);
-	
 	for(l=0;l<dico.base;l++) {
 		if (dico.tab[l].type->type==t_array) {
 			LABEL(".space %d",sizeof_type(dico.tab[l].type));
@@ -316,9 +319,9 @@ void show_assembly(FILE*f){
 		}else {LABEL(".word 0");COMMENT("%s",dico.tab[l].nom);NL;fprintf(f,"%s",vide);}
 	}
 	NL;
-	//PLCC_WARNING("vars not implemented"); 
-	LINE_V(".text");NL;
 	
+	// Convert the 3code into MIPS assembly
+	LINE_V(".text");NL;
 	for(l=0;l<line_code3;l++){
 		switch (code[l].op){
 			case c3_add:
@@ -351,11 +354,11 @@ void show_assembly(FILE*f){
 				CHECK(r1); CHECK(r1); CHECK(r2);
 				break;
 			case c3_inf:
-				THR_REG("slt"); CHECK(r1); CHECK(r2);
-				break;
-			case c3_sup:
 				LINE_N("slt");REG('t',NEW_R);SEP;REG('t',FIND_R2);SEP;REG('t',FIND_R1);
 				CHECK(r1); CHECK(r2);
+				break;
+			case c3_sup:
+				THR_REG("slt"); CHECK(r1); CHECK(r2);
 				break;
 			case c3_infeq:
 				LINE_N("li"); 	REG('t',NEW_R); 	SEP; LABEL("1"); NL;
@@ -378,10 +381,10 @@ void show_assembly(FILE*f){
 				THR_REG("and"); CHECK(r1); CHECK(r2);
 				break;
 			case c3_no:
-				THR_REG("not"); CHECK(r1); CHECK(r2);
+				LINE_N("not");REG('t',NEW_R);SEP;REG('t',FIND_R1); CHECK(r1);
 				break;
 			case c3_neg:
-				THR_REG("neg"); CHECK(r1); CHECK(r2);
+				LINE_N("neg");REG('t',NEW_R);SEP;REG('t',FIND_R1); CHECK(r1);
 				break;
 			case read:
 				LINE_N("li"); REG('v',0); SEP; LABEL("%d",5); NL;
@@ -397,7 +400,6 @@ void show_assembly(FILE*f){
 				LINE_N("la"); REG('t',NEW_R); SEP; LABEL("vars");NL;
 				LINE_V("lw"); REG('t',r); SEP; LABEL("%d($t%d)",code[l].adresse,r); 		
 				COMMENT("load $t%d<-%s",r,code[l].var);
-				//CHECK(r);
 				break;
 			case store:
 				LINE_N("la"); REG('t',NEW_R); 	 SEP; LABEL("%s","vars"); NL;
@@ -453,7 +455,7 @@ void show_assembly(FILE*f){
 		}
 		fprintf(f,"\n");
 	}
-	
+	// Ending program
 	LINE_N("li"); REG('v',0); SEP; LABEL("%d",10); NL;
 	LINE_V("syscall"); NL;
 	
@@ -462,4 +464,13 @@ void show_assembly(FILE*f){
 #undef NEW_R
 #undef FIND_R1
 #undef FIND_R2
-#undef UNDEF
+#undef CHECK
+#undef THR_REG
+#undef LINE_V
+#undef LINE_N
+
+#undef REG
+#undef LABEL
+#undef COMMENT
+#undef SEP
+#undef NL

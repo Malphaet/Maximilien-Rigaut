@@ -26,23 +26,17 @@ plcc - PascaL C Compiler  {#mainpage}
 ## TODO
 
 ### Important 
-+ Write some autotests
 + Write the sections
 
 ### Cosmetic
 + Write the docs
  + code3
- + identifiers : DON'T
  + plcc
  + utils
  + yylex
  + yyparse
+ + register
  
-### Tests
-+ arbre : 
-+ convert : DONE
+### Tests 
 + dico : 
-+ code3 : 
-+ plcc : DONE
-+ yylex : DONE
-+ yyparse : DONE
++ register :

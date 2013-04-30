@@ -8,7 +8,7 @@ begin
       write (2);
    else
    begin
-      b := - a + 2;
+      b := a + 2;
       write(b);
    end;
 end.

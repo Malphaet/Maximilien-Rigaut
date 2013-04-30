@@ -51,8 +51,4 @@ void afficherDico();
 void entreefonction(void);
 void sortiefonction(void);
 
-///* Registres */
-//int *fill_last_calls();
-//int free_register(int);
-//int find_register(int);
 #endif
