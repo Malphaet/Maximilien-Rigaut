@@ -124,15 +124,6 @@ void show_n_exp(n_exp*e){
 			break;
 	}
 }
-//struct n_exp_ {
-    //enum{varExp, intExp, opExp, trueExp, falseExp, appelExp, lireExp} type; /**< The type of the aforementioned expression */
-    //union{
-        //struct{operation op; struct n_exp_ *op1; struct n_exp_ *op2;} opExp_;
-        //n_var *var;     /**< The variable contained by the said expression */
-        //int entier;     /**< The integer contained by the said expresion */
-        //n_appel *appel; /**< The function call containned by the said expression */
-    //}u;  /**< The operation of the said expression */
-//};
 
 void show_n_appel(n_appel*a){
 	OPN;

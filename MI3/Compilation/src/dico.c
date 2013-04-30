@@ -38,10 +38,11 @@ int sizeof_type(n_type*type){
 int ajoutevariable(char *nom, n_type *type){
 	variable v;	int ind=cherche(nom),offset=1;
 	v.type=type; v.nom=nom; v.mode=context_var;
+	#ifdef DEBUG
 	PLCC_INFO("Adding variable %s at 0x%04d (%d:%s)",
 		v.nom,context_var==GLOBAL?adresseGlobaleCourante:adresseLocaleCourante,
 		ind,context_var?"local":"global");
-	
+	#endif
 	offset=sizeof_type(type);
 	if (context_var==GLOBAL) {
 		if (ind>=0) {PLCC_ERROR("%s already exists",nom);return 0;}
@@ -50,7 +51,6 @@ int ajoutevariable(char *nom, n_type *type){
 		v.adresse=adresseGlobaleCourante;
 		adresseGlobaleCourante+=offset;
 		dico.tab[dico.base++]=v; dico.sommet=dico.base;
-		//PLCC_INFO("Var %s at 0x%04d",dico.tab[cherche(nom)].nom,dico.tab[cherche(nom)].adresse);
 	} else {
 		if (ind>0&&ind<=dico.base) PLCC_WARNING("declaration of %s shadowing global variable",nom)
 		else if (ind>dico.sommet) {PLCC_WARNING("%s already exists",nom); return 0;}

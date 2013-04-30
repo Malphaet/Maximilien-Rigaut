@@ -81,8 +81,6 @@ void init_registers(){
 /** Free the register associated to the ligne if that line was used for the last time */
 void free_register(int ligne,int curr_ligne){
 	int r=ligne;
-	//r=registre_associe(ligne);
-	//printf("\nRegister $t%d (->line %d) is last used line %d (%s)",r,registre[r],dernier_appel[registre[r]],dernier_appel[registre[r]]<=curr_ligne?"freeing":"staying");
 	if (r<0) return;
 	if (dernier_appel[registre[r]]<=curr_ligne) registre[r]=-1;
 }
@@ -90,7 +88,6 @@ void free_register(int ligne,int curr_ligne){
 /** Find the first free register */
 int registre_libre(int ligne){
 	int i;
-	//if ((i=registre_associe(ligne))>0) return i; // The line already is in the register
 	for(i=0;i<SIZE_REGISTER;i++) if (registre[i]==-1) {
 		registre[i]=ligne; 
 		return i;

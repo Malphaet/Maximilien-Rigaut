@@ -88,7 +88,6 @@ n_var *cree_n_var_indicee(char *nom, n_exp *indice){
     n->nom = nom;
     n->indice = indice;
     //! @todo check existence
-    //if (cherche(nom)<0) PLCC_WARNING("%s doesn't exist",nom);
     return n;
 }
 
@@ -115,7 +114,6 @@ n_exp *cree_n_exp_appel(n_appel *app){
     n->type = appelExp;
     n->u.appel = app;
     //! @todo check
-    //if (cherche(app)<0) PLCC_WARNING("%s doesn't exist",app);
     return n;
 }
 
@@ -254,7 +252,6 @@ n_instr *cree_n_instr_appel(n_appel *app){
     n->type = appelInst;
     n->u.appel = app;
     //! @todo check existence
-    //if (cherche(app->fonction)<0) PLCC_WARNING("%s doesn't exist",app->fonction);
     return n;
 }
 
