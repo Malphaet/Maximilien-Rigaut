@@ -18,8 +18,8 @@ CFLAGS = $(DFLAGS)
 LDFLAGS = -lpthread
 
 
-EXEC=skiplist
-EXEC_O=skiplist_o
+EXEC=test
+EXEC_O=skiplib utils
 
 DIRS=$(BIN) $(OBJ) $(SRC) $(INC) $(DOC) $(TMP)
 
