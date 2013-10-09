@@ -20,8 +20,9 @@
 
 #ifndef __TEST_H__
 #define __TEST_H__
+#include "skiplib.h"
 
-int compint(void*,void*);
-int compstr(void*,void*);
+int compint(t_key,t_key);
+int compstr(t_key,t_key);
 
 #endif

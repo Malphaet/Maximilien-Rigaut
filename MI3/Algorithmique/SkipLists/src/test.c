@@ -23,11 +23,11 @@
 #include "test.h"
 #include "stdlib.h"
 
-int compint(void*a,void*b){
+int compint(t_key a,t_key b){
 	return *((int*)a)==*((int*)b);
 }
 
-int compstr(void*a,void*b){
+int compstr(t_key a,t_key b){
 	return strcmp((char*)a,(char*)b)==0;
 }
 

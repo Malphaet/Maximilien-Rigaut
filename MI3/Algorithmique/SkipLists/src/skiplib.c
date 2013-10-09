@@ -22,10 +22,17 @@
 #include "utils.h"
 #include "stdlib.h"
 
+
+// PROTOTYPE
+
+
+// PRIVATE FUNCTIONS
+
+// Doc and test
 SkipList*sk_create(double percent){
 	SkipList*s=malloc(sizeof(SkipList));
 	if(!s) ERROR("Malloc error");
-	s->insertPoint=malloc(32*sizeof(SkipList));
+	s->insertPoint=malloc(32*sizeof(sk_node));
 	if(!s->insertPoint) ERROR("Malloc error");
 	
 	s->level=0; s->percent=percent; s->size=0;
@@ -33,23 +40,45 @@ SkipList*sk_create(double percent){
 	return s;
 }
 
-//Skiplist*sk_find(SkipList*l,void*key,int key_compare(void*,void*)){
-	//Find t
+//SkipList*sk_add_node(sk_node*node,t_key*key){
+
 //}
-int sk_contains(SkipList*l, t_key key, int key_compare(t_key,t_key)){
-	l++;
-	//Look first item
-	//If not, get next (aka, move left, compare, come back and down or poursue, or fail)
-	//Return fail or sucess
-	return key_compare(key,key);
+
+// Doc and test
+sk_node*sk_find_last(SkipList*l,t_key key,int key_compare(t_key,t_key)){
+	sk_node*last_node=l->head;
+	int res;
+	while (1){
+		res=key_compare(last_node,key);
+		if (res==0) return last_node;
+		if (res<0) {
+			if (last_node->head==NULL) return last_node;
+			last_node=last_node->head;
+			continue;
+		}
+		if (!l->level) return last_node;
+		last_node=last_node->insertPoint[last_node->level-1];
+	} 
 }
 
-void sk_add(SkipList*l, t_key key){
+// MAIN FUNCTIONS
+
+int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key)){
+	/* If the last element before they key is the key itself, the list contains, else it aint*/
+	return key_compare(sk_find_last(l,key),key)==0;
+}
+
+void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(sk_node,t_key)){
 	//Find the position it should be, if exist, do nothing, if it doesn't: add it?
-	l++;key=key;
+	sk_node*last_node=sk_find_last(l,key);
+	if (key_compare(last_node,key)==0) post_actions(last_node,key);
+	else {
+		// Do the linking adding and creating
+	}
 }
 
-void sk_remove(SkipList*l,t_key key){
+
+void sk_remove(SkipList*l,t_key key,int key_compare(t_key,t_key)){
 	l++;key=key;
 }
 
@@ -58,7 +87,11 @@ void*sk_tolist(SkipList*l){
 	return NULL;
 }
 
-char*sk_tostring(SkipList*l){
+char*sk_tostring(SkipList*l,char*key_to_str(key)){
 	l++;
 	return "";
 }
+
+
+// INT FUNCTIONS
+// CHAR FUNCTIONS

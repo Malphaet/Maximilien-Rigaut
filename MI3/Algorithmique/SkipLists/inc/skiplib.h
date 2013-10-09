@@ -29,12 +29,12 @@ typedef struct s_node {
 } sk_node;
 
 typedef struct s_skip_list {
-	struct s_skip_list* head;
+	struct s_node* head;
 	int level; // The max level of skipping
 	double percent; // The percentage of elements that will be skipped
 	long size; // Size of the SkipList
 	/* boolean bool; //???*/
-	struct s_skip_list* insertPoint; // Table for methods ???
+	struct s_node* insertPoint; // Table for methods ???
 } SkipList;
 
 
