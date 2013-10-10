@@ -19,3 +19,13 @@ Orthographic Corrector  {#mainpage}
 ## Usage
 
 ## Todo
+
+Tests:
+* Create
+* Add
+* Delete
+* Find
+* Delete All
+
+Implement:
+* Delete

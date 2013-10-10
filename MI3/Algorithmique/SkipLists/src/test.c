@@ -34,6 +34,6 @@ int compstr(t_key a,t_key b){
 int main(int argc,char **argv){
 	int *i=malloc(sizeof(int));
 	*i=1;
-	printf("Hello world %d\n",sk_contains(NULL,i,compint));
+	printf("Hello world\n");
 	return 0;
 }

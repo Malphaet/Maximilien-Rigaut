@@ -25,7 +25,7 @@
 
 typedef struct s_node {
 	t_key value;
-	struct s_node* next;
+	struct s_node** next;
 } sk_node;
 
 typedef struct s_skip_list {
@@ -34,15 +34,21 @@ typedef struct s_skip_list {
 	double percent; // The percentage of elements that will be skipped
 	long size; // Size of the SkipList
 	/* boolean bool; //???*/
-	struct s_node* insertPoint; // Table for methods ???
+	struct s_node** insertPoint; // Table for methods ???
 } SkipList;
 
+/* Prototype */
 
-int sk_contains(SkipList*, void*, int key_compare(void*,void*));
+SkipList*sk_create(double);
+sk_node*sk_find_last(SkipList*l,t_key key,int key_compare(t_key,t_key));
+int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key));
+void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(sk_node*,t_key));
+
+/*int sk_contains(SkipList*, void*, int key_compare(void*,void*));
 void sk_add(SkipList*,void*);
 void sk_remove(SkipList*,void*);
 void*sk_tolist(SkipList*);
 char*sk_tostring(SkipList*);
-
+*/
 
 #endif
