@@ -23,7 +23,7 @@
 #include "test.h"
 #include "stdlib.h"
 
-
+#define cont_int(l,i) printf("%p %s %d\n",(void*)l,sk_contains_int(l,i)?"contains":"doesn't contain",i)
 
 int main(int argc,char **argv){
 	SkipList*l=sk_create(0.5);
@@ -35,7 +35,10 @@ int main(int argc,char **argv){
 	sk_add_int(l,16);
 	sk_add_int(l,2000);
 	sk_add_int(l,5);
-	printf("%p : %s\n",(void*)l,txt=sk_tostring_int(l));
-	sk_delete(l); free(txt);
+	printf("%p : %s\n",(void*)l,txt=sk_tostring_int(l)); free(txt);
+	cont_int(l,12); cont_int(l,33);
+	sk_remove_int(l,12); sk_remove_int(l,12); sk_remove_int(l,75);
+	printf("%p : %s\n",(void*)l,txt=sk_tostring_int(l)); free(txt);
+	sk_delete(l); 
 	return 0;
 }

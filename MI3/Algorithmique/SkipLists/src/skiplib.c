@@ -49,45 +49,40 @@ SkipList*sk_create(double percent){
 
 // Delete a skiplist and every value assotiated to it
 void sk_delete(SkipList*l){
-	sk_node*next_node=l->head,*node;
+	sk_node*next_node=l->head->next[0],*node;
 	while (next_node){
 		node=next_node;
 		next_node=next_node->next[0];
 		free(node->value); free(node->next); free(node);
 	}
-	//free(next_node->value); free(next_node); 
-	 free(l);
+	free(l->head->next); free(l->head); free(l);
 }
 
-// Try and find the node or the last one before that node (Insertion purposes)
-// Doc and test
-sk_node*sk_find_last(SkipList*l,t_key key,int key_compare(t_key,t_key)){
+// MAIN FUNCTIONS
+
+//* Find if a SkipList contains an element
+int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key)){
+	/* If the last element before they key is the key itself, the list contains, else it aint*/
 	sk_node*last_node=l->head;
 	int res,lvl=l->level;
+	
 	while (lvl>=0){
-		res=key_compare(last_node->next[lvl],key);
-		if (res==0) return last_node->next[lvl];
+		if (!last_node->next[lvl]) break;
+		res=key_compare(last_node->next[lvl]->value,key);
+		if (res==0) return 1;
 		if (res<0) {
 			last_node=last_node->next[lvl];
 			continue;
 		}
 		// If the next node is after our node and we are level 0, then we found the place
-		if (!l->level) return last_node; 
+		if (!lvl) return 0; 
 		last_node=last_node->next[lvl--];
 	}
-	return last_node;
-}
-
-// MAIN FUNCTIONS
-
-int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key)){
-	/* If the last element before they key is the key itself, the list contains, else it aint*/
-	return key_compare(sk_find_last(l,key,key_compare),key)==0;
+	return 0;
 }
 
 
 //* Find the position it should be, if exist, do the post actions, else add it
-// Doc and test
 void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(sk_node*,t_key)){
 	// Initalise the new node
 	int i=0,lvl=l->level,size=1;
@@ -103,7 +98,6 @@ void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(
 	
 	printf("Int : %2d {%d}\n",*((int*)n->value),size);
 	while (lvl>=0){
-		
 		if (last_node->next[lvl]) i=key_compare(key,last_node->next[lvl]->value);
 		else {
 			if (lvl<size) last_node->next[lvl]=n; lvl--;
@@ -138,23 +132,28 @@ void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(
 
 // Doc and test
 void sk_remove(SkipList*l,t_key key,int key_compare(t_key,t_key)){
-	sk_node*last_node=l->head,*del_node;
+	sk_node*last_node=l->head,*node;
 	int lvl=l->level; int res;
 	
-	// Case with the first node
+	node=l->head->next[lvl];
 	while (lvl>=0){
-		res=key_compare(last_node->next[lvl],key);
-		if (res<0) last_node=last_node->next[lvl];
-		if (res>0) lvl--;
+		if (!node) {lvl--; node=last_node; continue;}
+		res=key_compare(node->value,key);
+		printf("%d o %d = %d\n",*((int*)node->value),*((int*)key),res);
+		
+		if (res>0) {last_node=node; node=node->next[lvl];}
+		if (res<0) lvl--;
 		if (res==0) {
-			del_node=last_node->next[lvl];
-			last_node->next[lvl]=del_node->next[lvl];
+			last_node->next[lvl]=node->next[lvl];
 			if (lvl==0) {
-				free(del_node->next);
-				free(del_node);
+				free(node->next);
+				free(node->value);
+				free(node);
 				return;
 			}
+			node=last_node->next[--lvl];
 		}
+		
 	}
 }
 
@@ -226,6 +225,15 @@ void sk_add_int(SkipList*l,int key){
 	*i=key;
 	sk_add(l,(t_key) i,sk_compint,sk_no_action);
 }
+
+int	sk_contains_int(SkipList*l,int key){
+	return sk_contains(l,(t_key)(&key),sk_compint);
+}
+
+void sk_remove_int(SkipList*l,int key){
+	sk_remove(l,(t_key)(&key),sk_compint);
+}
+
 // CHAR FUNCTIONS
 
 int sk_compstr(t_key a,t_key b){
