@@ -22,7 +22,5 @@
 #define __TEST_H__
 #include "skiplib.h"
 
-int compint(t_key,t_key);
-int compstr(t_key,t_key);
 
 #endif

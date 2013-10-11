@@ -22,40 +22,57 @@
 #include "utils.h"
 #include "stdlib.h"
 #include "time.h"
+#include "stdio.h"
 
 // PROTOTYPE
 
 
 // PRIVATE FUNCTIONS
 
-// Doc and test
+// Create a skiplist
 SkipList*sk_create(double percent){
 	SkipList*s=malloc(sizeof(SkipList));
+	sk_node*n=malloc(sizeof(sk_node));
 	if(!s) ERROR("Malloc error");
-	s->insertPoint=malloc(32*sizeof(sk_node*));
-	if(!s->insertPoint) ERROR("Malloc error");
+	if(!n) ERROR("Malloc error");
 	
-	s->level=0; s->percent=percent; s->size=0;
-	s->head=s->insertPoint[0];
+	n->next=calloc(32,sizeof(sk_node*));
+	if(!n->next) ERROR("Malloc error");
 	
+	s->level=-1; s->percent=percent; s->size=0;
+	s->head=n;
+	printf("Skiplist\n | Percent - %f\n | Id - %p \n | Head - %p\n",percent,(void*)s,(void*)n);
 	// We'll need a random generator, it's a good idea to initialise it at some point
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	return s;
 }
 
+// Delete a skiplist and every value assotiated to it
+void sk_delete(SkipList*l){
+	sk_node*next_node=l->head,*node;
+	while (next_node){
+		node=next_node;
+		next_node=next_node->next[0];
+		free(node->value); free(node->next); free(node);
+	}
+	//free(next_node->value); free(next_node); 
+	 free(l);
+}
+
+// Try and find the node or the last one before that node (Insertion purposes)
 // Doc and test
 sk_node*sk_find_last(SkipList*l,t_key key,int key_compare(t_key,t_key)){
 	sk_node*last_node=l->head;
 	int res,lvl=l->level;
 	while (lvl>=0){
-		res=key_compare(last_node,key);
-		if (res==0) return last_node;
+		res=key_compare(last_node->next[lvl],key);
+		if (res==0) return last_node->next[lvl];
 		if (res<0) {
-			if (last_node->next[lvl]==NULL) return last_node;
 			last_node=last_node->next[lvl];
 			continue;
 		}
-		if (!l->level) return last_node;
+		// If the next node is after our node and we are level 0, then we found the place
+		if (!l->level) return last_node; 
 		last_node=last_node->next[lvl--];
 	}
 	return last_node;
@@ -68,55 +85,164 @@ int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key)){
 	return key_compare(sk_find_last(l,key,key_compare),key)==0;
 }
 
+
+//* Find the position it should be, if exist, do the post actions, else add it
+// Doc and test
 void sk_add(SkipList*l,t_key key,int key_compare(t_key,t_key),void post_actions(sk_node*,t_key)){
-	//Find the position it should be, if exist, do nothing, if it doesn't: add it?
-	
 	// Initalise the new node
-	int i=0,lvl=l->level,size=0;
+	int i=0,lvl=l->level,size=1;
 	sk_node*n=malloc(sizeof(sk_node));
 	sk_node*last_node=l->head,*tmp_node;
 	if (!n) ERROR("Malloc error");
 	
 	// Randomly generate the size
-	for(i=0;i<32;i++) while (rand()%2) size++;
-	n->next=malloc(sizeof(sk_node*)*size);
-	while (lvl>0){
-		i=key_compare(last_node,key);
-		if (i==0) {
-			post_actions(last_node,key);
+	for(i=0;i<32;i++) if (rand()%2) size++; else break;// @Todo use the random percent
+	n->next=calloc((size+1),sizeof(sk_node*));
+	n->value=key;
+	if (!n->next) ERROR("Malloc Error");
+	
+	printf("Int : %2d {%d}\n",*((int*)n->value),size);
+	while (lvl>=0){
+		
+		if (last_node->next[lvl]) i=key_compare(key,last_node->next[lvl]->value);
+		else {
+			if (lvl<size) last_node->next[lvl]=n; lvl--;
+			continue;
+		}
+		if (i==0) { // The node already exist
+			post_actions(last_node->next[lvl],key);
 			free(n->next); free(n);
 			return;
 		}
-		if (i<0) n->next[lvl]=last_node; // Let's suppose that it's the last linking possible
-		else {
-			tmp_node=n->next[lvl];
-			n->next[lvl]=tmp_node->next[lvl];
-			tmp_node->next[lvl]=n;
+		if (i<0)// The current node is before ours
+			last_node=last_node->next[lvl];
+		else {	// The current node is after ours
+			if (size>=lvl){ // If the node is as hight as the current level, insert it
+				printf(" ] %p [%d] -> %p (%d)\n",(void*)last_node,lvl,(void*)last_node->next[lvl],
+					*((int*)last_node->next[lvl]->value));
+				tmp_node=last_node->next[lvl];
+				last_node->next[lvl]=n;
+				n->next[lvl]=tmp_node;
+				printf(" [ %p [%d] -> %p (%d)\n",(void*)last_node,lvl,(void*)last_node->next[lvl],
+					*((int*)last_node->next[lvl]->value));
+			}
 			lvl--;
 		}
 	}
-	while (l->level<size) l->insertPoint[l->level++]=n;
+	while (l->level<size) {
+		l->head->next[++l->level]=n;
+		printf(" | %p [%d] -> %p (%d)\n",(void*)l->head,l->level,(void*)n,*((int*)n->value));
+	}
+	l->size++;
 }
 
-
+// Doc and test
 void sk_remove(SkipList*l,t_key key,int key_compare(t_key,t_key)){
-	sk_node*last_node=sk_find_last(l,key,key_compare);
-	// Find all nodes that link to it, and skip it, then free the memory
-	if (key_compare(last_node,key)==0) {
-		
-	} else return;
+	sk_node*last_node=l->head,*del_node;
+	int lvl=l->level; int res;
+	
+	// Case with the first node
+	while (lvl>=0){
+		res=key_compare(last_node->next[lvl],key);
+		if (res<0) last_node=last_node->next[lvl];
+		if (res>0) lvl--;
+		if (res==0) {
+			del_node=last_node->next[lvl];
+			last_node->next[lvl]=del_node->next[lvl];
+			if (lvl==0) {
+				free(del_node->next);
+				free(del_node);
+				return;
+			}
+		}
+	}
 }
 
-void*sk_tolist(SkipList*l){
-	l++;
-	return NULL;
+// Doc and test
+t_key sk_tolist(SkipList*l){
+	t_key*list;int i=0; sk_node*last_node=l->head->next[0];
+	
+	if (l->size==0) return NULL;
+	list=malloc(sizeof(void*)*l->size);
+	if (!list) ERROR("Malloc error");
+	
+	while (last_node!=NULL) list[i++]=(t_key)last_node->value;
+	
+	return list;
 }
 
-char*sk_tostring(SkipList*l,char*key_to_str(t_key)){
-	l++;
-	return key_to_str(NULL);
+// Doc and test
+char*sk_tostring(SkipList*l,struct char_size key_to_str(t_key)){
+	char**str,*res,*tmp; int size=0,nb=0,i=0; sk_node*last_node=l->head->next[0];
+	struct char_size cs;
+	
+	if (!l->size) return calloc(1,sizeof(char));
+	str=malloc(sizeof(char*)*l->size);
+	if (!str) ERROR("Malloc error");
+	
+	while(last_node!=NULL) {
+		cs=key_to_str(last_node->value);
+		size+=cs.size; str[i++]=cs.txt; nb++;
+		last_node=last_node->next[0];
+	}
+	
+	res=malloc(sizeof(char)*(size+nb+1));
+	if (!res) ERROR("Malloc Error");
+	
+	size=0;i=0;
+	while(i<nb){
+		tmp=str[i];
+		do {res[size++]=*tmp++;} while (*tmp);
+		free(str[i]); i++; res[size++]=' ';
+	}
+	
+	free(str);
+	res[size++]=0;
+	return res;
 }
 
 
 // INT FUNCTIONS
+int sk_compint(t_key a,t_key b){
+	if (!b|!a) return -1;
+	return *((int*)b)-*((int*)a);
+}
+
+struct char_size int_to_str(t_key key){
+	struct char_size ret;
+	int nb=*((int*)key); ret.size=0;
+	
+	while (nb) {ret.size++; nb/=10;}
+	ret.txt=malloc(sizeof(char)*(ret.size+1));
+	if (!ret.txt) ERROR("Malloc Error");
+	
+	sprintf(ret.txt,"%d",*((int*)key));
+	return ret;
+}
+
+void sk_add_int(SkipList*l,int key){
+	int *i=malloc(sizeof(int));
+	if (!i) ERROR("Malloc Error");
+	*i=key;
+	sk_add(l,(t_key) i,sk_compint,sk_no_action);
+}
 // CHAR FUNCTIONS
+
+int sk_compstr(t_key a,t_key b){
+	return strcmp((char*)a,(char*)b)==0;
+}
+
+struct char_size char_to_str(t_key key){
+	struct char_size ret;
+	ret.size=strlen((char*)key);
+	ret.txt=malloc(sizeof(char)*(ret.size+1));
+	if (!ret.txt) ERROR("Malloc Error");
+	
+	strcpy(ret.txt,(char*)key);
+	return ret;
+}
+
+// GENERAL FUNCTIONS
+void sk_no_action(sk_node*n,t_key k){
+	(void)n;(void)k;
+}

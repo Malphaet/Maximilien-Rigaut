@@ -23,17 +23,19 @@
 #include "test.h"
 #include "stdlib.h"
 
-int compint(t_key a,t_key b){
-	return *((int*)a)==*((int*)b);
-}
 
-int compstr(t_key a,t_key b){
-	return strcmp((char*)a,(char*)b)==0;
-}
 
 int main(int argc,char **argv){
-	int *i=malloc(sizeof(int));
-	*i=1;
-	printf("Hello world\n");
+	SkipList*l=sk_create(0.5);
+	char*txt;
+	(void)argc;(void)argv;
+	sk_add_int(l,12);
+	sk_add_int(l,2);
+	sk_add_int(l,1);
+	sk_add_int(l,16);
+	sk_add_int(l,2000);
+	sk_add_int(l,5);
+	printf("%p : %s\n",(void*)l,txt=sk_tostring_int(l));
+	sk_delete(l); free(txt);
 	return 0;
 }
