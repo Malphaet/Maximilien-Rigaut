@@ -1,0 +1,142 @@
+cat bible.txt | sed "s/. /.\n/g" | wc -l
+cat bible.txt | sed "s/. /.\n/g" | less
+cat bible.txt | sed "s/\. /\.\n/g" | less
+cat bible.txt | sed "s/\. /\.\n/g" | wc -l
+bin/split-sentences.perl -l fr <bible.txt | less
+bin/split-sentences.perl -l fr  <bible.txt | less
+bin/split-sentences.perl -l fr  <bible.txt | wc -l
+bin/split-sentences.perl -l fr  <bible.txt > bible-sent.txt
+less bible-sent.txt 
+meld bible.txt bible.sent
+meld bible.txt bible-sent.txt 
+l
+cat bible.txt | sed "s/\. /\.\n/g" | meld bible-sent.txt
+man meld
+xarg
+xargs
+man xargs
+cat bible.txt | sed "s/\. /\.\n/g" | xargs meld bible-sent.txt
+cat bible.txt | sed "s/\. /\.\n/g" | xargs "meld bible-sent.txt"
+man xargs
+cat bible.txt | sed "s/\. /\.\n/g" | xargs -0 meld bible-sent.txt
+cat bible.txt | sed "s/\. /\.\n/g" > bib.txt
+meld bib.txt bible-clean.xml 
+less bib.
+less bib.txt 
+meld bib.txt bible-sent.txt 
+cat bible.txt | sed "s/([^ ]), /\1 , /g" | less
+cat bible.txt | sed -r "s/([^ ]), /\1 , /g" | less
+cat bible.txt | sed -r "s/([^ ])([,.]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([,;\(\).]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([:cat bible.txt | sed -r "s/([^ ])([,;\(\).]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([,;:\(\).]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([,;:\!\(\).]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([,;\?:\!\(\).]) /\1 \2 /g" | less
+cat bible.txt | sed -r "s/([^ ])([,;\?:\!\(\).]) /\1 \2 /g" | biblespaced.txt
+cat bible.txt | sed -r "s/([^ ])([,;\?:\!\(\).]) /\1 \2 /g" > bible-spaced.txt
+wc bible-spaced.txt 
+bin/tokenizer.perl -l fr < bible-sent.txt > bible-sent-tok.txt
+wc bible-sent-tok.txt 
+cat bible-sent-tok.txt | sed "s/./\L&/g" | less
+cat bible-sent-tok.txt | sed "s/./\L&/g" | wc -w
+python bin/mwetoolkit/bin/lowercase.py -x -a complex bible-sent-tok.txt | less
+python bin/mwetoolkit/bin/lowercase.py -x -a complex bible-sent-tok.txt > bible-sent-tok-low.txt
+bin/treetagger/cmd/tree-tagger-french-utf8 bible-sent-tok-low.txt | less
+bin/treetagger/cmd/tree-tagger-french-utf8 bible-sent-tok-low.txt > bible-tagged.txt
+grep porte bible-tagged.txt 
+grep INC bible-tagged.txt 
+grep I bible-tagged.txt 
+grep < bible-tagged.txt 
+grep '<' bible-tagged.txt 
+grep '<' bible-tagged.txt | grep "porte"
+grep '<' bible-tagged.txt | grep "sort"
+grep '<unknown>' bible-tagged.txt | grep "sort"
+grep '<unknown>' bible-tagged.txt | grep "fait"
+grep -E "\<porte>\" bible-tagged.txt
+grep -E "\<porte\>" bible-tagged.txt
+grep -E "\<porte\>" bible-tagged.txt | wc
+grep -E "\<porte\>" bible-tagged.txt | grep "NOM" | wc
+grep -E "\<sort\>" bible-tagged.txt | grep "NOM" | wc
+grep -E "\<sort\>" bible-tagged.txt | wc
+grep -E "\<fait\>" bible-tagged.txt | grep "NOM" | wc
+grep -E "\<fait\>" bible-tagged.txt | wc
+grep  "<unknown>" bible-tagged.txt | wc
+grep  "<unknown>" bible-tagged.txt | grep "-" | wc
+grep  "<unknown>" bible-tagged.txt 
+grep  "<unknown>" bible-tagged.txt | grep -E "[A-Z][a-z]"
+grep "<unknown>" bible-tagged.txt | grep -E "[A-Z][a-z]"
+grep  "<unknown>" bible-tagged.txt 
+grep "<unknown>" bible-tagged.txt | grep  "[A-Z][a-z]"
+grep
+grep "<unknown>" bible-tagged.txt | grep "[A-Z]"
+grep "<unknown>" bible-tagged.txt | grep -E "[A-Z]"
+grep  "<unknown>" bible-tagged.txt | grep "-" | wc
+grep "<unknown>" bible-tagged.txt | grep "[A]"
+grep "<unknown>" bible-tagged.txt | grep "A"
+grep "<unknown>" bible-tagged.txt | grep "a"
+grep "<unknown>" bible-tagged.txt | grep "[A-Z]"
+grep "<unknown>" bible-tagged.txt | grep "[A-Z][a-z]"
+grep "<unknown>" bible-tagged.txt | grep "[A-Z][a-z]" | wc
+man cut
+cat bible-tagged.txt | cut -c ":"
+man cut
+cat bible-tagged.txt | cut -d ":"
+man cut
+cut -d ":" bible-tagged.txt
+man cut
+cut --delim=":" bible-tagged.txt
+man cut
+cut -d ":" -f 2- bible-tagged.txt
+grep ":" bible-tagged.txt  | cut -d ":" -f 2-
+grep ":" bible-tagged.txt  | cut -d ":" -f 1-2
+grep ":" bible-tagged.txt  | cut -d : -f 1-2
+grep ":" bible-tagged.txt  | cut -f 1
+grep ":" bible-tagged.txt  | cut -f 1 | sort -u
+grep ":" bible-tagged.txt  | cut -f 2 | cut -d ":" 1 
+grep ":" bible-tagged.txt  | cut -f 2 | cut -d ":" -f 1 
+grep ":" bible-tagged.txt  | cut -f 2 | cut -d ":" -f 1 | sort -u
+man count
+man sort
+man uniq
+grep ":" bible-tagged.txt  | cut -f 2 | cut -d ":" -f 1 | sort | uniq -c
+grep ":" bible-tagged.txt  | g
+cat bible-tagged.txt | cut -f 2 | cut -d ":" -f 1 | sort | uniq -c
+cat bible-tagged.txt | cut -f 2 | cut -d ":" -f 1 
+cat bible-tagged.txt | cut -f 2 | cut -d ":" -f 1 | sort  wc -l
+cat bible-tagged.txt | cut -f 2 | cut -d ":" -f 1 | wc -l
+cat bible-tagged.txt | cut -f 2  | wc -l
+cat bible-tagged.txt | cut -f 2 | cut -d ":" -f 1 | sort | uniq -c
+grep ADV bible-tagged.txt | grep -E "ment\>"
+grep ADV bible-tagged.txt | grep -E "ment\>" | wc
+cut -d ":" -f 1-2 bible-tagged.txt 
+cut -d ":" -f 1 bible-tagged.txt 
+cut -f 1-2 bible-tagged.txt 
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort -c | head -n 12
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort -c 
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort -c
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort -c
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sort
+man uniq
+man sort
+man strip
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | strip
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g"
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g" | sed "s/ /          /g"
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g" | sed "s/ /          /g" | sort
+man sort
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g" | sed "s/ /          /g" | sort -n
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g" | sort -n
+cut -f 1-2 bible-tagged.txt | cut -d ":" -f 1 | sort | uniq -c | sed "s/^ *//g" | sort -n > sorted-frequency
+mv sorted-frequency sorted-frequency.txt
+grep NOM sorted-frequency.txt 
+grep NOM sorted-frequency.txt | head
+grep NOM sorted-frequency.txt | tail
+grep ADV sorted-frequency.txt | tail
+grep ADJ sorted-frequency.txt | tail
+grep VER sorted-frequency.txt | tail
+grep "NOM" bible-tagged.txt | grep -E "[A-Z][a-z]"
+grep "NOM" bible-tagged.txt | grep -E "[A-Z][a-z]" | wc
