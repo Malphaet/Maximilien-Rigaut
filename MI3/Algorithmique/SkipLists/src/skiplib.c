@@ -67,15 +67,16 @@ int sk_contains(SkipList*l,t_key key,int key_compare(t_key,t_key)){
 	int res,lvl=l->level;
 	
 	while (lvl>=0){
-		if (!last_node->next[lvl]) break;
-		res=key_compare(last_node->next[lvl]->value,key);
-		if (res==0) return 1;
-		if (res<0) {
-			last_node=last_node->next[lvl];
-			continue;
+		if (last_node->next[lvl]) {
+			res=key_compare(last_node->next[lvl]->value,key);
+			if (res==0) return 1;
+			if (res<0) {
+				last_node=last_node->next[lvl];
+				continue;
+			}
+			// If the next node is after our node and we are level 0, then we found the place
+			if (!lvl) return 0; 
 		}
-		// If the next node is after our node and we are level 0, then we found the place
-		if (!lvl) return 0; 
 		last_node=last_node->next[lvl--];
 	}
 	return 0;
@@ -146,15 +147,16 @@ void sk_remove(SkipList*l,t_key key,int key_compare(t_key,t_key)){
 		if (res==0) {
 			last_node->next[lvl]=node->next[lvl];
 			if (lvl==0) {
-				free(node->next);
-				free(node->value);
-				free(node);
-				return;
+				free(node->next); free(node->value); free(node);
+				l->size--;
+				break;
 			}
 			node=last_node->next[--lvl];
 		}
 		
 	}
+	last_node=l->head; lvl=l->level;
+	while (!last_node->next[lvl--]) l->level--;
 }
 
 // Doc and test
@@ -200,6 +202,21 @@ char*sk_tostring(SkipList*l,struct char_size key_to_str(t_key)){
 	return res;
 }
 
+
+void sk_print(SkipList*l){
+	int *coupling[2],**table,max_l=0,i;
+	sk_node*node=l->head;
+	coupling[0]=malloc(sizeof(int)*l->size);
+	coupling[1]=malloc(sizeof(int)*l->size);
+	table=malloc(sizeof(int*)*l->level);
+	for(i=0;i<l->level;i++) table[i]=malloc(sizeof(int)*l->size);
+	for(i=0;i<l-size;i++) {
+		table[9][i]=node->value;
+		coupling[0][i]=node->value;
+		coupling[1][i]=i;
+		node=node->next;
+	}
+}
 
 // INT FUNCTIONS
 int sk_compint(t_key a,t_key b){
